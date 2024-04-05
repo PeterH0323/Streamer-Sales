@@ -1,15 +1,40 @@
-from http import HTTPStatus
+import argparse
 import json
-import os
-from pathlib import Path
 import random
 import re
+from http import HTTPStatus
+from pathlib import Path
+
 import dashscope
-from tqdm import tqdm
+import requests
 import yaml
+from tqdm import tqdm
 
 
-def call_qwen_message(content_str, system_str="You are a helpful assistant.", model_type=dashscope.Generation.Models.qwen_turbo):
+def set_api_key(api_type, api_yaml_path):
+    """设置 api key
+
+    Args:
+        api_type (str): api 类型
+        api_yaml_path (str): api yaml 文件路径
+    """
+    # 读取 yaml 文件
+    with open(api_yaml_path, "r", encoding="utf-8") as f:
+        api_yaml = yaml.safe_load(f)
+
+    # 设置 api key
+    if api_type == "qwen":
+        api_key = api_yaml["ali_qwen_api_key"]
+        dashscope.api_key = api_key
+    elif api_type == "ernie":
+        api_key = api_yaml["baidu_ernie_api_key"]
+    else:
+        raise ValueError("api_type must be qwen or ernie")
+
+    return api_key
+
+
+def call_qwen_message(content_str, model_type=dashscope.Generation.Models.qwen_turbo):
 
     try:
         response = dashscope.Generation.call(model_type, prompt=content_str)
@@ -31,27 +56,89 @@ def call_qwen_message(content_str, system_str="You are a helpful assistant.", mo
         )
         response_str = "Error"
 
-    # return response.output.choices[0]["message"]["content"]
     return response_str
 
 
-def set_api_key(api_type, api_yaml_path):
-    """设置 api key
+def call_ernie_message(content_str, access_token):
+    url = f"https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token={access_token}"
+
+    payload = json.dumps(
+        {
+            "messages": [
+                {"role": "user", "content": content_str},
+            ],
+            "disable_search": False,
+            "enable_citation": False,
+        }
+    )
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    if response.status_code == HTTPStatus.OK:
+
+        # 获取 body 中的数据
+        response_json = response.json()
+
+        print("Used token: ", response_json["usage"])
+        response_str = response_json["result"]
+    else:
+        response_str = "Error"
+
+    return response_str
+
+
+def format_json_from_response(func, content_str, func_args):
+    response = func(content_str, func_args)
+
+    if "```json" in response:
+        response = re.findall(r"```json(.*)```", response, flags=re.DOTALL)[0]
+
+    # 去掉导致 json 格式化失败的字符
+    response = response.replace("\\", "\\\\").replace("\n\n", "\n").replace("”", '"').replace("“", '"')
+
+    # 加上 strict=False 解决 decode Invalid control character
+    format_json = json.loads(response, strict=False)
+
+    return format_json, response
+
+
+def process_request(func, content_str, func_args):
+    """_summary_
 
     Args:
-        api_type (str): api 类型
-        api_yaml_path (str): api yaml 文件路径
+        func (_type_): _description_
+        content_str (_type_): _description_
+        func_args (str):
+            qwen: model_type
+            ernie: api_key
+    Returns:
+        _type_: _description_
     """
-    # 读取 yaml 文件
-    with open(api_yaml_path, "r", encoding="utf-8") as f:
-        api_yaml = yaml.safe_load(f)
 
-    # 设置 api key
-    if api_type == "qwen":
-        api_key = api_yaml["ali_qwen_api_key"]
-        dashscope.api_key = api_key
-    elif api_type == "baidu":
-        pass
+    try:
+        format_json, response = format_json_from_response(func, content_str, func_args)
+    except Exception as e:
+        try:
+            # 再试一次
+            print(f"\n Got error, try again <== {e} \n")
+            format_json, response = format_json_from_response(func, content_str, func_args)
+        except Exception as e:
+            print(f"\n Got error <== {e} \n")
+            
+
+            print(response)
+            with open("error.log", "w", encoding="utf-8") as f_error:
+                if isinstance(e, json.decoder.JSONDecodeError):
+                    f_error.write(f"JSONDecodeError doc: {str(e.doc)} \n")
+                f_error.write(str(e))
+                f_error.write("\n")
+                f_error.write(str(response))
+                f_error.flush()
+
+            format_json = {"Error": "Error"}
+
+    return format_json
 
 
 def gen_product_highlights(dastset_yaml_path, api_yaml_path):
@@ -90,13 +177,22 @@ def gen_product_highlights(dastset_yaml_path, api_yaml_path):
         yaml.dump(dataset_yaml, f, allow_unicode=True)
 
 
-def gen_qwen_dataset(dastset_yaml_path, api_yaml_path, save_json_root):
+def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path, model_name: str):
+
+    # 确保文件夹存在
+    save_json_root.mkdir(parents=True, exist_ok=True)
+
     # 读取 yaml 文件
     with open(dastset_yaml_path, "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
     # 设置 api key
-    set_api_key("qwen", api_yaml_path)
+    api_key = set_api_key(model_name, api_yaml_path)
+
+    # qwen 配置调取的模型种类，确保有个一是最强模型
+    # gen_model_type = [dashscope.Generation.Models.qwen_plus] * (gen_num - 2)
+    # gen_model_type += [dashscope.Generation.Models.qwen_max] * 2
+    qwen_model_type = [dashscope.Generation.Models.qwen_max] * 3
 
     for role_type, role_character in dataset_yaml["role_type"].items():
 
@@ -104,10 +200,16 @@ def gen_qwen_dataset(dastset_yaml_path, api_yaml_path, save_json_root):
             # 先生成萝莉的
             break
 
-        # 生成任务及其性格
-        character = "、".join(role_character)
-
         gen_json = dict()
+
+        # 获取文件名满足 *_train_step* 的文件
+        for json_file in save_json_root.iterdir():
+            if json_file.suffix != ".json":
+                continue
+
+            if "_train_step_" in json_file.name:
+                with open(json_file, "r", encoding="utf-8") as f:
+                    gen_json = json.load(f)
 
         # 遍历所有产品，方便进度条显示
         list_product = [
@@ -117,22 +219,27 @@ def gen_qwen_dataset(dastset_yaml_path, api_yaml_path, save_json_root):
             for product_name in product_name_list.keys()
         ]
 
+        # 生成人物性格
+        character = "、".join(role_character)
+
         pbar = tqdm(total=len(list_product))
+        count = 0
         # 遍历产品
-        for product_type, products in dataset_yaml["product_list"].items():
-            for product_class, product_name_list in products.items():
+        for _, products in dataset_yaml["product_list"].items():
+            for _, product_name_list in products.items():
                 for product, hightlights in product_name_list.items():
                     pbar.set_description(product)
 
-                    gen_json.update({product_type: {product_class: {product: []}}})
+                    if product in gen_json:
+                        # 跳过已经有的
+                        count += 1
+                        pbar.update(1)
+                        continue
+
+                    gen_json.update({product: []})
 
                     conversation_setting = dataset_yaml["conversation_setting"]
                     gen_num = conversation_setting["each_product_gen"]
-
-                    # 配置调取的模型种类，确保有个一是最强模型
-                    # gen_model_type = [dashscope.Generation.Models.qwen_plus] * (gen_num - 2)
-                    # gen_model_type += [dashscope.Generation.Models.qwen_max] * 2
-                    gen_model_type = [dashscope.Generation.Models.qwen_max] * 3
 
                     # 生成数据
                     for idx in range(gen_num):
@@ -162,42 +269,52 @@ def gen_qwen_dataset(dastset_yaml_path, api_yaml_path, save_json_root):
                             )
                         )
 
-                        try:
-                            print(f"\n Resquest ==> {content_str} \n")
-                            qwen_response = call_qwen_message(content_str=content_str, model_type=gen_model_type[idx])
+                        print(f"\n Resquest {idx + 1}/{gen_num} ==> {content_str} \n")
+                        if model_name == "qwen":
+                            format_json = process_request(call_qwen_message, content_str, qwen_model_type[idx])
+                        elif model_name == "ernie":
+                            format_json = process_request(call_ernie_message, content_str, api_key)
+                        else:
+                            raise ValueError(f"model_name {model_name} not support")
 
-                            if "```json" in qwen_response:
-                                qwen_response = re.findall(r"```json(.*)```", qwen_response, flags=re.DOTALL)[0]
-
-                            format_json = json.loads(
-                                qwen_response.replace("\\", "\\\\"), strict=False
-                            )  # 加上 strict=False 解决 decode Invalid control character
-
+                        if "conversation" in format_json and len(format_json["conversation"]) > 0:
                             # 将第一个对话加入必要信息
                             format_json["conversation"][0] = {
                                 "system": f"现在你是一位金牌带货{role_type}主播，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。",
                                 "input": f"我的{product_info_str}，你需要根据我给出的商品信息撰写一段直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。",
                                 "output": format_json["conversation"][0]["output"],
                             }
-                            print(f"\n Response <== {format_json} \n")
-                        except Exception as e:
-                            print(f"\n Got error <== {e} \n")
-                            format_json = {"@@@@ Error @@@@"}
+                        else:
+                            format_json = {"Error": "Error"}
 
-                        gen_json[product_type][product_class][product].append(format_json)
+                        print(f"\n Response {idx + 1}/{gen_num} <== {format_json} \n")
+                        gen_json[product].append(format_json)
 
                     pbar.update(1)
 
                     # json dump
-                    with open(Path(save_json_root).joinpath(f"{role_type}_train_step.json"), "w", encoding="utf-8") as f:
+                    count += 1  # 防止中间有问题，每次都保存一个新的 json
+                    with open(save_json_root.joinpath(f"{role_type}_train_step_{count}.json"), "w", encoding="utf-8") as f:
                         json.dump(gen_json, f, indent=4, ensure_ascii=False)
+
+                    # 如果保存成功，删掉旧的
+                    if count > 1:
+                        save_json_root.joinpath(f"{role_type}_train_step_{count - 1}.json").unlink()
 
 
 if __name__ == "__main__":
+
+    # 命令行输入参数
+    parser = argparse.ArgumentParser(description="Gen Dataset")
+    parser.add_argument("model_name", type=str, choices=["qwen", "ernie"], help="Model name for data generation")
+    args = parser.parse_args()
+
     DATA_YAML_PATH = "/path/to/dataset/gen_dataset/conversation_cfg.yaml"
-    API_YAML_PATH =  "/path/to/dataset/gen_dataset/api_cfg.yaml"
+    API_YAML_PATH = "/path/to/dataset/gen_dataset/api_cfg.yaml"
+    GEN_JSON_STEP_ROOT = Path(f"/path/to/dataset/trainval_dataset/{args.model_name}_step")
 
-    GEN_JSON_STEP_ROOT = "/path/to/dataset/trainval_dataset/step"
-
+    # 生成产品特性
     # gen_product_highlights(DATA_YAML_PATH, API_YAML_PATH)
-    gen_qwen_dataset(DATA_YAML_PATH, API_YAML_PATH, GEN_JSON_STEP_ROOT)
+
+    # 生成对话数据集
+    gen_dataset(DATA_YAML_PATH, API_YAML_PATH, GEN_JSON_STEP_ROOT, model_name=args.model_name)
