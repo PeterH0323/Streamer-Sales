@@ -1,0 +1,60 @@
+电动牙刷: 
+    heighlights: [高效清洁, 减少手动压力, 定时提醒, 智能模式调节, 无线充电, 噪音低]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+口红: 
+    heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+洗发水: 
+    heighlights: [温和配方, 深层清洁, 滋养头皮, 丰富泡沫, 易冲洗, 适合各种发质]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+面膜: 
+    heighlights: [密集滋养, 深层补水, 急救修复, 快速见效, 定期护理, 多种类型选择]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+女士香水: 
+    heighlights: [浪漫优雅, 花香调为主, 情感表达, 适合各种年龄, 瓶身设计精致, 提升女性魅力]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+笔: 
+    heighlights: [耐用性, 可书写性, 不同颜色和类型, 轻便设计, 环保材料, 易于携带]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+瑜伽垫: 
+    heighlights: [防滑材质, 吸湿排汗, 厚度适中, 耐用易清洁, 各种瑜伽动作适用, 轻巧便携]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+运动裤: 
+    heighlights: [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+炒锅: 
+    heighlights: [不粘涂层, 耐磨耐用, 导热快, 易清洗, 多种烹饪方式, 设计人性化]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+平板电脑: 
+    heighlights: [轻薄, 触控操作, 电池续航好, 移动办公便利, 娱乐性强, 适合儿童学习]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+OLED电视: 
+    heighlights: [色彩鲜艳, 对比度极高, 响应速度快, 无背光眩光, 厚度较薄, 自发光无需额外照明]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
+牛肉: 
+    heighlights: [富含铁质, 营养价值高, 肌肉纤维好, 红白相间纹理, 适合烧烤炖煮, 草食动物来源]
+    images: "./product_info/images/dog.jpg"
+    doc:
+
