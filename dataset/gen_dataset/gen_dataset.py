@@ -39,6 +39,7 @@ def call_qwen_message(content_str, model_type=dashscope.Generation.Models.qwen_t
     try:
         response = dashscope.Generation.call(model_type, prompt=content_str)
     except Exception as e:
+        print(f"Maybe connect error , try again : {e}")
         response = dashscope.Generation.call(model_type, prompt=content_str)
 
     if response.status_code == HTTPStatus.OK:
@@ -88,7 +89,7 @@ def call_ernie_message(content_str, access_token):
     return response_str
 
 
-def format_json_from_response(func, content_str, func_args):
+def format_json_from_response(func, content_str, func_args, model_name):
     response = func(content_str, func_args)
 
     if "```json" in response:
@@ -97,13 +98,32 @@ def format_json_from_response(func, content_str, func_args):
     # 去掉导致 json 格式化失败的字符
     response = response.replace("\\", "\\\\").replace("\n\n", "\n").replace("”", '"').replace("“", '"')
 
+    if model_name == "qwen":
+        # qwen 需要检查文案中是否有 " ，并替换为单引号 '
+
+        # 查找第一个 output 的字符串
+        output_start = response.find('"output": "')
+        if output_start != -1:
+            # 查找第二个 output 的字符位置
+            output_end = response.find("}", output_start + 1)
+            if output_end != -1:
+                response = list(response)
+                # 截取第二个 output 的字符串
+                check_len = len(response[output_start + len('"output": "') : output_end - 10])
+                for idx in range(check_len):
+                    str_idx = output_start + len('"output": "') + idx
+                    if response[str_idx] == '"':
+                        response[str_idx] = "'"
+
+                response = "".join(response)
+
     # 加上 strict=False 解决 decode Invalid control character
     format_json = json.loads(response, strict=False)
 
     return format_json, response
 
 
-def process_request(func, content_str, func_args):
+def process_request(func, content_str, func_args, model_name):
     """_summary_
 
     Args:
@@ -117,23 +137,22 @@ def process_request(func, content_str, func_args):
     """
 
     try:
-        format_json, response = format_json_from_response(func, content_str, func_args)
+        format_json, response = format_json_from_response(func, content_str, func_args, model_name)
     except Exception as e:
         try:
             # 再试一次
             print(f"\n Got error, try again <== {e} \n")
-            format_json, response = format_json_from_response(func, content_str, func_args)
+            if isinstance(e, json.decoder.JSONDecodeError):
+                print(f"JSONDecodeError doc 1: {str(e.doc)} \n")
+            format_json, response = format_json_from_response(func, content_str, func_args, model_name)
         except Exception as e:
             print(f"\n Got error <== {e} \n")
-            
-
-            print(response)
-            with open("error.log", "w", encoding="utf-8") as f_error:
+            if isinstance(e, json.decoder.JSONDecodeError):
+                print(f"JSONDecodeError doc 2: {str(e.doc)} \n")
+            with open(f"error-{model_name}.log", "a+", encoding="utf-8") as f_error:
                 if isinstance(e, json.decoder.JSONDecodeError):
                     f_error.write(f"JSONDecodeError doc: {str(e.doc)} \n")
                 f_error.write(str(e))
-                f_error.write("\n")
-                f_error.write(str(response))
                 f_error.flush()
 
             format_json = {"Error": "Error"}
@@ -202,14 +221,17 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
         gen_json = dict()
 
-        # 获取文件名满足 *_train_step* 的文件
-        for json_file in save_json_root.iterdir():
-            if json_file.suffix != ".json":
-                continue
+        save_json_path = save_json_root.joinpath(f"{model_name}_{role_type}_train.json")
+        bk_json_path = save_json_root.joinpath(f"{model_name}_{role_type}_train.json.bk")
 
-            if "_train_step_" in json_file.name:
-                with open(json_file, "r", encoding="utf-8") as f:
-                    gen_json = json.load(f)
+        # 加载之前已经有的 json
+        if save_json_path.exists():
+            with open(save_json_path, "r", encoding="utf-8") as f:
+                gen_json = json.load(f)
+
+        # 加载成功的话，再删除备份的 json
+        if bk_json_path.exists():
+            bk_json_path.unlink()
 
         # 遍历所有产品，方便进度条显示
         list_product = [
@@ -223,7 +245,7 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
         character = "、".join(role_character)
 
         pbar = tqdm(total=len(list_product))
-        count = 0
+
         # 遍历产品
         for _, products in dataset_yaml["product_list"].items():
             for _, product_name_list in products.items():
@@ -232,7 +254,6 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
                     if product in gen_json:
                         # 跳过已经有的
-                        count += 1
                         pbar.update(1)
                         continue
 
@@ -269,37 +290,40 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
                             )
                         )
 
-                        print(f"\n Resquest {idx + 1}/{gen_num} ==> {content_str} \n")
+                        print(f"\n Resquest [ {model_name} ] {idx + 1}/{gen_num} ==> {content_str} \n")
                         if model_name == "qwen":
-                            format_json = process_request(call_qwen_message, content_str, qwen_model_type[idx])
+                            format_json = process_request(call_qwen_message, content_str, qwen_model_type[idx], model_name)
                         elif model_name == "ernie":
-                            format_json = process_request(call_ernie_message, content_str, api_key)
+                            format_json = process_request(call_ernie_message, content_str, api_key, model_name)
                         else:
                             raise ValueError(f"model_name {model_name} not support")
 
                         if "conversation" in format_json and len(format_json["conversation"]) > 0:
                             # 将第一个对话加入必要信息
                             format_json["conversation"][0] = {
-                                "system": f"现在你是一位金牌带货{role_type}主播，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。",
+                                "system": f"现在你是一位金牌带货主播，你的名字叫{role_type}，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。",
                                 "input": f"我的{product_info_str}，你需要根据我给出的商品信息撰写一段直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。",
                                 "output": format_json["conversation"][0]["output"],
                             }
                         else:
                             format_json = {"Error": "Error"}
 
-                        print(f"\n Response {idx + 1}/{gen_num} <== {format_json} \n")
+                        print(f"\n Response [ {model_name} ] {idx + 1}/{gen_num} <== {format_json} \n")
                         gen_json[product].append(format_json)
 
                     pbar.update(1)
 
-                    # json dump
-                    count += 1  # 防止中间有问题，每次都保存一个新的 json
-                    with open(save_json_root.joinpath(f"{role_type}_train_step_{count}.json"), "w", encoding="utf-8") as f:
+                    # 备份旧的
+                    if save_json_path.exists():
+                        save_json_path.rename(bk_json_path)
+
+                    # 保存 json
+                    with open(save_json_path, "w", encoding="utf-8") as f:
                         json.dump(gen_json, f, indent=4, ensure_ascii=False)
 
                     # 如果保存成功，删掉旧的
-                    if count > 1:
-                        save_json_root.joinpath(f"{role_type}_train_step_{count - 1}.json").unlink()
+                    if bk_json_path.exists():
+                        bk_json_path.unlink()
 
 
 if __name__ == "__main__":
