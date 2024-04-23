@@ -80,7 +80,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
 
 
 def get_sales_info():
-    with open(r"/root/hingwen_camp/dataset/conversation_cfg.yaml", "r", encoding="utf-8") as f:
+    with open(r"../dataset/gen_dataset/conversation_cfg.yaml", "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
     sales_name = "乐乐喵"
