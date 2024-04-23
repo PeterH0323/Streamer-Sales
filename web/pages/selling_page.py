@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Time    : 2024.3.28
+# @Time    : 2024.1.28
 # @Author  : HinGwenWong
 
 """This script refers to the dialogue example of streamlit, the interactive
@@ -21,6 +21,7 @@ Using `python path/to/web_demo.py` may cause unknown problems.
 """
 # isort: skip_file
 import copy
+import random
 import warnings
 from dataclasses import asdict, dataclass
 from typing import Callable, List, Optional
@@ -30,6 +31,8 @@ import torch
 from torch import nn
 from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList
 from transformers.utils import logging
+
+from main_page import resize_image
 
 
 logger = logging.get_logger(__name__)
@@ -170,6 +173,8 @@ def generate_interactive(
 def on_btn_click(*args, **kwargs):
     if kwargs["info"] == "清除对话历史":
         del st.session_state.messages
+    elif kwargs["info"] == "返回商品页":
+        st.session_state.page_switch = "main_page.py"
     else:
         st.session_state.button_msg = kwargs["info"]
 
@@ -180,15 +185,45 @@ def prepare_generation_config():
         st.markdown("## 销冠 —— 卖货主播大模型")
         "[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/xxx)"
 
-        st.markdown("## 例子")
-        st.button("你好", on_click=on_btn_click, kwargs={"info": "你好"})
+        st.subheader("目前讲解")
+        with st.container(height=400, border=True):
+            st.subheader(st.session_state.product_name)
+
+            image = resize_image(st.session_state.image_path, max_height=100)
+            st.image(image, channels="bgr")
+
+            st.subheader("产品特点", divider="grey")
+            st.markdown(st.session_state.hightlight)
+
+            want_to_buy_list = [
+                "我打算买了。",
+                "我准备入手了。",
+                "我决定要买了。",
+                "我准备下单了。",
+                "我将要购买这款产品。",
+                "我准备买下来了。",
+                "我准备将这个买下。",
+                "我准备要购买了。",
+                "我决定买下它。",
+                "我准备将其买下。",
+            ]
+            st.button("加入购物车🛒", on_click=on_btn_click, kwargs={"info": random.choice(want_to_buy_list)})
+
+        # TODO 加入卖货信息
+        # 卖出 xxx 个
+        # 成交额
+
         # 模型配置
         st.button("清除对话历史", on_click=on_btn_click, kwargs={"info": "清除对话历史"})
-        max_length = st.slider("Max Length", min_value=8, max_value=32768, value=32768)
-        top_p = st.slider("Top P", 0.0, 1.0, 0.8, step=0.01)
-        temperature = st.slider("Temperature", 0.0, 1.0, 0.7, step=0.01)
-        st.markdown("## 模型配置")
+        st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
+    #     st.markdown("## 模型配置")
+    #     max_length = st.slider("Max Length", min_value=8, max_value=32768, value=32768)
+    #     top_p = st.slider("Top P", 0.0, 1.0, 0.8, step=0.01)
+    #     temperature = st.slider("Temperature", 0.0, 1.0, 0.7, step=0.01)
 
+    max_length = 32768
+    top_p = 0.8
+    temperature = 0.7
     generation_config = GenerationConfig(max_length=max_length, top_p=top_p, temperature=temperature)
 
     return generation_config
@@ -223,7 +258,7 @@ def get_response(prompt, meta_instruction, user_avator, robot_avator, model, tok
     # Add user message to chat history
     if not first_input:
         st.session_state.messages.append({"role": "user", "content": prompt, "avatar": user_avator})
-        
+
     with st.chat_message("robot", avatar=robot_avator):
         message_placeholder = st.empty()
         for cur_response in generate_interactive(
@@ -234,6 +269,8 @@ def get_response(prompt, meta_instruction, user_avator, robot_avator, model, tok
             **asdict(generation_config),
         ):
             # Display robot response in chat message container
+            if cur_response == "~":
+                continue
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
     # Add robot response to chat history
@@ -248,11 +285,23 @@ def get_response(prompt, meta_instruction, user_avator, robot_avator, model, tok
 
 
 def main(meta_instruction):
+
+    st.set_page_config(
+        page_title="Streamer-Sales 销冠",
+        page_icon="🛒",
+        layout="wide",
+        initial_sidebar_state="expanded",
+        menu_items={
+            "Get Help": "https://www.extremelycoolapp.com/help",
+            "Report a bug": "https://www.extremelycoolapp.com/bug",
+            "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
+        },
+    )
     # torch.cuda.empty_cache()
 
-    if "model" not in st.session_state:
-        st.switch_page("main_page.py")
-        
+    if st.session_state.page_switch != st.session_state.current_page:
+        st.switch_page(st.session_state.page_switch)
+
     user_avator = "../assets/user.png"
     robot_avator = "../assets/logo.png"
 
@@ -268,7 +317,7 @@ def main(meta_instruction):
     for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=message.get("avatar")):
             st.markdown(message["content"])
-            
+
     if len(st.session_state.messages) == 0:
         # 直接产品介绍
         get_response(
@@ -279,7 +328,7 @@ def main(meta_instruction):
             st.session_state.model,
             st.session_state.tokenizer,
             generation_config,
-            first_input = True
+            first_input=True,
         )
 
     if "button_msg" not in st.session_state:
@@ -310,8 +359,15 @@ def main(meta_instruction):
         )
 
 
-st.sidebar.page_link("main_page.py", label="商品页")
-st.sidebar.page_link("./pages/selling_page.py", label="主播卖货")
+# st.sidebar.page_link("main_page.py", label="商品页")
+# st.sidebar.page_link("./pages/selling_page.py", label="主播卖货", disabled=True)
 
 # META_INSTRUCTION = ("现在你是一位金牌带货主播，你的名字叫乐乐喵，你的说话方式是甜美、可爱、熟练使用各种网络热门梗造句、称呼客户为[家人们]。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。")
+
+st.session_state.current_page = "pages/selling_page.py"
+
+if "model" not in st.session_state or "sales_info" not in st.session_state or st.session_state.sales_info == "":
+    st.session_state.page_switch = "main_page.py"
+    st.switch_page("main_page.py")
+
 main((st.session_state.sales_info))
