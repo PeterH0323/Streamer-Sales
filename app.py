@@ -166,6 +166,10 @@ def main(model_dir, using_modelscope):
 
     # TODO 侧边栏显示产品概览，数量，入驻品牌方
     with st.sidebar:
+        # 标题
+        st.markdown("## 销冠 —— 卖货主播大模型")
+        "[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)"
+
         st.markdown(f"## 主播后台信息")
         st.markdown(f"共有商品：{len(product_name_list)} 件")
         st.markdown(f"共有品牌方：{len(product_name_list)} 个")

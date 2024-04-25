@@ -183,7 +183,7 @@ def prepare_generation_config():
     with st.sidebar:
         # 标题
         st.markdown("## 销冠 —— 卖货主播大模型")
-        "[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/xxx)"
+        "[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)"
 
         st.subheader("目前讲解")
         with st.container(height=400, border=True):
