@@ -382,7 +382,7 @@ xtuner chat ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_merge \
 1. 安装 lmdeploy
 
 ```bash
-pip install 'lmdeploy[all]==v0.2.1'
+pip install lmdeploy[all]==0.3.0
 ```
 
 1. 进行 4bit 量化
@@ -403,6 +403,8 @@ lmdeploy lite auto_awq ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_
 
 - [x] 生成多个产品数据集
 - [x] 根据产品生成话术，每个都是5个往来的对话
+- [ ] 每个话术分为3个角色，
+  - [x] 乐乐喵——可爱萝莉，
 
 ## 后记
 
