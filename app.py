@@ -193,7 +193,7 @@ def main(model_dir, using_modelscope):
 
 if __name__ == "__main__":
 
-    USING_MODELSCOPE = False
+    USING_MODELSCOPE = True
     if USING_MODELSCOPE:
         MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
     else:
