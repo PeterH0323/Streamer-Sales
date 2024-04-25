@@ -161,3 +161,4 @@ cython_debug/
 work_dir
 bk
 tmp
+doc/.$*
