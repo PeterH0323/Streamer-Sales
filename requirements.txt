@@ -102,7 +102,7 @@ six==1.16.0
 smmap==5.0.1
 sortedcontainers==2.4.0
 soupsieve==2.5
-streamlit==1.29.0
+streamlit==1.32.2
 sympy
 tenacity==8.2.3
 termcolor==2.4.0
