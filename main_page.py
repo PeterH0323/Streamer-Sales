@@ -1,8 +1,9 @@
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
 import copy
 import cv2
 import streamlit as st
 import yaml
-
 
 def resize_image(image_path, max_height):
     # 读取图片
@@ -80,7 +81,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
 
 
 def get_sales_info():
-    with open(r"../dataset/gen_dataset/conversation_cfg.yaml", "r", encoding="utf-8") as f:
+    with open(r"./dataset/gen_dataset/conversation_cfg.yaml", "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
     sales_name = "乐乐喵"
@@ -97,9 +98,6 @@ def get_sales_info():
     st.session_state.product_info_struct_template = product_info_struct
 
 
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
-
 
 @st.cache_resource
 def load_model(model_dir, using_modelscope):
@@ -113,6 +111,7 @@ def load_model(model_dir, using_modelscope):
 
 
 def main(model_dir, using_modelscope):
+    # --client.showSidebarNavigation=false
     st.set_page_config(
         page_title="Streamer-Sales 销冠",
         page_icon="🛒",
@@ -190,11 +189,12 @@ def main(model_dir, using_modelscope):
 
 if __name__ == "__main__":
 
-    USING_MODELSCOPE = True
+    USING_MODELSCOPE = False
     if USING_MODELSCOPE:
         MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
     else:
         MODEL_DIR = "hingwen/streamer-sales-lelemiao-7b"
 
-    # MODEL_DIR = "/root/hingwen_camp/work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge"
+    MODEL_DIR = "/root/hingwen_camp/work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge"
+
     main(MODEL_DIR, USING_MODELSCOPE)

@@ -302,8 +302,8 @@ def main(meta_instruction):
     if st.session_state.page_switch != st.session_state.current_page:
         st.switch_page(st.session_state.page_switch)
 
-    user_avator = "../assets/user.png"
-    robot_avator = "../assets/logo.png"
+    user_avator = "./assets/user.png"
+    robot_avator = "./assets/logo.png"
 
     st.title("Streamer-Sales 销冠 —— 卖货主播大模型")
 
