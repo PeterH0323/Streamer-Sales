@@ -195,6 +195,4 @@ if __name__ == "__main__":
     else:
         MODEL_DIR = "hingwen/streamer-sales-lelemiao-7b"
 
-    MODEL_DIR = "/root/hingwen_camp/work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge"
-
     main(MODEL_DIR, USING_MODELSCOPE)
