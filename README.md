@@ -86,8 +86,6 @@ model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto", trust
 model = model.eval()
 response, history = model.chat(tokenizer, "你好", history=[])
 print(response)
-response, history = model.chat(tokenizer, "李白简介", history=history)
-print(response)
 ```
 
 </details>
