@@ -126,8 +126,8 @@ def main(model_dir, using_modelscope):
 
     # 初始化页面跳转
     if "page_switch" not in st.session_state:
-        st.session_state.page_switch = "main_page.py"
-    st.session_state.current_page = "main_page.py"
+        st.session_state.page_switch = "app.py"
+    st.session_state.current_page = "app.py"
 
     # 判断是否需要跳转页面
     if st.session_state.page_switch != st.session_state.current_page:
@@ -143,7 +143,7 @@ def main(model_dir, using_modelscope):
         get_sales_info()
 
     # 添加页面导航页
-    # st.sidebar.page_link("main_page.py", label="商品页", disabled=True)
+    # st.sidebar.page_link("app.py", label="商品页", disabled=True)
     # st.sidebar.page_link("./pages/selling_page.py", label="主播卖货")
 
     # 主页标题

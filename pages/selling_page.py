@@ -32,7 +32,7 @@ from torch import nn
 from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList
 from transformers.utils import logging
 
-from main_page import resize_image
+from app import resize_image
 
 
 logger = logging.get_logger(__name__)
@@ -174,7 +174,7 @@ def on_btn_click(*args, **kwargs):
     if kwargs["info"] == "清除对话历史":
         del st.session_state.messages
     elif kwargs["info"] == "返回商品页":
-        st.session_state.page_switch = "main_page.py"
+        st.session_state.page_switch = "app.py"
     else:
         st.session_state.button_msg = kwargs["info"]
 
@@ -359,7 +359,7 @@ def main(meta_instruction):
         )
 
 
-# st.sidebar.page_link("main_page.py", label="商品页")
+# st.sidebar.page_link("app.py", label="商品页")
 # st.sidebar.page_link("./pages/selling_page.py", label="主播卖货", disabled=True)
 
 # META_INSTRUCTION = ("现在你是一位金牌带货主播，你的名字叫乐乐喵，你的说话方式是甜美、可爱、熟练使用各种网络热门梗造句、称呼客户为[家人们]。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。")
@@ -367,7 +367,7 @@ def main(meta_instruction):
 st.session_state.current_page = "pages/selling_page.py"
 
 if "model" not in st.session_state or "sales_info" not in st.session_state or st.session_state.sales_info == "":
-    st.session_state.page_switch = "main_page.py"
-    st.switch_page("main_page.py")
+    st.session_state.page_switch = "app.py"
+    st.switch_page("app.py")
 
 main((st.session_state.sales_info))
