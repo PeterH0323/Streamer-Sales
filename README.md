@@ -368,8 +368,7 @@ xtuner convert merge /path/to/internlm2-chat-7b \
 3. 启动 web demo
 
 ```bash
-cd web
-streamlit run main_page.py --server.address=0.0.0.0 --server.port 7860 --client.showSidebarNavigation=false
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 <!-- # 也可以直接使用命令行 cli 的方式进行启动
@@ -405,6 +404,13 @@ lmdeploy lite auto_awq ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_
 - [x] 根据产品生成话术，每个都是5个往来的对话
 - [ ] 每个话术分为3个角色，
   - [x] 乐乐喵——可爱萝莉，
+  - [ ] 理性大男人大老板
+  - [ ] 有文化底蕴的书生
+- [ ] 接入 RAG 解读产品文档
+- [ ] 后续接入 Agent，支持网上搜索对比同类
+- [ ] 数字人 + 语音
+- [ ] 生成数据集的时候，加上每个角色的名字
+- [ ] 根据用户的反馈和行为，实时调整解说策略，并推荐产品
 
 ## 后记
 
