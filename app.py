@@ -151,7 +151,7 @@ def main(model_dir, using_modelscope):
     st.header("商品页")
 
     # 说明
-    st.info("这是主播后台，这里需要主播讲解的商品目录，如果需要加入更多商品，点击下方的添加按钮即可", icon="ℹ️")
+    st.info("这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可（开发中）", icon="ℹ️")
 
     # 读取 yaml 文件
     with open("./product_info/product_info.yaml", "r", encoding="utf-8") as f:
