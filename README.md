@@ -70,7 +70,7 @@ Demo 访问地址：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sal
 
 | 模型                | 基座             | 数据量    | ModelScope(HF)                                                                     | Transformers(HF)   | OpenXLab(HF)                                                                                                                                                       |
 | ------------------- | ---------------- | --------- | ---------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ancient-chat-llm-7b | interlm2-chat-7b | 40w Toekn | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | hugging face(TODO) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b) |
+| streamer-sales-lelemiao-7b | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | hugging face(TODO) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b) |
 
 
 <details>
@@ -374,8 +374,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 <!-- # 也可以直接使用命令行 cli 的方式进行启动
 xtuner chat ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_merge \
-            --prompt-template internlm2_chat \
-            --system-template ancient_chat -->
+            --prompt-template internlm2_chat -->
 
 ### LMDeploy 
 
