@@ -1,9 +1,12 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
 import copy
+
 import cv2
 import streamlit as st
 import yaml
+
+from utils.lmdeploy_infer import load_turbomind_model
+from utils.transformers_infer import load_hf_model
+
 
 def resize_image(image_path, max_height):
     # 读取图片
@@ -98,19 +101,7 @@ def get_sales_info():
     st.session_state.product_info_struct_template = product_info_struct
 
 
-
-@st.cache_resource
-def load_model(model_dir, using_modelscope):
-    if using_modelscope:
-        from modelscope import snapshot_download
-
-        model_dir = snapshot_download(model_dir, revision="master")
-    model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(torch.bfloat16).cuda()
-    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
-    return model, tokenizer
-
-
-def main(model_dir, using_modelscope):
+def main(model_dir, using_lmdeploy):
     # --client.showSidebarNavigation=false
     st.set_page_config(
         page_title="Streamer-Sales 销冠",
@@ -118,9 +109,9 @@ def main(model_dir, using_modelscope):
         layout="wide",
         initial_sidebar_state="expanded",
         menu_items={
-            "Get Help": "https://www.extremelycoolapp.com/help",
-            "Report a bug": "https://www.extremelycoolapp.com/bug",
-            "About": "# This is a header. This is an *extremely* cool app!",
+            "Get Help": "https://github.com/PeterH0323/Streamer-Sales/tree/main",
+            "Report a bug": "https://github.com/PeterH0323/Streamer-Sales/issues",
+            "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
         },
     )
 
@@ -135,7 +126,11 @@ def main(model_dir, using_modelscope):
 
     # 加载模型
     print("load model begin.")
-    st.session_state.model, st.session_state.tokenizer = load_model(model_dir, using_modelscope)
+    st.session_state.using_lmdeploy = using_lmdeploy
+    if st.session_state.using_lmdeploy:
+        st.session_state.model, st.session_state.tokenizer = load_turbomind_model(model_dir)
+    else:
+        st.session_state.model, st.session_state.tokenizer = load_hf_model(model_dir)
     print("load model end.")
 
     # 获取销售信息
@@ -193,10 +188,7 @@ def main(model_dir, using_modelscope):
 
 if __name__ == "__main__":
 
-    USING_MODELSCOPE = True
-    if USING_MODELSCOPE:
-        MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
-    else:
-        MODEL_DIR = "hingwen/streamer-sales-lelemiao-7b"
+    USING_LMDEPLOY = True # 是否使用 LMDeploy 执行推理
+    MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
 
-    main(MODEL_DIR, USING_MODELSCOPE)
+    main(MODEL_DIR, USING_LMDEPLOY)
