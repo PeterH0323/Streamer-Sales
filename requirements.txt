@@ -65,7 +65,7 @@ ninja==1.11.1.1
 numpy
 opencv-python==4.9.0.80
 openpyxl==3.1.2
-oss2==2.18.4
+oss2==2.17.0
 packaging==23.2
 pandas==2.1.4
 peft==0.7.1
@@ -92,7 +92,7 @@ PyYAML==6.0.1
 referencing==0.32.1
 regex==2023.12.25
 requests
-rich==13.7.0
+rich==13.4.2
 rpds-py==0.16.2
 safetensors==0.4.1
 scipy==1.11.4
@@ -114,7 +114,7 @@ toolz==0.12.0
 torch==2.1.2
 torchvision==0.16.2
 tornado==6.4
-tqdm==4.66.1
+tqdm==4.65.0
 transformers==4.37.2
 transformers-stream-generator==0.0.4
 triton==2.1.0
