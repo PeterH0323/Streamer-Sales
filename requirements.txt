@@ -115,9 +115,9 @@ torch==2.1.2
 torchvision==0.16.2
 tornado==6.4
 tqdm==4.66.1
-transformers==4.36.2
+transformers==4.37.2
 transformers-stream-generator==0.0.4
-triton
+triton==2.1.0
 typing_extensions
 tzdata==2023.4
 tzlocal==5.2
