@@ -72,7 +72,7 @@ Demo 访问地址：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sal
 | 模型                | 基座             | 数据量    | ModelScope(HF)                                                                     | Transformers(HF)   | OpenXLab(HF)                                                                                                                                                       |
 | ------------------- | ---------------- | --------- | ---------------------------------------------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | streamer-sales-lelemiao-7b | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | hugging face(TODO) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b) |
-
+| streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | hugging face(TODO) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
 
 <details>
 <summary> 从 ModelScope 导入</summary>
@@ -402,7 +402,7 @@ python ./benchmark/get_benchmark_report.py
 
 ```bash
 +---------------------------------+------------------------+-----------------+
-|             Model               |       Processer        | Speed (words/s) |
+|             Model               |        Toolkit         | Speed (words/s) |
 +---------------------------------+------------------------+-----------------+
 |    streamer-sales-lelemiao-7b   |       transformer      |     60.9959     |
 |    streamer-sales-lelemiao-7b   |  LMDeploy (Turbomind)  |     147.9898    |
