@@ -39,6 +39,7 @@ license: Apache License 2.0
 
 ## NEWS
 
+- [2024.05.14] 发布【乐乐喵】4 bit 模型
 - [2024.04.16] 发布【乐乐喵】模型，完成初版页面
 - [2024.04.06] 生成数据初版完成，训练初版模型
 
@@ -381,22 +382,33 @@ xtuner chat ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_merge \
 1. 安装 lmdeploy
 
 ```bash
-pip install lmdeploy[all]==0.3.0
+pip install lmdeploy[all]==0.4.0
 ```
 
-1. 进行 4bit 量化
+2. 进行 4bit 量化
 
 ```bash
-lmdeploy lite auto_awq ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_merge \
-                       --calib-dataset 'c4' \
-                       --calib-samples 128 \
-                       --calib-seqlen 2048 \
-                       --w-bits 4 \
-                       --w-group-size 128 \
-                       --work-dir ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_merge-4bit
-
+lmdeploy lite auto_awq ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge  \
+                       --work-dir ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge_4bit
 ```
 
+3. 测试速度
+
+```bash
+python ./benchmark/get_benchmark_report.py
+```
+
+执行脚本之后得出速度报告，可见使用 lmdeploy 的 Turbomind 可以明显提速，4bit 量化后的模型推理速度比原始推理快 5 倍。
+
+```bash
++---------------------------------+------------------------+-----------------+
+|             Model               |       Processer        | Speed (words/s) |
++---------------------------------+------------------------+-----------------+
+|    streamer-sales-lelemiao-7b   |       transformer      |     60.9959     |
+|    streamer-sales-lelemiao-7b   |  LMDeploy (Turbomind)  |     147.9898    |
+| streamer-sales-lelemiao-7b-4bit |  LMDeploy (Turbomind)  |     306.6347    |
++---------------------------------+------------------------+-----------------+
+```
 
 ## TODO
 
@@ -404,13 +416,14 @@ lmdeploy lite auto_awq ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_
 - [x] 根据产品生成话术，每个都是5个往来的对话
 - [ ] 每个话术分为3个角色，
   - [x] 乐乐喵——可爱萝莉，
-  - [ ] 理性大男人大老板
+  - [ ] 强哥——专业性极强的总裁
   - [ ] 有文化底蕴的书生
+- [x] 模型推理加速
 - [ ] 接入 RAG 解读产品文档
 - [ ] 后续接入 Agent，支持网上搜索对比同类
 - [ ] 数字人 + 语音
-- [ ] 生成数据集的时候，加上每个角色的名字
 - [ ] 根据用户的反馈和行为，实时调整解说策略，并推荐产品
+- [ ] 多用户提问时候，建立 good quection 和 bad question 列表防止过度回复？
 
 ## 后记
 
