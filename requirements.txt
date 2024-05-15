@@ -118,7 +118,7 @@ tornado==6.4
 tqdm==4.66.1
 transformers==4.36.2
 transformers-stream-generator==0.0.4
-triton==2.0.0
+triton
 typing_extensions
 tzdata==2023.4
 tzlocal==5.2
