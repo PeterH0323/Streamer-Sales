@@ -188,7 +188,9 @@ def main(model_dir, using_lmdeploy):
 
 if __name__ == "__main__":
 
-    USING_LMDEPLOY = False # 是否使用 LMDeploy 执行推理
+    USING_LMDEPLOY = True # 是否使用 LMDeploy 执行推理
+    
+    # 模型路径
     MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
 
     main(MODEL_DIR, USING_LMDEPLOY)

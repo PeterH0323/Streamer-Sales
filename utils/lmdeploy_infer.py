@@ -8,7 +8,11 @@ from modelscope import snapshot_download
 
 def prepare_generation_config():
 
-    gen_config = GenerationConfig(top_p=0.8, top_k=40, temperature=0.8, repetition_penalty=1.005)  # , min_new_tokens=200
+    gen_config = GenerationConfig(
+        top_p=0.8,
+        temperature=0.7,
+        repetition_penalty=1.005,
+    )  # top_k=40, min_new_tokens=200
     return gen_config
 
 
@@ -16,8 +20,8 @@ def prepare_generation_config():
 def load_turbomind_model(model_dir, model_format="hf"):  # hf awq
 
     model_dir = snapshot_download(model_dir, revision="master")
-    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.6)
-    pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO", model_name=Path(model_dir).name)
+    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.8)
+    pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO", model_name="internlm2")
 
     return pipe, None
 
