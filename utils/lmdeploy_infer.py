@@ -8,7 +8,7 @@ from modelscope import snapshot_download
 
 def prepare_generation_config():
 
-    gen_config = GenerationConfig(top_p=0.8, top_k=40, temperature=0.7)  # , min_new_tokens=200
+    gen_config = GenerationConfig(top_p=0.8, top_k=40, temperature=0.8, repetition_penalty=1.005)  # , min_new_tokens=200
     return gen_config
 
 
@@ -60,9 +60,11 @@ def get_turbomind_response(
         message_placeholder = st.empty()
         cur_response = ""
         for item in model_pipe.stream_infer(real_prompt, gen_config=prepare_generation_config()):
+
+            if "~" not in item.text:
+                item.text = item.text.replace("~", "")
+
             cur_response += item.text
-            # if cur_response == "~":
-            # continue
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
 
