@@ -27,30 +27,13 @@ def load_turbomind_model(model_dir, model_format="hf"):  # hf awq
 
 
 def combine_history(prompt, meta_instruction, history_msg=None):
-    total_prompt = [
-        [
-            {
-                "role": "system",
-                "content": meta_instruction,
-            },
-        ],
-    ]
+    total_prompt = [{"role": "system", "content": meta_instruction}]
     if history_msg is not None:
         for message in history_msg:
-            total_prompt[0].append(
-                {
-                    "role": message["role"],
-                    "content": message["content"],
-                }
-            )
+            total_prompt.append({"role": message["role"], "content": message["content"]})
 
-    total_prompt[0].append(
-        {
-            "role": "user",
-            "content": prompt,
-        }
-    )
-    return total_prompt
+    total_prompt.append({"role": "user", "content": prompt})
+    return [total_prompt]
 
 
 def get_turbomind_response(
