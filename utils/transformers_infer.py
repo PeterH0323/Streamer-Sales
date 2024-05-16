@@ -225,7 +225,7 @@ def get_hf_response(
             **asdict(generation_config),
         ):
             # Display robot response in chat message container
-            if "~" not in cur_response:
+            if "~" in cur_response:
                 cur_response = cur_response.replace("~", "")
 
             message_placeholder.markdown(cur_response + "▌")

@@ -61,7 +61,7 @@ def get_turbomind_response(
         cur_response = ""
         for item in model_pipe.stream_infer(real_prompt, gen_config=prepare_generation_config()):
 
-            if "~" not in item.text:
+            if "~" in item.text:
                 item.text = item.text.replace("~", "")
 
             cur_response += item.text
