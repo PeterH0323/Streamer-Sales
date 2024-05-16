@@ -19,7 +19,7 @@ def prepare_generation_config():
 @st.cache_resource
 def load_turbomind_model(model_dir, model_format="hf"):  # hf awq
 
-    # model_dir = snapshot_download(model_dir, revision="master")
+    model_dir = snapshot_download(model_dir, revision="master")
     backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768)
     pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO")
 
