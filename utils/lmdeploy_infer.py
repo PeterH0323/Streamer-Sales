@@ -1,3 +1,4 @@
+from pathlib import Path
 from lmdeploy import pipeline, GenerationConfig, TurbomindEngineConfig
 
 import streamlit as st
@@ -21,7 +22,7 @@ def load_turbomind_model(model_dir, model_format="hf"):  # hf awq
 
     model_dir = snapshot_download(model_dir, revision="master")
     backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768)
-    pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO")
+    pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO", model_name=Path(model_dir).name)
 
     return pipe, None
 
