@@ -1,19 +1,14 @@
 from pathlib import Path
-from lmdeploy import pipeline, GenerationConfig, TurbomindEngineConfig
 
 import streamlit as st
 import torch
+from lmdeploy import GenerationConfig, TurbomindEngineConfig, pipeline
 from modelscope import snapshot_download
 
 
 def prepare_generation_config():
 
-    gen_config = GenerationConfig(
-        top_p=0.8,
-        top_k=40,
-        temperature=0.7,
-        # max_new_tokens=4096
-    )
+    gen_config = GenerationConfig(top_p=0.8, top_k=40, temperature=0.7, min_new_tokens=200)
     return gen_config
 
 
@@ -27,8 +22,12 @@ def load_turbomind_model(model_dir, model_format="hf"):  # hf awq
     return pipe, None
 
 
-def combine_history(prompt, meta_instruction, history_msg=None):
+def combine_history(prompt, meta_instruction, history_msg=None, first_input_str=""):
     total_prompt = [{"role": "system", "content": meta_instruction}]
+
+    if first_input_str != "":
+        total_prompt.append({"role": "user", "content": first_input_str})
+
     if history_msg is not None:
         for message in history_msg:
             total_prompt.append({"role": message["role"], "content": message["content"]})
@@ -45,13 +44,16 @@ def get_turbomind_response(
     model_pipe,
     tokenizer,
     session_messages,
-    first_input=False,
+    add_session_msg=True,
+    first_input_str="",
 ):
-    real_prompt = combine_history(prompt, meta_instruction, history_msg=session_messages)  # 是否加上历史对话记录
+    real_prompt = combine_history(
+        prompt, meta_instruction, history_msg=session_messages, first_input_str=first_input_str
+    )  # 是否加上历史对话记录
     print(real_prompt)
 
     # Add user message to chat history
-    if not first_input:
+    if add_session_msg:
         session_messages.append({"role": "user", "content": prompt, "avatar": user_avator})
 
     with st.chat_message("assistant", avatar=robot_avator):

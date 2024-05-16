@@ -116,7 +116,8 @@ def main(meta_instruction):
             st.session_state.model,
             st.session_state.tokenizer,
             session_messages=st.session_state.messages,
-            first_input=True,
+            add_session_msg=False,
+            first_input_str="",
         )
 
     if "button_msg" not in st.session_state:
@@ -144,6 +145,8 @@ def main(meta_instruction):
             st.session_state.model,
             st.session_state.tokenizer,
             session_messages=st.session_state.messages,
+            add_session_msg=True,
+            first_input_str=st.session_state.first_input,
         )
 
 

@@ -9,9 +9,9 @@ import torch
 from modelscope import snapshot_download
 from torch import nn
 from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList
+from transformers.utils import logging
 
 from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
-from transformers.utils import logging
 
 
 logger = logging.get_logger(__name__)
@@ -164,8 +164,12 @@ def generate_interactive(
             break
 
 
-def combine_history(prompt, meta_instruction, history_msg=None):
+def combine_history(prompt, meta_instruction, history_msg=None, first_input_str=""):
     total_prompt = f"<s><|im_start|>system\n{meta_instruction}<|im_end|>\n"
+
+    if first_input_str != "":
+        total_prompt += user_prompt.format(user=first_input_str)
+
     if history_msg is not None:
         for message in history_msg:
             cur_content = message["content"]
@@ -190,13 +194,25 @@ def prepare_generation_config():
     return generation_config
 
 
-def get_hf_response(prompt, meta_instruction, user_avator, robot_avator, model, tokenizer, session_messages, first_input=False):
+def get_hf_response(
+    prompt,
+    meta_instruction,
+    user_avator,
+    robot_avator,
+    model,
+    tokenizer,
+    session_messages,
+    add_session_msg=True,
+    first_input_str="",
+):
     generation_config = prepare_generation_config()
 
-    real_prompt = combine_history(prompt, meta_instruction, history_msg=session_messages)  # 是否加上历史对话记录
-    # print(real_prompt)
+    real_prompt = combine_history(
+        prompt, meta_instruction, history_msg=session_messages, first_input_str=first_input_str
+    )  # 是否加上历史对话记录
+    print(real_prompt)
     # Add user message to chat history
-    if not first_input:
+    if add_session_msg:
         session_messages.append({"role": "user", "content": prompt, "avatar": user_avator})
 
     with st.chat_message("assistant", avatar=robot_avator):
