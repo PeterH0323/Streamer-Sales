@@ -441,3 +441,20 @@ python ./benchmark/get_benchmark_report.py
 ## 开源许可证
 
 该项目采用 [Apache License 2.0 开源许可证](https://github.com/PeterH0323/Streamer-Sales/LICENSE) 同时，请遵守所使用的模型与数据集的许可证。
+
+## 引用
+
+如果本项目对您的工作有所帮助，请使用以下格式引用：
+
+```bibtex
+@misc{Streamer-Sales,
+    title={Streamer-Sales},
+    author={Streamer-Sales},
+    url={https://github.com/PeterH0323/Streamer-Sales},
+    year={2024}
+}
+```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=PeterH0323/Streamer-Sales&type=Date)](https://star-history.com/#PeterH0323/Streamer-Sales&Date)
