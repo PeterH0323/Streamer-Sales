@@ -8,7 +8,7 @@ from modelscope import snapshot_download
 
 def prepare_generation_config():
 
-    gen_config = GenerationConfig(top_p=0.8, top_k=40, temperature=0.7, min_new_tokens=200)
+    gen_config = GenerationConfig(top_p=0.8, top_k=40, temperature=0.7)  # , min_new_tokens=200
     return gen_config
 
 
