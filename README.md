@@ -56,6 +56,9 @@ license: Apache License 2.0
 
 **开源不易，如果本项目帮到大家，可以右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐是我们最大的鼓励，谢谢各位！**  
 
+## 架构图
+
+![架构图](./doc/architecture.png)
 
 ## 演示
 
