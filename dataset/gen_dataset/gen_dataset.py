@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import json
 import random
 import re
@@ -265,18 +266,28 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
                     gen_json.update({product: []})
 
-                    conversation_setting = dataset_yaml["conversation_setting"]
-                    gen_num = conversation_setting["each_product_gen"]
+                    data_gen_setting = dataset_yaml["data_gen_setting"]
+                    gen_num = data_gen_setting["each_product_gen"]
 
                     # 生成数据
                     for idx in range(gen_num):
 
-                        # 随机抽取 3 个产品特性
-                        hightlights_list = random.sample(hightlights, 3)
+                        # 随机抽取 ${each_pick_hightlight} 个产品特性
+                        each_pick_hightlight = data_gen_setting["each_pick_hightlight"]
+                        if each_pick_hightlight >= len(hightlights):
+                            # 超过打乱，增加随机性
+                            hightlights_list = random.shuffle(hightlights)
+                        else:
+                            hightlights_list = random.sample(hightlights, each_pick_hightlight)
                         hightlight_str = "、".join(hightlights_list)
 
-                        # 随机抽取 3 个提问角度
-                        customer_question_type = random.sample(dataset_yaml["customer_question_type"], 3)
+                        # 随机抽取 ${each_pick_question} 个提问角度
+                        each_pick_question = data_gen_setting["each_pick_question"]
+                        if each_pick_question >= len(dataset_yaml["customer_question_type"]):
+                            # 超过打乱，增加随机性
+                            customer_question_type = random.shuffle(dataset_yaml["customer_question_type"])
+                        else:
+                            customer_question_type = random.sample(dataset_yaml["customer_question_type"], each_pick_question)
                         customer_question_str = "、".join(customer_question_type)
 
                         # 商品信息
@@ -284,15 +295,15 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
                         product_info_str += dataset_yaml["product_info_struct"][1].replace("{highlights}", hightlight_str)
 
                         content_str = (
-                            conversation_setting["dataset_gen_prompt"]
+                            data_gen_setting["dataset_gen_prompt"]
                             .replace("{role_type}", role_type)
                             .replace("{character}", character)
                             .replace("{product_info}", product_info_str)
                             .replace("{customer_question}", customer_question_str)
-                            .replace("{each_conversation_qa}", str(conversation_setting["each_conversation_qa"]))
+                            .replace("{each_conversation_qa}", str(data_gen_setting["each_conversation_qa"]))
                             .replace(
                                 "{dataset_json_format}",
-                                conversation_setting["dataset_json_format"].replace("{product_info}", product_info_str),
+                                data_gen_setting["dataset_json_format"].replace("{product_info}", product_info_str),
                             )
                         )
 
@@ -305,10 +316,20 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
                             raise ValueError(f"model_name {model_name} not support")
 
                         if "conversation" in format_json and len(format_json["conversation"]) > 0:
+
+                            # 第一个结果因为节省 token，需要将 system 和 input 放回去
+                            conversation_setting = deepcopy(dataset_yaml["conversation_setting"])
+                            system_str = (
+                                conversation_setting["system"]
+                                .replace("{role_type}", role_type)
+                                .replace("{character}", character)
+                            )
+                            input_str = conversation_setting["first_input"].replace("{product_info}", product_info_str)
+
                             # 将第一个对话加入必要信息
                             format_json["conversation"][0] = {
-                                "system": f"现在你是一位金牌带货主播，你的名字叫{role_type}，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。",
-                                "input": f"我的{product_info_str}，你需要根据我给出的商品信息撰写一段直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。",
+                                "system": system_str,
+                                "input": input_str,
                                 "output": format_json["conversation"][0]["output"],
                             }
                         else:
