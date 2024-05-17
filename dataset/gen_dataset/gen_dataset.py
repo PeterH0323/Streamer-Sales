@@ -196,7 +196,7 @@ def gen_product_highlights(dastset_yaml_path, api_yaml_path):
         yaml.dump(dataset_yaml, f, allow_unicode=True)
 
 
-def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path, model_name: str):
+def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path, model_name: str, specific_name=""):
 
     # 确保文件夹存在
     save_json_root.mkdir(parents=True, exist_ok=True)
@@ -204,6 +204,11 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
     # 读取 yaml 文件
     with open(dastset_yaml_path, "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
+
+    if specific_name != "":
+        assert (
+            specific_name in dataset_yaml["role_type"]
+        ), f"{specific_name} not in dataset_yaml['role_type'] ({dataset_yaml['role_type']}), pls check dataset yaml!"
 
     # 设置 api key
     api_key = set_api_key(model_name, api_yaml_path)
@@ -215,9 +220,10 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
     for role_type, role_character in dataset_yaml["role_type"].items():
 
-        if role_type != "萝莉":
-            # 先生成萝莉的
-            break
+        if specific_name != "" and role_type != specific_name:
+            # 只生成特定人物的
+            print(f"specific_name = {specific_name}, skipping for {role_type}")
+            continue
 
         gen_json = dict()
 
@@ -328,17 +334,23 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
 if __name__ == "__main__":
 
+    # 例子：全部人物使用 Qwen api 生成数据
+    # cd /path/to/Streamer-Sales/dataset/gen_dataset
+    # python gen_dataset.py qwen
+
     # 命令行输入参数
     parser = argparse.ArgumentParser(description="Gen Dataset")
     parser.add_argument("model_name", type=str, choices=["qwen", "ernie"], help="Model name for data generation")
+    parser.add_argument("--data_yaml", type=str, default="./conversation_cfg.yaml", help="data setting file path")
+    parser.add_argument("--api_yaml", type=str, default="./api_cfg.yaml", help="api setting file path")
+    parser.add_argument("--output_dir", type=str, default="./trainval_dataset/response", help="generation json output dir")
+    parser.add_argument("--specific_name", type=str, default="", help="Character name for data generation")
     args = parser.parse_args()
 
-    DATA_YAML_PATH = "/path/to/dataset/gen_dataset/conversation_cfg.yaml"
-    API_YAML_PATH = "/path/to/dataset/gen_dataset/api_cfg.yaml"
-    GEN_JSON_STEP_ROOT = Path(f"/path/to/dataset/trainval_dataset/{args.model_name}_step")
-
-    # 生成产品特性
+    # 生成产品特性（可选）
     # gen_product_highlights(DATA_YAML_PATH, API_YAML_PATH)
 
     # 生成对话数据集
-    gen_dataset(DATA_YAML_PATH, API_YAML_PATH, GEN_JSON_STEP_ROOT, model_name=args.model_name)
+    gen_dataset(
+        args.data_yaml, args.api_yaml, Path(args.output_dir), model_name=args.model_name, specific_name=args.specific_name
+    )

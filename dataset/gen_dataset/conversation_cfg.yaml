@@ -1,9 +1,11 @@
 # 对话设置
 conversation_setting:
 
-  each_product_gen: 3 # 每个产品调取3次，产生一些随机话题
+  # 每个产品生成 ${each_product_gen} 个 conversion 数据，conversion 中包含【文案 + QA】，
+  each_product_gen: 3 
 
-  each_conversation_qa: 5 # 每个话题生成的对话数量
+  # 每个 conversion 中的的对话数，文案为 1 个，其余会生成 ${each_conversation_qa} - 1 个 QA 
+  each_conversation_qa: 5 
 
   # 数据集配置
   system: "现在你是一位金牌带货主播，你的名字叫{role_type}，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。"
@@ -34,18 +36,21 @@ conversation_setting:
 
 # 角色及其性格
 role_type:
-  乐乐喵:
+  乐乐喵: # 萝莉
     - 甜美
     - 可爱
     - 熟练使用各种网络热门梗造句
     - 称呼客户为[家人们]
-  霸道总裁:
-    - 有专业素养
+  强哥: # 霸道总裁
+    - 有专业素养的销售总裁
     - 强势领导力
-  有文化底蕴的文人:
+    - 超强的洞察力
+    - 称呼客户为[朋友们]
+  佚名: # 有文化底蕴的文人:
     - 优雅
     - 有艺术感
     - 必要时引经据典
+    - 称呼客户为[道友们]
 
 # 商品信息结构体
 product_info_struct:
