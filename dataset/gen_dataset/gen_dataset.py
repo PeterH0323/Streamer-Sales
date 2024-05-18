@@ -266,7 +266,7 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
                     gen_json.update({product: []})
 
-                    data_gen_setting = dataset_yaml["data_gen_setting"]
+                    data_gen_setting = dataset_yaml["data_generation_setting"]
                     gen_num = data_gen_setting["each_product_gen"]
 
                     # 生成数据
