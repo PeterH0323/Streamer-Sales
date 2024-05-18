@@ -131,19 +131,31 @@ pip install -r requirements-raw.txt
 # 对话设置
 conversation_setting:
 
-  each_product_gen: 3 # 每个产品调取3次，产生一些随机话题
-
-  each_conversation_qa: 5 # 每个话题生成的对话数量
-
-  # 数据集配置
   system: "现在你是一位金牌带货主播，你的名字叫{role_type}，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。"
   first_input: "我的{product_info}，你需要根据我给出的商品信息撰写一段直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。"
 
+# 数据集生成设置
+data_generation_setting:
+
+  # 每个产品生成 ${each_product_gen} 个 conversion 数据，conversion 中包含【文案 + QA】，
+  each_product_gen: 3
+
+  # 每个 conversion 中的的对话数，文案为 1 个，其余会生成 ${each_conversation_qa} - 1 个 QA 
+  each_conversation_qa: 5
+
+  # 每个文案生成随机抽取 ${each_pick_hightlight} 个亮点
+  each_pick_hightlight: 3
+
+  # 每个文案生成后随机抽取 ${each_pick_hightlight} 个问题生成用户的提问
+  each_pick_question: 3
+
+  # 数据集生成 prompt
   dataset_gen_prompt: 现在你是一位金牌带货主播，你的名字叫{role_type}，你的说话方式是{character}。
                       我的{product_info}，你需要根据我给出的商品信息撰写一段至少600字的直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。
                       输出文案后，结合商品信息站在消费者的角度根据[{customer_question}]提出{each_conversation_qa}个问题并解答。
                       全部输出的信息使用我期望的 json 格式进行输出：{dataset_json_format}。注意 json 一定要合法。
-
+ 
+  # 数据生成 json 格式
   dataset_json_format: 
     '{
       "conversation": [
@@ -221,6 +233,12 @@ cd dataset/gen_dataset
 python gen_dataset.py ${model_type}
 ```
 
+如果需要指定某一个角色数据的生成在命令后面加上 `--specific_name xxx` 
+
+```bash
+python gen_dataset.py ${model_type} --specific_name 乐乐喵
+```
+
 执行之后，会在 `dataset/trainval_dataset/response` 生成对应模型的数据集
 
 ```bash
@@ -229,7 +247,8 @@ python gen_dataset.py ${model_type}
 └── qwen_乐乐喵_train.json
 ```
 
-3. 进行数据清洗并合并，以及生成自我认知数据
+
+1. 进行数据清洗并合并，以及生成自我认知数据
 
 ```bash
 python merge_dataset.py dataset/trainval_dataset/response dataset/trainval_dataset/train.jsonl

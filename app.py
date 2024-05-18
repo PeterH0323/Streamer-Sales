@@ -146,7 +146,10 @@ def main(model_dir, using_lmdeploy):
     st.header("商品页")
 
     # 说明
-    st.info("这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可（开发中）", icon="ℹ️")
+    st.info(
+        "这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可",
+        icon="ℹ️",
+    )
 
     # 读取 yaml 文件
     with open("./product_info/product_info.yaml", "r", encoding="utf-8") as f:
@@ -183,14 +186,15 @@ def main(model_dir, using_lmdeploy):
         heightlight_input = st.text_input(label="添加商品特性")
         product_image = st.file_uploader(label="上传商品图片")
         product_book = st.file_uploader(label="上传商品说明书")
-        submit_button = st.form_submit_button(label="提交")
+        submit_button = st.form_submit_button(label="提交（开发中）", disabled=True)
 
 
 if __name__ == "__main__":
 
-    USING_LMDEPLOY = True # 是否使用 LMDeploy 执行推理
-    
+    USING_LMDEPLOY = True  # 是否使用 LMDeploy 执行推理
+
     # 模型路径
     MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
+    # MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
 
     main(MODEL_DIR, USING_LMDEPLOY)
