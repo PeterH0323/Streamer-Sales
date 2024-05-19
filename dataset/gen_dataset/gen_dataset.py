@@ -362,14 +362,14 @@ if __name__ == "__main__":
     # 命令行输入参数
     parser = argparse.ArgumentParser(description="Gen Dataset")
     parser.add_argument("model_name", type=str, choices=["qwen", "ernie"], help="Model name for data generation")
-    parser.add_argument("--data_yaml", type=str, default="./conversation_cfg.yaml", help="data setting file path")
-    parser.add_argument("--api_yaml", type=str, default="./api_cfg.yaml", help="api setting file path")
-    parser.add_argument("--output_dir", type=str, default="./trainval_dataset/response", help="generation json output dir")
+    parser.add_argument("--data_yaml", type=str, default="../../configs/conversation_cfg.yaml", help="data setting file path")
+    parser.add_argument("--api_yaml", type=str, default="../../configs/api_cfg.yaml", help="api setting file path")
+    parser.add_argument("--output_dir", type=str, default="./train_dataset/response", help="generation json output dir")
     parser.add_argument("--specific_name", type=str, default="", help="Character name for data generation")
     args = parser.parse_args()
 
     # 生成产品特性（可选）
-    # gen_product_highlights(DATA_YAML_PATH, API_YAML_PATH)
+    # gen_product_highlights(args.data_yaml, args.api_yaml)
 
     # 生成对话数据集
     gen_dataset(

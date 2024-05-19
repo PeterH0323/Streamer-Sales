@@ -117,15 +117,15 @@ pip install -r requirements-raw.txt
 
 ## 数据集准备
 
-本模型的数据集构建采用了 通义千问 & 文心一言 生成数据集，相关的配置详见 `dataset/gen_dataset/conversation_cfg.yaml`。
+本模型的数据集构建采用了 通义千问 & 文心一言 生成数据集，相关的配置详见 `./configs/conversation_cfg.yaml`。
 
 **训练本模型的数据集的生成方式，以及数据集已开源，详见 `dataset` 文件夹**
 
 下面介绍如何用商用大模型生成自由数据集：
 
-1. 获取模型的 api key，填入 `dataset/gen_dataset/api_cfg.yaml` 对应的位置
+1. 获取模型的 api key，填入 `./configs/api_cfg.yaml` 对应的位置
 
-2. 数据集生成配置文件 `dataset/gen_dataset/conversation_cfg.yaml` 介绍
+2. 数据集生成配置文件 `./configs/conversation_cfg.yaml` 介绍
 
 ```yaml
 # 对话设置

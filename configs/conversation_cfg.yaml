@@ -4,6 +4,7 @@ conversation_setting:
   system: "现在你是一位金牌带货主播，你的名字叫{role_type}，你的说话方式是{character}。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。"
   first_input: "我的{product_info}，你需要根据我给出的商品信息撰写一段直播带货口播文案。你需要放大商品的亮点价值，激发用户的购买欲。"
 
+
 # 数据集生成设置
 data_generation_setting:
 
@@ -43,6 +44,12 @@ data_generation_setting:
         ... 直到问题结束
       ]
     }'
+
+# 说明书生成设置
+doc_generation_setting:
+  # 说明书生成 prompt
+  dataset_gen_prompt: 我上传的是一个产品的详细说明，请帮我生成 markdwon 格式的说明书，需要包含产品名字、产品细节、卖点、亮点，越详细越好。
+
 
 # 角色及其性格
 role_type:
