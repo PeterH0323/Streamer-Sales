@@ -1,6 +1,6 @@
 电动牙刷: 
     heighlights: [高效清洁, 减少手动压力, 定时提醒, 智能模式调节, 无线充电, 噪音低]
-    images: "./product_info/images/ele_toothblush.png"
+    images: "./product_info/images/elec_toothblush.png"
     doc:
 
 口红: 
@@ -50,7 +50,7 @@
 
 OLED电视: 
     heighlights: [色彩鲜艳, 对比度极高, 响应速度快, 无背光眩光, 厚度较薄, 自发光无需额外照明]
-    images: "./product_info/images/TV.png"
+    images: "./product_info/images/oled_tv.png"
     doc:
 
 牛肉: 
