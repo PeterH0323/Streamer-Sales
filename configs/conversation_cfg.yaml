@@ -46,9 +46,9 @@ data_generation_setting:
     }'
 
 # 说明书生成设置
-doc_generation_setting:
+instruction_generation_setting:
   # 说明书生成 prompt
-  dataset_gen_prompt: 我上传的是一个产品的详细说明，请帮我生成 markdwon 格式的说明书，需要包含产品名字、产品细节、卖点、亮点，越详细越好。
+  dataset_gen_prompt: 我上传的是一个产品的详细说明，请帮我生成 markdwon 格式的说明书，需要包含产品名字、产品细节详情、卖点、亮点，越详细越好，只输出说明书即可。
 
 
 # 角色及其性格
