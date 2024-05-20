@@ -39,6 +39,7 @@ license: Apache License 2.0
 
 ## NEWS
 
+- [2024.05.21] 接入 RAG，主播每次回答问题都会借鉴说明书，实现加商品无需微调即可让回答更加贴近商品实际
 - [2024.05.15] 接入 [LMDeploy](https://github.com/InternLM/lmdeploy)，**推理效率提升 3倍+** 🚀🚀🚀
 - [2024.05.10] 发布【乐乐喵】4 bit 模型
 - [2024.04.16] 发布【乐乐喵】模型，完成初版页面
@@ -62,7 +63,7 @@ license: Apache License 2.0
 
 ## 演示
 
-Demo 访问地址：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+**Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
 
 <p align="center">
     <img src="assets/demo2.png" alt="Demo1" width="90%">
@@ -78,25 +79,51 @@ Demo 访问地址：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sal
 | streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b)      |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
 
-<details>
-<summary> 从 ModelScope 导入</summary>
 
-```python
-import torch
-from modelscope import snapshot_download, AutoTokenizer, AutoModelForCausalLM
-model_dir = snapshot_download('HinGwenWoong/streamer-sales-lelemiao-7b')
-tokenizer = AutoTokenizer.from_pretrained(model_dir, device_map="auto", trust_remote_code=True)
-# Set `torch_dtype=torch.float16` to load model in float16, otherwise it will be loaded as float32 and might cause OOM Error.
-model = AutoModelForCausalLM.from_pretrained(model_dir, device_map="auto", trust_remote_code=True, torch_dtype=torch.float16)
-model = model.eval()
-response, history = model.chat(tokenizer, "你好", history=[])
-print(response)
+## 开发计划
+
+- [x] 生成多个产品数据集
+- [x] 根据产品生成话术，每个都是5个往来的对话
+- [ ] 每个话术分为3个角色，
+  - [x] 乐乐喵——可爱萝莉，
+  - [ ] 强哥——专业性极强的总裁
+  - [ ] 佚名——有文化底蕴的书生
+- [x] 模型推理加速
+- [x] 接入 RAG 解读产品文档
+- [ ] 后续接入 Agent，支持网上搜索对比同类
+- [ ] 数字人 + 语音
+- [ ] 根据用户的反馈和行为，实时调整解说策略，并推荐产品
+- [ ] 多用户提问时候，建立 good quection 和 bad question 列表防止过度回复？
+- [ ] 上传说明书之后自动总结亮点、商品信息，供上传者借鉴修改
+
+## 快速体验
+
+**Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+
+or 
+
+本地：
+```bash
+conda env create -f environment.yml
+conda activate streamer-sales
+pip install -r requirements-raw.txt
+
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
-</details>
+## 指南
 
+本指南会从以下几点进行说明：
 
-## 环境搭建
+- [一、环境搭建](#一、环境搭建)
+- [二、微调数据集准备](#二、微调数据集准备)
+- [三、训练](#三、训练)
+- [四、说明书生成](#四、说明书生成)
+- [五、RAG向量数据库](#五、RAG向量数据库)
+- [六、部署](#六、部署)
+- [七、如何添加商品](#七、如何添加商品)
+
+### 一、环境搭建
 
 本项目使用 [xtuner](https://github.com/InternLM/xtuner) 训练，在 [internlm2-chat-7b](https://huggingface.co/internlm/internlm2-chat-7b) 上进行微调
 
@@ -115,7 +142,7 @@ conda activate streamer-sales
 pip install -r requirements-raw.txt
 ```
 
-## 数据集准备
+### 二、微调数据集准备
 
 本模型的数据集构建采用了 通义千问 & 文心一言 生成数据集，相关的配置详见 `./configs/conversation_cfg.yaml`。
 
@@ -174,20 +201,29 @@ data_generation_setting:
       ]
     }'
 
+# 说明书生成设置
+instruction_generation_setting:
+  # 说明书生成 prompt
+  dataset_gen_prompt: 我上传的是一个产品的详细说明，请帮我生成 markdwon 格式的说明书，需要包含产品名字、产品细节详情、卖点、亮点，越详细越好，只输出说明书即可。
+
+
 # 角色及其性格
 role_type:
-  乐乐喵:
+  乐乐喵: # 萝莉
     - 甜美
     - 可爱
     - 熟练使用各种网络热门梗造句
     - 称呼客户为[家人们]
-  霸道总裁:
-    - 有专业素养
+  强哥: # 霸道总裁
+    - 有专业素养的销售总裁
     - 强势领导力
-  有文化底蕴的文人:
+    - 超强的洞察力
+    - 称呼客户为[朋友们]
+  佚名: # 有文化底蕴的文人:
     - 优雅
     - 有艺术感
     - 必要时引经据典
+    - 称呼客户为[道友们]
 
 # 商品信息结构体
 product_info_struct:
@@ -247,8 +283,7 @@ python gen_dataset.py ${model_type} --specific_name 乐乐喵
 └── qwen_乐乐喵_train.json
 ```
 
-
-1. 进行数据清洗并合并，以及生成自我认知数据
+4. 进行数据清洗并合并，以及生成自我认知数据
 
 ```bash
 python merge_dataset.py dataset/trainval_dataset/response dataset/trainval_dataset/train.jsonl
@@ -344,7 +379,7 @@ python merge_dataset.py dataset/trainval_dataset/response dataset/trainval_datas
 ```
 
 
-## 训练
+### 三、训练
 
 1. 将 `./finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_data.py` 中 数据集路径 和 模型路径 改为您的本地路径
 
@@ -367,13 +402,64 @@ pack_to_max_length = True
 xtuner train finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_data.py --deepspeed deepspeed_zero2
 ```
 
-注意：如果显存不够了，调小一点 `batch_size` 和 `max_length`，反之还剩很多，调大这两个值
+注意：如果显存不够了，优先调小 `batch_size`， 如果 `bs = 1` 还不够则调小 `max_length`，反之还剩很多，调大这两个值
 
-## 部署
 
-### Web 部署 Demo
+### 四、说明书生成
 
-1. 将 pth 转为 hf 
+1. 搭建环境
+
+这里用到 ppocr 工具来进行 ocr 识别，（本人也是 ppocr 的贡献者，目前 commit 数排在 10 / 181 :smile:）
+
+另外生成一个虚拟环境，避免有版本冲突
+```bash
+conda create -n ppocr python=3.8
+conda activate ppocr
+
+pip install paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
+pip install paddleocr==2.7.3
+```
+
+2. 网上下载图片 or 自己的图片，如果有自己的说明书，则下一步改为直接运行 `gen_instructions.py` 中的 `gen_instructions_according_ocr_res` 这个方法即可
+
+3. 识别文字 & 使用 LLM 总结生成 markdown 文件
+
+```bash
+cd ./dataset/gen_instructions
+python gen_instructions.py --image_dir /path/to/image_dir --ocr_output_dir ./ocr_res --instruction_output_dir ./instructions
+```
+
+调取上面的脚本会生成 ocr 识别结果，以及最终的 markdown 说明书文件。`ocr_output_dir` 里面会生成 `work_dir` 文件夹，里面有识别结果图。
+
+OCR 识别过程中，如果图片长宽比例大于2，则会设置步长为短边滑动窗口对长边进行切图，确保识别结果比较准确
+
+### 五、RAG 向量数据库
+
+1. 切换环境
+
+```bash
+conda activate streamer-sales
+```
+
+2. 生成向量数据库，本脚本借鉴豆哥（[茴香豆](https://github.com/InternLM/HuixiangDou)），感谢豆哥！
+
+```bash
+cd utils/rag
+python feature_store.py
+```
+
+如果遇到 `No module named 'faiss.swigfaiss_avx2` ，在终端进入 python 执行以下代码即可解决
+
+```bash
+import faiss
+from pathlib import Path
+import os
+os.system(f"cd {Path(faiss.__file__).parent} && ln -s swigfaiss.py swigfaiss_avx2.py")
+```
+
+### 六、部署
+
+1. 将 pth 转为 HF 格式的模型
 
 ```bash
 xtuner convert pth_to_hf ./finetune_configs/internlm2_chat_7b_qlora_custom_data.py \
@@ -390,32 +476,20 @@ xtuner convert merge /path/to/internlm2-chat-7b \
                      ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge
 ```
 
-3. 启动 web demo
-
-```bash
-streamlit run app.py --server.address=0.0.0.0 --server.port 7860
-```
-
-<!-- # 也可以直接使用命令行 cli 的方式进行启动
-xtuner chat ./work_dirs/internlm2_chat_7b_qlora_custom_data/epoch_10_merge \
-            --prompt-template internlm2_chat -->
-
-### LMDeploy 
-
-1. 安装 lmdeploy
+3. 安装 lmdeploy
 
 ```bash
 pip install lmdeploy[all]==0.4.0
 ```
 
-2. 进行 4bit 量化
+4. 对模型进行 4bit 量化（可选）
 
 ```bash
 lmdeploy lite auto_awq ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge  \
                        --work-dir ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_merge_4bit
 ```
 
-3. 测试速度
+5. 测试速度（可选）
 
 ```bash
 python ./benchmark/get_benchmark_report.py
@@ -433,24 +507,51 @@ python ./benchmark/get_benchmark_report.py
 +---------------------------------+------------------------+-----------------+
 ```
 
-## TODO
+6. 启动 Web APP
 
-- [x] 生成多个产品数据集
-- [x] 根据产品生成话术，每个都是5个往来的对话
-- [ ] 每个话术分为3个角色，
-  - [x] 乐乐喵——可爱萝莉，
-  - [ ] 强哥——专业性极强的总裁
-  - [ ] 有文化底蕴的书生
-- [x] 模型推理加速
-- [ ] 接入 RAG 解读产品文档
-- [ ] 后续接入 Agent，支持网上搜索对比同类
-- [ ] 数字人 + 语音
-- [ ] 根据用户的反馈和行为，实时调整解说策略，并推荐产品
-- [ ] 多用户提问时候，建立 good quection 和 bad question 列表防止过度回复？
+> [!NOTE] 
+> 使用 LMDeploy 作为推理框架，将 app.py 里面的 `USING_LMDEPLOY` 设置为 `True`
+> 
+> 反之，使用原生 HF 进行推理，则将 app.py 里面的 `USING_LMDEPLOY` 设置为 `False`
+
+```bash
+streamlit run app.py --server.address=0.0.0.0 --server.port 7860
+```
+
+使用浏览器打开 `http://127.0.0.1:7860` 即可访问 Web 页面
+
+
+### 七、如何添加商品
+
+商品文件都放置在 `/mnt/d/Project/Streamer-Sales/product_info` 目录中，其中
+
+- `images`: 存放商品图片
+- `instructions`: 存放商品说明书
+- `product_info.yaml`: 商品信息表
+
+`product_info.yaml` 解析：
+
+```yaml
+商品名: 
+    heighlights: [亮点1, 亮点2, 亮点3]
+    images: 商品图片路径，必须位于 product_info/images/ 中
+    instruction: 商品说明书路径，必须位于 product_info/instructions/ 中，说明书需要时 markdown 格式
+
+# 例子：
+
+唇膏: 
+    heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
+    images: "./product_info/images/lip_stick.png"
+    instruction:
+...
+```
+
+**Enjoy ！**
+
 
 ## 后记
 
-本项目属于个人的一个学习项目，还有很多不足的地方，例如本模型在数据集方面的还没做很精细的调优，还有时候标点符号会错误。
+本项目属于个人的一个学习项目，还有很多不足的地方，例如本模型在数据集方面的还没做很精细的调优。
 
 欢迎大家一起讨论，如果大家有数据集，可以在 issue 留言讨论。
 

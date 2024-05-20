@@ -162,3 +162,4 @@ work_dir
 bk
 tmp
 doc/.$*
+response/*.json
