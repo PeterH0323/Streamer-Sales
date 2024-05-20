@@ -33,10 +33,26 @@ def resize_image(image_path, max_height):
     return resized_image
 
 
+@st.experimental_dialog("产品说明书")
+def instruction_dialog(instruction_path):
+    """产品说明书显示框
+
+    Args:
+        instruction_path (str): 说明书路径
+    """
+    with open(instruction_path, "r", encoding="utf-8") as f:
+        instruct_lines = f.readlines()
+
+    st.markdown(instruct_lines)
+    if st.button("确定"):
+        # st.rerun()
+        pass
+
+
 def on_btton_click(*args, **kwargs):
     # 按钮回调函数
     if kwargs["type"] == "check_manual":
-        pass
+        instruction_dialog(kwargs["instruction_path"])
 
     elif kwargs["type"] == "process_sales":
         st.session_state.page_switch = "pages/selling_page.py"
@@ -205,7 +221,7 @@ def main(model_dir, using_lmdeploy, enable_rag):
         product_name_input = st.text_input(label="添加商品名称")
         heightlight_input = st.text_input(label="添加商品特性")
         product_image = st.file_uploader(label="上传商品图片")
-        product_book = st.file_uploader(label="上传商品说明书")
+        product_instruction = st.file_uploader(label="上传商品说明书")
         submit_button = st.form_submit_button(label="提交(后续开放)", disabled=True)
 
 
