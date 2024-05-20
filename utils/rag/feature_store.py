@@ -1,4 +1,5 @@
 """extract feature and search with user query."""
+
 import argparse
 import json
 import os
@@ -478,6 +479,21 @@ def test_query(retriever: Retriever, sample: str = None):
         empty_cache()
 
     empty_cache()
+
+
+def fix_system_error():
+    """
+    Fix `No module named 'faiss.swigfaiss_avx2`
+    """
+    import faiss
+    from pathlib import Path
+    import os
+
+    if Path(faiss.__file__).parent.joinpath("swigfaiss_avx2.py").exists():
+        return
+
+    print("Fixing faiss error...")
+    os.system(f"cd {Path(faiss.__file__).parent} && ln -s swigfaiss.py swigfaiss_avx2.py")
 
 
 def gen_vector_db(config_path, source_dir, work_dir, test_mode=False, update_reject=False):
