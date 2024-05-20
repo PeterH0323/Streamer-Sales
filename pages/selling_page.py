@@ -52,15 +52,16 @@ def init_sidebar():
                 "我决定买下它。",
                 "我准备将其买下。",
             ]
-            st.button("加入购物车🛒", on_click=on_btn_click, kwargs={"info": random.choice(want_to_buy_list)})
+            buy_flag = st.button("加入购物车🛒", on_click=on_btn_click, kwargs={"info": random.choice(want_to_buy_list)})
 
         # TODO 加入卖货信息
         # 卖出 xxx 个
         # 成交额
 
-        # 模型配置
         st.button("清除对话历史", on_click=on_btn_click, kwargs={"info": "清除对话历史"})
         st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
+
+        # 模型配置
     #     st.markdown("## 模型配置")
     #     max_length = st.slider("Max Length", min_value=8, max_value=32768, value=32768)
     #     top_p = st.slider("Top P", 0.0, 1.0, 0.8, step=0.01)
@@ -148,7 +149,7 @@ def main(meta_instruction):
             add_session_msg=True,
             first_input_str=st.session_state.first_input,
             rag_retriever=st.session_state.rag_retriever,
-            product_name=st.session_state.product_name
+            product_name=st.session_state.product_name,
         )
 
 

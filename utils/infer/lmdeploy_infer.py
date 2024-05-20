@@ -6,6 +6,7 @@ from lmdeploy import GenerationConfig, TurbomindEngineConfig, pipeline
 from modelscope import snapshot_download
 
 from utils.rag.retriever import CacheRetriever
+from utils.rag.rag_worker import build_rag_propmt
 
 
 def prepare_generation_config():
@@ -33,18 +34,6 @@ def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=No
     if enable_rag:
         # 加载 rag 模型
         retriever = CacheRetriever(config_path=rag_config).get(config_path=rag_config, work_dir=db_path)
-
-        # update reject throttle
-        # retriever = cache.get(config_path=rag_config, work_dir=db_path)
-        # with open(os.path.join('resource', 'good_questions.json')) as f:
-        #     good_questions = json.load(f)
-        # with open(os.path.join('resource', 'bad_questions.json')) as f:
-        #     bad_questions = json.load(f)
-        # retriever.update_throttle(config_path=args.config_path,
-        #                           good_questions=good_questions,
-        #                           bad_questions=bad_questions)
-
-        # cache.pop('default')
 
     return pipe, None, retriever
 
@@ -78,25 +67,7 @@ def get_turbomind_response(
 ):
 
     if rag_retriever is not None:
-
-        GENERATE_TEMPLATE = "这是说明书：“{}”\n 客户的问题：“{}” \n 请阅读说明并运用你的性格进行解答。"  # noqa E501
-        context_max_length = 3000
-        chunk, db_context, references = rag_retriever.query(
-            f"商品名：{product_name}。{prompt}", context_max_length=context_max_length - 2 * len(GENERATE_TEMPLATE)
-        )
-        
-        print(f"@@@@@@@@@@@@{chunk}")
-        
-        if db_context is None:
-            print("feature store reject")
-
-        print(f"get db contenxt = {db_context}")
-        prompt_rag = prompt
-        if db_context is not None and len(db_context) > 0:
-            prompt_rag = GENERATE_TEMPLATE.format(db_context, prompt)
-            
-        print("=" * 20)
-        print(f"RAG reference = {references}")
+        prompt_rag = build_rag_propmt(rag_retriever, product_name, prompt)
 
     real_prompt = combine_history(
         prompt_rag if rag_retriever else prompt,

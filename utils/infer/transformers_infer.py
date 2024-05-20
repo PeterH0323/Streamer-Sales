@@ -13,6 +13,9 @@ from transformers.utils import logging
 
 from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
 
+from utils.rag.retriever import CacheRetriever
+from utils.rag.rag_worker import build_rag_propmt
+
 
 logger = logging.get_logger(__name__)
 
@@ -24,12 +27,18 @@ cur_query_prompt = "<|im_start|>user\n{user}<|im_end|>\n\
 
 
 @st.cache_resource
-def load_hf_model(model_dir):
+def load_hf_model(model_dir, enable_rag=True, rag_config=None, db_path=None):
 
     model_dir = snapshot_download(model_dir, revision="master")
     model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(torch.bfloat16).cuda()
     tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
-    return model, tokenizer
+
+    retriever = None
+    if enable_rag:
+        # 加载 rag 模型
+        retriever = CacheRetriever(config_path=rag_config).get(config_path=rag_config, work_dir=db_path)
+
+    return model, tokenizer, retriever
 
 
 @dataclass
@@ -204,17 +213,25 @@ def get_hf_response(
     session_messages,
     add_session_msg=True,
     first_input_str="",
+    rag_retriever=None,
+    product_name="",
 ):
-    generation_config = prepare_generation_config()
+    if rag_retriever is not None:
+        prompt_rag = build_rag_propmt(rag_retriever, product_name, prompt)
 
     real_prompt = combine_history(
-        prompt, meta_instruction, history_msg=session_messages, first_input_str=first_input_str
+        prompt_rag if rag_retriever else prompt,
+        meta_instruction,
+        history_msg=session_messages,
+        first_input_str=first_input_str,
     )  # 是否加上历史对话记录
     print(real_prompt)
+
     # Add user message to chat history
     if add_session_msg:
         session_messages.append({"role": "user", "content": prompt, "avatar": user_avator})
 
+    generation_config = prepare_generation_config()
     with st.chat_message("assistant", avatar=robot_avator):
         message_placeholder = st.empty()
         for cur_response in generate_interactive(
