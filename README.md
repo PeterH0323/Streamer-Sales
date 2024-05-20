@@ -434,7 +434,7 @@ python gen_instructions.py --image_dir /path/to/image_dir --ocr_output_dir ./ocr
 
 OCR 识别过程中，如果图片长宽比例大于2，则会设置步长为短边滑动窗口对长边进行切图，确保识别结果比较准确
 
-### 五、RAG 向量数据库
+### 五、RAG 向量数据库（可选，后面的 Web APP 启动的时候会执行）
 
 1. 切换环境
 
@@ -449,14 +449,7 @@ cd utils/rag
 python feature_store.py
 ```
 
-如果遇到 `No module named 'faiss.swigfaiss_avx2` ，在终端进入 python 执行以下代码即可解决
-
-```bash
-import faiss
-from pathlib import Path
-import os
-os.system(f"cd {Path(faiss.__file__).parent} && ln -s swigfaiss.py swigfaiss_avx2.py")
-```
+代码中的 里面会自动解决 `No module named 'faiss.swigfaiss_avx2` 的问题
 
 ### 六、部署
 

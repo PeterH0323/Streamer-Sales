@@ -498,6 +498,9 @@ def fix_system_error():
 
 def gen_vector_db(config_path, source_dir, work_dir, test_mode=False, update_reject=False):
 
+    # 解决 faiss 导入问题
+    fix_system_error()
+
     # 必须是绝对路径，否则加载会有问题
     work_dir = str(Path(work_dir).absolute())
 
