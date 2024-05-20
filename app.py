@@ -4,8 +4,9 @@
 # @Author  : HinGwenWong
 
 import copy
+from datetime import datetime
 from pathlib import Path
-import time
+import shutil
 
 import cv2
 import streamlit as st
@@ -38,16 +39,23 @@ EACH_CARD_OFFSET = 100  # 每个商品卡片比图片高度多出的距离
 EACH_ROW_COL = 2  # 商品页显示多少列
 
 # ==================================================================
+#                               商品配置
+# ==================================================================
+PRODUCT_INSTRUCTION_DIR = r"./product_info/instructions"
+PRODUCT_IMAGES_DIR = r"./product_info/images"
+
+# ==================================================================
 #                             配置文件路径
 # ==================================================================
 PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
 CONVERSATION_CFG_YAML_PATH = r"./configs/conversation_cfg.yaml"
 
+PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
+
 # ==================================================================
 #                               RAG 配置
 # ==================================================================
 RAG_CONFIG_PATH = r"./config/rag_config.yaml"
-RAG_SOURCE_DIR = r"./product_info/instructions"
 RAG_VECTOR_DB_DIR = r"./work_dir/rag_vector_db"
 
 
@@ -322,8 +330,8 @@ def main(model_dir, using_lmdeploy, enable_rag):
     with st.form(key="add_product_form"):
         product_name_input = st.text_input(label="添加商品名称")
         heightlight_input = st.text_input(label="添加商品特性")
-        product_image = st.file_uploader(label="上传商品图片")
-        product_instruction = st.file_uploader(label="上传商品说明书")
+        product_image = st.file_uploader(label="上传商品图片", type=["png", "jpg", "jpeg", "bmp"])
+        product_instruction = st.file_uploader(label="上传商品说明书", type=["md"])
         submit_button = st.form_submit_button(label="提交(后续开放)", disabled=True)
 
         if submit_button:
@@ -355,17 +363,47 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
 
     # 显示上传状态，并执行上传操作
     with st.status("正在上传商品...", expanded=True) as status:
-        st.write("说明书上传中...")
-        # 保存图片 & 说明书
-        time.sleep(1)
+
+        save_tag = datetime().now().strftime("%Y-%m-%d-%H-%M-%S")
+        image_save_path = Path(PRODUCT_IMAGES_DIR).joinpath(f"{save_tag}.{Path(product_image.name).suffix}")
+        instruct_save_path = Path(PRODUCT_INSTRUCTION_DIR).joinpath(f"{save_tag}.md")
+
+        st.write("图片保存中...")
+        image_data = product_image.getvalue()
+        with open(image_save_path, "wb") as file:
+            file.write(image_data)
+
+        st.write("说明书保存中...")
+        instruct_data = product_instruction.getvalue()
+        with open(instruct_save_path, "wb") as file:
+            file.write(instruct_data)
 
         st.write("更新商品明细表...")
-        # 更新 product_infor.yaml
-        time.sleep(1)
+        with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+            product_info_dict = yaml.safe_load(f)
+
+        product_info_dict.update(
+            {
+                product_name_input: {
+                    "heighlights": heightlight_input.split("、"),
+                    "images": str(image_save_path),
+                    "instruction": str(instruct_save_path),
+                }
+            }
+        )
+
+        # 备份
+        if Path(PRODUCT_INFO_YAML_BACKUP_PATH).exists():
+            Path(PRODUCT_INFO_YAML_BACKUP_PATH).unlink()
+        shutil.copy(PRODUCT_INFO_YAML_PATH, PRODUCT_INFO_YAML_BACKUP_PATH)
+
+        # 覆盖保存
+        with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+            yaml.dump(product_info_dict, f, allow_unicode=True)
 
         st.write("生成数据库...")
         # 重新生成 RAG 向量数据库
-        time.sleep(1)
+        gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
 
         # TODO 可以不输入图片和特性，大模型自动生成一版让用户自行选择
 
@@ -390,7 +428,7 @@ def gen_rag_db(force_gen=False):
         return
 
     # 调用函数生成向量数据库
-    gen_vector_db(RAG_CONFIG_PATH, RAG_SOURCE_DIR, RAG_VECTOR_DB_DIR)
+    gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
 
 
 if __name__ == "__main__":
