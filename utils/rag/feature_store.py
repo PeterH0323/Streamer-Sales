@@ -8,7 +8,8 @@ import shutil
 from multiprocessing import Pool
 from typing import Any, List, Optional
 
-import pytoml
+import yaml
+
 from BCEmbedding.tools.langchain import BCERerank
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import MarkdownHeaderTextSplitter, MarkdownTextSplitter, RecursiveCharacterTextSplitter
@@ -125,8 +126,8 @@ class FeatureStore:
         self.config_path = config_path
         self.reject_throttle = -1
         self.language = language
-        with open(config_path, encoding="utf8") as f:
-            config = pytoml.load(f)["feature_store"]
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)["feature_store"]
             self.reject_throttle = config["reject_throttle"]
 
         logger.warning(

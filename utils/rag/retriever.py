@@ -3,9 +3,10 @@ import os
 import time
 
 import numpy as np
-import pytoml
+import yaml
 from BCEmbedding.tools.langchain import BCERerank
-from langchain.embeddings import HuggingFaceEmbeddings
+# from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import ModelScopeEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.vectorstores.faiss import FAISS as Vectorstore
 from langchain_community.vectorstores.utils import DistanceStrategy
@@ -83,11 +84,11 @@ class Retriever:
         index_max = np.argmax(sum_precision_recall)
         optimal_threshold = max(thresholds[index_max], 0.0)
 
-        with open(config_path, encoding="utf8") as f:
-            config = pytoml.load(f)
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
         config["feature_store"]["reject_throttle"] = float(optimal_threshold)
         with open(config_path, "w", encoding="utf8") as f:
-            pytoml.dump(config, f)
+            yaml.dump(config, f)
         logger.info(f"The optimal threshold is: {optimal_threshold}, saved it to {config_path}")  # noqa E501
 
     def query(self, question: str, context_max_length: int = 16000):  # , tracker: QueryTracker = None):
@@ -185,14 +186,15 @@ class CacheRetriever:
     def __init__(self, config_path: str, max_len: int = 4):
         self.cache = dict()
         self.max_len = max_len
-        with open(config_path, encoding="utf8") as f:
-            config = pytoml.load(f)["feature_store"]
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)["feature_store"]
             embedding_model_path = config["embedding_model_path"]
             reranker_model_path = config["reranker_model_path"]
 
         # load text2vec and rerank model
         logger.info("loading test2vec and rerank models")
-        self.embeddings = HuggingFaceEmbeddings(
+        # self.embeddings = HuggingFaceEmbeddings(
+        self.embeddings = ModelScopeEmbeddings(
             model_name=embedding_model_path,
             model_kwargs={"device": "cuda"},
             encode_kwargs={"batch_size": 1, "normalize_embeddings": True},
@@ -209,8 +211,8 @@ class CacheRetriever:
         if not os.path.exists(work_dir) or not os.path.exists(config_path):
             return None, "workdir or config.ini not exist"
 
-        with open(config_path, encoding="utf8") as f:
-            reject_throttle = pytoml.load(f)["feature_store"]["reject_throttle"]
+        with open(config_path, "r", encoding="utf-8") as f:
+            reject_throttle = yaml.safe_load(f)["feature_store"]["reject_throttle"]
 
         if len(self.cache) >= self.max_len:
             # drop the oldest one
