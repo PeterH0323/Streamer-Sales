@@ -1,4 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2024.4.16
+# @Author  : HinGwenWong
+
 import copy
+from pathlib import Path
 import time
 
 import cv2
@@ -46,6 +52,17 @@ RAG_VECTOR_DB_DIR = r"./work_dir/rag_vector_db"
 
 
 def resize_image(image_path, max_height):
+    """
+    缩放图像，保持纵横比，将图像的高度调整为指定的最大高度。
+
+    参数:
+    - image_path: 图像文件的路径。
+    - max_height: 指定的最大高度值。
+
+    返回:
+    - resized_image: 缩放后的图像。
+    """
+
     # 读取图片
     image = cv2.imread(image_path)
     height, width = image.shape[:2]
@@ -61,10 +78,13 @@ def resize_image(image_path, max_height):
 
 @st.experimental_dialog("产品说明书")
 def instruction_dialog(instruction_path):
-    """产品说明书 popup 显示框
+    """
+    显示产品说明书的popup窗口。
+
+    通过给定的说明书路径，将文件内容以markdown格式在Streamlit应用中显示出来，并提供一个“确定”按钮供用户确认阅读。
 
     Args:
-        instruction_path (str): 说明书路径
+        instruction_path (str): 说明书的文件路径，该文件应为文本文件，并使用utf-8编码。
     """
     with open(instruction_path, "r", encoding="utf-8") as f:
         instruct_lines = f.readlines()
@@ -76,45 +96,74 @@ def instruction_dialog(instruction_path):
 
 
 def on_btton_click(*args, **kwargs):
-    # 按钮回调函数
+    """
+    按钮点击事件的回调函数。
+    """
+
+    # 根据按钮类型执行相应操作
     if kwargs["type"] == "check_manual":
+        # 显示说明书
         instruction_dialog(kwargs["instruction_path"])
 
     elif kwargs["type"] == "process_sales":
+        # 切换到主播卖货页面
         st.session_state.page_switch = "pages/selling_page.py"
 
+        # 更新会话状态中的产品信息
         st.session_state.hightlight = kwargs["heighlights"]
         product_info_struct = copy.deepcopy(st.session_state.product_info_struct_template)
         product_info_str = product_info_struct[0].replace("{name}", kwargs["product_name"])
         product_info_str += product_info_struct[1].replace("{highlights}", st.session_state.hightlight)
 
+        # 生成商品文案 prompt
         st.session_state.first_input = copy.deepcopy(st.session_state.first_input_template).replace(
             "{product_info}", product_info_str
         )
 
+        # 更新图片路径和产品名称
         st.session_state.image_path = kwargs["image_path"]
         st.session_state.product_name = kwargs["product_name"]
 
-        # 清空对话
+        # 清空历史对话
         st.session_state.messages = []
 
 
 def make_product_container(product_name, product_info, image_height, each_card_offset):
+    """
+    创建并展示产品信息容器。
+
+    参数:
+    - product_name: 产品名称。
+    - product_info: 包含产品信息的字典，需包括图片路径、特点和说明书路径。
+    - image_height: 图片展示区域的高度。
+    - each_card_offset: 容器内各部分间距。
+    """
+
+    # 创建带边框的产品信息容器，设置高度
     with st.container(border=True, height=image_height + each_card_offset):
+
+        # 页面标题
         st.header(product_name)
+
+        # 划分左右两列，左侧为图片，右侧为商品信息
         image_col, info_col = st.columns([0.2, 0.8])
 
+        # 图片展示区域
         with image_col:
             print(f"Loading {product_info['images']} ...")
             image = resize_image(product_info["images"], max_height=image_height)
             st.image(image, channels="bgr")
 
+        # 产品信息展示区域
         with info_col:
-            st.subheader("特点", divider="grey")
+
+            # 亮点展示
+            st.subheader("亮点", divider="grey")
 
             heighlights_str = "、".join(product_info["heighlights"])
             st.text(heighlights_str)
 
+            # 说明书按钮
             st.subheader("说明书", divider="grey")
             st.button(
                 "查看",
@@ -128,6 +177,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
             )
             # st.button("更新", key=f"update_manual_{product_name}")
 
+            # 讲解按钮
             st.subheader("主播", divider="grey")
             st.button(
                 "开始讲解",
@@ -143,24 +193,51 @@ def make_product_container(product_name, product_info, image_height, each_card_o
 
 
 def get_sales_info():
+    """
+    从配置文件中加载销售相关信息，并存储到session状态中。
+
+    该函数不接受参数，也不直接返回任何值，但会更新全局的session状态，包括：
+    - sales_info: 系统问候语，针对销售角色定制
+    - first_input_template: 对话开始时的第一个输入模板
+    - product_info_struct_template: 产品信息结构模板
+
+    """
+
+    # 加载对话配置文件
     with open(CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
+    # 从配置中提取角色信息
     sales_info = dataset_yaml["role_type"][SALES_NAME]
 
+    # 从配置中提取对话设置相关的信息
     system = dataset_yaml["conversation_setting"]["system"]
     first_input = dataset_yaml["conversation_setting"]["first_input"]
     product_info_struct = dataset_yaml["product_info_struct"]
 
+    # 将销售角色名和角色信息插入到 system prompt
     system_str = system.replace("{role_type}", SALES_NAME).replace("{character}", "、".join(sales_info))
 
+    # 更新session状态，存储销售相关信息
     st.session_state.sales_info = system_str
     st.session_state.first_input_template = first_input
     st.session_state.product_info_struct_template = product_info_struct
 
 
 def main(model_dir, using_lmdeploy, enable_rag):
-    # --client.showSidebarNavigation=false
+    """
+    初始化页面配置，加载模型，处理页面跳转，并展示商品信息。
+
+    参数:
+    - model_dir: 模型目录路径，用于加载指定的模型。
+    - using_lmdeploy: 布尔值，指示是否使用lmdeploy加载模型。
+    - enable_rag: 布尔值，指示是否启用RAG（Retrieve And Generate）模型。
+
+    返回值:
+    无
+    """
+
+    # 初始化 Streamlit 页面配置
     st.set_page_config(
         page_title="Streamer-Sales 销冠",
         page_icon="🛒",
@@ -209,7 +286,7 @@ def main(model_dir, using_lmdeploy, enable_rag):
 
     # 说明
     st.info(
-        "这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可（开发中）",
+        "这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可",
         icon="ℹ️",
     )
 
@@ -219,7 +296,7 @@ def main(model_dir, using_lmdeploy, enable_rag):
 
     product_name_list = list(product_info_dict.keys())
 
-    # TODO 侧边栏显示产品概览，数量，入驻品牌方
+    # 侧边栏显示产品数量，入驻品牌方
     with st.sidebar:
         # 标题
         st.markdown("## 销冠 —— 卖货主播大模型")
@@ -241,6 +318,7 @@ def main(model_dir, using_lmdeploy, enable_rag):
                 product_name = product_name_list[row_id + col_id]
                 make_product_container(product_name, product_info_dict[product_name], PRODUCT_IMAGE_HEIGHT, EACH_CARD_OFFSET)
 
+    # 添加新商品上传表单
     with st.form(key="add_product_form"):
         product_name_input = st.text_input(label="添加商品名称")
         heightlight_input = st.text_input(label="添加商品特性")
@@ -253,7 +331,20 @@ def main(model_dir, using_lmdeploy, enable_rag):
 
 
 def update_product_info(product_name_input, heightlight_input, product_image, product_instruction):
+    """
+    更新产品信息的函数。
 
+    参数:
+    - product_name_input: 商品名称输入，字符串类型。
+    - heightlight_input: 商品特性输入，字符串类型。
+    - product_image: 商品图片，图像类型。
+    - product_instruction: 商品说明书，文本类型。
+
+    返回值:
+    无。该函数直接操作UI状态，不返回任何值。
+    """
+
+    # 检查入参
     if product_name_input == "" or heightlight_input == "":
         st.error("商品名称和特性不能为空")
         return
@@ -262,6 +353,7 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         st.error("图片和说明书不能为空")
         return
 
+    # 显示上传状态，并执行上传操作
     with st.status("正在上传商品...", expanded=True) as status:
         st.write("说明书上传中...")
         # 保存图片 & 说明书
@@ -277,22 +369,37 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
 
         # TODO 可以不输入图片和特性，大模型自动生成一版让用户自行选择
 
+        # 更新状态
         status.update(label="添加商品成功!", state="complete", expanded=False)
+
+        # 刷新页面
         st.rerun()
 
 
 @st.cache_resource
-def gen_rag_db():
-    # 生成向量数据库
+def gen_rag_db(force_gen=False):
+    """
+    生成向量数据库。
+
+    参数:
+    force_gen - 布尔值，当设置为 True 时，即使数据库已存在也会重新生成数据库。
+    """
+
+    # 检查数据库目录是否存在，如果存在且force_gen为False，则不执行生成操作
+    if Path(RAG_VECTOR_DB_DIR).exists() and not force_gen:
+        return
+
+    # 调用函数生成向量数据库
     gen_vector_db(RAG_CONFIG_PATH, RAG_SOURCE_DIR, RAG_VECTOR_DB_DIR)
 
 
 if __name__ == "__main__":
+    # streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
     print("Starting...")
 
     if ENABLE_RAG:
-        # 每次启动生成向量数据库
+        # 生成向量数据库
         gen_rag_db()
 
     main(MODEL_DIR, USING_LMDEPLOY, ENABLE_RAG)

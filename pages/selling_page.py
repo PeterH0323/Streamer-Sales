@@ -16,8 +16,11 @@ logger = logging.get_logger(__name__)
 
 
 def on_btn_click(*args, **kwargs):
+    """
+    处理按钮点击事件的函数。
+    """
     if kwargs["info"] == "清除对话历史":
-        del st.session_state.messages
+        st.session_state.messages = []
     elif kwargs["info"] == "返回商品页":
         st.session_state.page_switch = "app.py"
     else:
@@ -25,6 +28,9 @@ def on_btn_click(*args, **kwargs):
 
 
 def init_sidebar():
+    """
+    初始化侧边栏界面，展示商品信息，并提供操作按钮。
+    """
     with st.sidebar:
         # 标题
         st.markdown("## 销冠 —— 卖货主播大模型")
@@ -62,14 +68,15 @@ def init_sidebar():
         st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
 
         # 模型配置
-    #     st.markdown("## 模型配置")
-    #     max_length = st.slider("Max Length", min_value=8, max_value=32768, value=32768)
-    #     top_p = st.slider("Top P", 0.0, 1.0, 0.8, step=0.01)
-    #     temperature = st.slider("Temperature", 0.0, 1.0, 0.7, step=0.01)
+        # st.markdown("## 模型配置")
+        # max_length = st.slider("Max Length", min_value=8, max_value=32768, value=32768)
+        # top_p = st.slider("Top P", 0.0, 1.0, 0.8, step=0.01)
+        # temperature = st.slider("Temperature", 0.0, 1.0, 0.7, step=0.01)
 
 
 def main(meta_instruction):
 
+    # 设置页面配置，包括标题、图标、布局和菜单项
     st.set_page_config(
         page_title="Streamer-Sales 销冠",
         page_icon="🛒",
@@ -81,32 +88,37 @@ def main(meta_instruction):
             "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
         },
     )
-    # torch.cuda.empty_cache()
 
+    # 检查页面切换状态并进行切换
     if st.session_state.page_switch != st.session_state.current_page:
         st.switch_page(st.session_state.page_switch)
 
+    # 定义用户和机器人头像路径
     user_avator = "./assets/user.png"
     robot_avator = "./assets/logo.png"
 
+    # 页面标题
     st.title("Streamer-Sales 销冠 —— 卖货主播大模型")
 
+    # 初始化侧边栏
     init_sidebar()
 
+    # 根据是否使用lmdeploy选择响应函数
     if st.session_state.using_lmdeploy:
         get_response_func = get_turbomind_response
     else:
         get_response_func = get_hf_response
 
-    # Initialize chat history
+    # 初始化聊天历史记录
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display chat messages from history on app rerun
+    # 在应用重新运行时显示聊天历史消息
     for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=message.get("avatar")):
             st.markdown(message["content"])
 
+    # 如果聊天历史为空，则显示产品介绍
     if len(st.session_state.messages) == 0:
         # 直接产品介绍
         get_response_func(
@@ -121,9 +133,11 @@ def main(meta_instruction):
             first_input_str="",
         )
 
+    # 初始化按钮消息状态
     if "button_msg" not in st.session_state:
         st.session_state.button_msg = "x-x"
 
+    # 输入框显示提示信息
     hint_msg = "你好，可以问我任何关于产品的问题"
     if st.session_state.button_msg != "x-x":
         prompt = st.session_state.button_msg
@@ -132,7 +146,7 @@ def main(meta_instruction):
     else:
         prompt = st.chat_input(hint_msg)
 
-    # Accept user input
+    # 接收用户输入
     if prompt:
         # Display user message in chat message container
         with st.chat_message("user", avatar=user_avator):

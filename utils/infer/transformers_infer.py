@@ -14,7 +14,7 @@ from transformers.utils import logging
 from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
 
 from utils.rag.retriever import CacheRetriever
-from utils.rag.rag_worker import build_rag_propmt
+from utils.rag.rag_worker import build_rag_prompt
 
 
 logger = logging.get_logger(__name__)
@@ -217,7 +217,7 @@ def get_hf_response(
     product_name="",
 ):
     if rag_retriever is not None:
-        prompt_rag = build_rag_propmt(rag_retriever, product_name, prompt)
+        prompt_rag = build_rag_prompt(rag_retriever, product_name, prompt)
 
     real_prompt = combine_history(
         prompt_rag if rag_retriever else prompt,
