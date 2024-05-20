@@ -4,8 +4,19 @@ import cv2
 import streamlit as st
 import yaml
 
-from utils.lmdeploy_infer import load_turbomind_model
-from utils.transformers_infer import load_hf_model
+from utils.infer.lmdeploy_infer import load_turbomind_model
+from utils.infer.transformers_infer import load_hf_model
+from utils.rag.feature_store import gen_vector_db
+
+# 基础信息
+SALES_NAME = "乐乐喵"
+PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
+CONVERSATION_CFG_YAML_PATH = r"./configs/conversation_cfg.yaml"
+
+# RAG
+RAG_CONFIG_PATH = r"./config/rag_config.yaml"
+RAG_SOURCE_DIR = r"./product_info/instructions"
+RAG_VECTOR_DB_DIR = r"./work_dir/rag_vector_db"
 
 
 def resize_image(image_path, max_height):
@@ -26,6 +37,7 @@ def on_btton_click(*args, **kwargs):
     # 按钮回调函数
     if kwargs["type"] == "check_manual":
         pass
+
     elif kwargs["type"] == "process_sales":
         st.session_state.page_switch = "pages/selling_page.py"
 
@@ -51,6 +63,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
         image_col, info_col = st.columns([0.2, 0.8])
 
         with image_col:
+            print(f"Loading {product_info['images']} ...")
             image = resize_image(product_info["images"], max_height=image_height)
             st.image(image, channels="bgr")
 
@@ -63,9 +76,13 @@ def make_product_container(product_name, product_info, image_height, each_card_o
             st.subheader("说明书", divider="grey")
             st.button(
                 "查看",
-                key=f"check_manual_{product_name}",
+                key=f"check_instruction_{product_name}",
                 on_click=on_btton_click,
-                kwargs={"type": "check_manual", "product_name": product_name},
+                kwargs={
+                    "type": "check_instruction",
+                    "product_name": product_name,
+                    "instruction_path": product_info["instruction"],
+                },
             )
             # st.button("更新", key=f"update_manual_{product_name}")
 
@@ -84,24 +101,23 @@ def make_product_container(product_name, product_info, image_height, each_card_o
 
 
 def get_sales_info():
-    with open(r"./configs/conversation_cfg.yaml", "r", encoding="utf-8") as f:
+    with open(CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
-    sales_name = "乐乐喵"
-    sales_info = dataset_yaml["role_type"][sales_name]
+    sales_info = dataset_yaml["role_type"][SALES_NAME]
 
     system = dataset_yaml["conversation_setting"]["system"]
     first_input = dataset_yaml["conversation_setting"]["first_input"]
     product_info_struct = dataset_yaml["product_info_struct"]
 
-    system_str = system.replace("{role_type}", sales_name).replace("{character}", "、".join(sales_info))
+    system_str = system.replace("{role_type}", SALES_NAME).replace("{character}", "、".join(sales_info))
 
     st.session_state.sales_info = system_str
     st.session_state.first_input_template = first_input
     st.session_state.product_info_struct_template = product_info_struct
 
 
-def main(model_dir, using_lmdeploy):
+def main(model_dir, using_lmdeploy, enable_rag):
     # --client.showSidebarNavigation=false
     st.set_page_config(
         page_title="Streamer-Sales 销冠",
@@ -128,7 +144,9 @@ def main(model_dir, using_lmdeploy):
     print("load model begin.")
     st.session_state.using_lmdeploy = using_lmdeploy
     if st.session_state.using_lmdeploy:
-        st.session_state.model, st.session_state.tokenizer = load_turbomind_model(model_dir)
+        st.session_state.model, st.session_state.tokenizer, st.session_state.rag_retriever = load_turbomind_model(
+            model_dir, enable_rag=enable_rag, rag_config=RAG_CONFIG_PATH, db_path=RAG_VECTOR_DB_DIR
+        )
     else:
         st.session_state.model, st.session_state.tokenizer = load_hf_model(model_dir)
     print("load model end.")
@@ -147,12 +165,12 @@ def main(model_dir, using_lmdeploy):
 
     # 说明
     st.info(
-        "这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可",
+        "这是主播后台，这里需要主播讲解的商品目录，选择一个商品，点击【开始讲解】即可跳转到主播讲解页面。如果需要加入更多商品，点击下方的添加按钮即可（开发中）",
         icon="ℹ️",
     )
 
     # 读取 yaml 文件
-    with open("./product_info/product_info.yaml", "r", encoding="utf-8") as f:
+    with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
 
     # 配置
@@ -172,6 +190,8 @@ def main(model_dir, using_lmdeploy):
         st.markdown(f"共有商品：{len(product_name_list)} 件")
         st.markdown(f"共有品牌方：{len(product_name_list)} 个")
 
+        # TODO 单品成交量
+
     # 生成商品信息
     for row_id in range(0, len(product_name_list), each_row_col):
         for col_id, col_handler in enumerate(st.columns(each_row_col)):
@@ -186,15 +206,26 @@ def main(model_dir, using_lmdeploy):
         heightlight_input = st.text_input(label="添加商品特性")
         product_image = st.file_uploader(label="上传商品图片")
         product_book = st.file_uploader(label="上传商品说明书")
-        submit_button = st.form_submit_button(label="提交（开发中）", disabled=True)
+        submit_button = st.form_submit_button(label="提交(后续开放)", disabled=True)
+
+
+@st.cache_resource
+def gen_rag_db():
+    # 生成向量数据库
+    gen_vector_db(RAG_CONFIG_PATH, RAG_SOURCE_DIR, RAG_VECTOR_DB_DIR)
 
 
 if __name__ == "__main__":
 
-    USING_LMDEPLOY = True  # 是否使用 LMDeploy 执行推理
+    print("Starting...")
+    USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
+    ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
 
-    # 模型路径
     MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
     # MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
 
-    main(MODEL_DIR, USING_LMDEPLOY)
+    if ENABLE_RAG:
+        # 每次启动生成向量数据库
+        gen_rag_db()
+
+    main(MODEL_DIR, USING_LMDEPLOY, ENABLE_RAG)

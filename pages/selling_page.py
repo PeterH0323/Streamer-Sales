@@ -9,8 +9,8 @@ import streamlit as st
 from transformers.utils import logging
 
 from app import resize_image
-from utils.lmdeploy_infer import get_turbomind_response
-from utils.transformers_infer import get_hf_response
+from utils.infer.lmdeploy_infer import get_turbomind_response
+from utils.infer.transformers_infer import get_hf_response
 
 logger = logging.get_logger(__name__)
 
@@ -147,6 +147,8 @@ def main(meta_instruction):
             session_messages=st.session_state.messages,
             add_session_msg=True,
             first_input_str=st.session_state.first_input,
+            rag_retriever=st.session_state.rag_retriever,
+            product_name=st.session_state.product_name
         )
 
 
