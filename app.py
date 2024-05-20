@@ -1,4 +1,5 @@
 import copy
+import time
 
 import cv2
 import streamlit as st
@@ -8,12 +9,37 @@ from utils.infer.lmdeploy_infer import load_turbomind_model
 from utils.infer.transformers_infer import load_hf_model
 from utils.rag.feature_store import gen_vector_db
 
-# 基础信息
-SALES_NAME = "乐乐喵"
+
+# ==================================================================
+#                               模型配置
+# ==================================================================
+MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
+# MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
+
+SALES_NAME = "乐乐喵"  # 启动的角色名
+
+# ==================================================================
+#                               组件配置
+# ==================================================================
+USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
+ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
+
+# ==================================================================
+#                               页面配置
+# ==================================================================
+PRODUCT_IMAGE_HEIGHT = 400  # 商品图片高度
+EACH_CARD_OFFSET = 100  # 每个商品卡片比图片高度多出的距离
+EACH_ROW_COL = 2  # 商品页显示多少列
+
+# ==================================================================
+#                             配置文件路径
+# ==================================================================
 PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
 CONVERSATION_CFG_YAML_PATH = r"./configs/conversation_cfg.yaml"
 
-# RAG
+# ==================================================================
+#                               RAG 配置
+# ==================================================================
 RAG_CONFIG_PATH = r"./config/rag_config.yaml"
 RAG_SOURCE_DIR = r"./product_info/instructions"
 RAG_VECTOR_DB_DIR = r"./work_dir/rag_vector_db"
@@ -35,7 +61,7 @@ def resize_image(image_path, max_height):
 
 @st.experimental_dialog("产品说明书")
 def instruction_dialog(instruction_path):
-    """产品说明书显示框
+    """产品说明书 popup 显示框
 
     Args:
         instruction_path (str): 说明书路径
@@ -157,14 +183,16 @@ def main(model_dir, using_lmdeploy, enable_rag):
         st.switch_page(st.session_state.page_switch)
 
     # 加载模型
-    print("load model begin.")
     st.session_state.using_lmdeploy = using_lmdeploy
     if st.session_state.using_lmdeploy:
-        st.session_state.model, st.session_state.tokenizer, st.session_state.rag_retriever = load_turbomind_model(
-            model_dir, enable_rag=enable_rag, rag_config=RAG_CONFIG_PATH, db_path=RAG_VECTOR_DB_DIR
-        )
+        load_model_func = load_turbomind_model
     else:
-        st.session_state.model, st.session_state.tokenizer = load_hf_model(model_dir)
+        load_model_func = load_hf_model
+
+    print("load model begin.")
+    st.session_state.model, st.session_state.tokenizer, st.session_state.rag_retriever = load_model_func(
+        model_dir, enable_rag=enable_rag, rag_config=RAG_CONFIG_PATH, db_path=RAG_VECTOR_DB_DIR
+    )
     print("load model end.")
 
     # 获取销售信息
@@ -189,11 +217,6 @@ def main(model_dir, using_lmdeploy, enable_rag):
     with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
 
-    # 配置
-    product_image_height = 400
-    each_card_offset = 100
-    each_row_col = 2
-
     product_name_list = list(product_info_dict.keys())
 
     # TODO 侧边栏显示产品概览，数量，入驻品牌方
@@ -207,15 +230,16 @@ def main(model_dir, using_lmdeploy, enable_rag):
         st.markdown(f"共有品牌方：{len(product_name_list)} 个")
 
         # TODO 单品成交量
+        # st.markdown(f"共有品牌方：{len(product_name_list)} 个")
 
     # 生成商品信息
-    for row_id in range(0, len(product_name_list), each_row_col):
-        for col_id, col_handler in enumerate(st.columns(each_row_col)):
+    for row_id in range(0, len(product_name_list), EACH_ROW_COL):
+        for col_id, col_handler in enumerate(st.columns(EACH_ROW_COL)):
             with col_handler:
                 if row_id + col_id >= len(product_name_list):
                     continue
                 product_name = product_name_list[row_id + col_id]
-                make_product_container(product_name, product_info_dict[product_name], product_image_height, each_card_offset)
+                make_product_container(product_name, product_info_dict[product_name], PRODUCT_IMAGE_HEIGHT, EACH_CARD_OFFSET)
 
     with st.form(key="add_product_form"):
         product_name_input = st.text_input(label="添加商品名称")
@@ -223,6 +247,38 @@ def main(model_dir, using_lmdeploy, enable_rag):
         product_image = st.file_uploader(label="上传商品图片")
         product_instruction = st.file_uploader(label="上传商品说明书")
         submit_button = st.form_submit_button(label="提交(后续开放)", disabled=True)
+
+        if submit_button:
+            update_product_info(product_name_input, heightlight_input, product_image, product_instruction)
+
+
+def update_product_info(product_name_input, heightlight_input, product_image, product_instruction):
+
+    if product_name_input == "" or heightlight_input == "":
+        st.error("商品名称和特性不能为空")
+        return
+
+    if product_image is None or product_instruction is None:
+        st.error("图片和说明书不能为空")
+        return
+
+    with st.status("正在上传商品...", expanded=True) as status:
+        st.write("说明书上传中...")
+        # 保存图片 & 说明书
+        time.sleep(1)
+
+        st.write("更新商品明细表...")
+        # 更新 product_infor.yaml
+        time.sleep(1)
+
+        st.write("生成数据库...")
+        # 重新生成 RAG 向量数据库
+        time.sleep(1)
+
+        # TODO 可以不输入图片和特性，大模型自动生成一版让用户自行选择
+
+        status.update(label="添加商品成功!", state="complete", expanded=False)
+        st.rerun()
 
 
 @st.cache_resource
@@ -234,11 +290,6 @@ def gen_rag_db():
 if __name__ == "__main__":
 
     print("Starting...")
-    USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
-    ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
-
-    MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
-    # MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
 
     if ENABLE_RAG:
         # 每次启动生成向量数据库
