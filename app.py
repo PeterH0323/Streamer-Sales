@@ -4,18 +4,17 @@
 # @Author  : HinGwenWong
 
 import copy
+import shutil
 from datetime import datetime
 from pathlib import Path
-import shutil
 
-import cv2
 import streamlit as st
 import yaml
 
 from utils.infer.lmdeploy_infer import load_turbomind_model
 from utils.infer.transformers_infer import load_hf_model
 from utils.rag.feature_store import gen_vector_db
-
+from utils.tools import resize_image
 
 # ==================================================================
 #                               模型配置
@@ -55,36 +54,24 @@ PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
 # ==================================================================
 #                               RAG 配置
 # ==================================================================
-RAG_CONFIG_PATH = r"./config/rag_config.yaml"
-RAG_VECTOR_DB_DIR = r"./work_dir/rag_vector_db"
+RAG_CONFIG_PATH = r"./configs/rag_config.yaml"
+RAG_VECTOR_DB_DIR = r"./work_dirs/instruction_db"
 
 
-def resize_image(image_path, max_height):
-    """
-    缩放图像，保持纵横比，将图像的高度调整为指定的最大高度。
+# 初始化 Streamlit 页面配置
+st.set_page_config(
+    page_title="Streamer-Sales 销冠",
+    page_icon="🛒",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        "Get Help": "https://github.com/PeterH0323/Streamer-Sales/tree/main",
+        "Report a bug": "https://github.com/PeterH0323/Streamer-Sales/issues",
+        "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
+    },
+)
 
-    参数:
-    - image_path: 图像文件的路径。
-    - max_height: 指定的最大高度值。
-
-    返回:
-    - resized_image: 缩放后的图像。
-    """
-
-    # 读取图片
-    image = cv2.imread(image_path)
-    height, width = image.shape[:2]
-
-    # 计算新的宽度，保持纵横比
-    new_width = int(width * max_height / height)
-
-    # 缩放图片
-    resized_image = cv2.resize(image, (new_width, max_height))
-
-    return resized_image
-
-
-@st.experimental_dialog("产品说明书")
+@st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
     """
     显示产品说明书的popup窗口。
@@ -94,13 +81,15 @@ def instruction_dialog(instruction_path):
     Args:
         instruction_path (str): 说明书的文件路径，该文件应为文本文件，并使用utf-8编码。
     """
+    print(f"Show instruction : {instruction_path}")
     with open(instruction_path, "r", encoding="utf-8") as f:
-        instruct_lines = f.readlines()
+        instruct_lines = "".join(f.readlines())
 
+    st.warning("一定要点击下方的【确定】按钮离开该页面", icon="⚠️")
     st.markdown(instruct_lines)
+    st.warning("一定要点击下方的【确定】按钮离开该页面", icon="⚠️")
     if st.button("确定"):
-        # st.rerun()
-        pass
+        st.rerun()
 
 
 def on_btton_click(*args, **kwargs):
@@ -109,9 +98,9 @@ def on_btton_click(*args, **kwargs):
     """
 
     # 根据按钮类型执行相应操作
-    if kwargs["type"] == "check_manual":
+    if kwargs["type"] == "check_instruction":
         # 显示说明书
-        instruction_dialog(kwargs["instruction_path"])
+        st.session_state.show_instruction_path = kwargs["instruction_path"]
 
     elif kwargs["type"] == "process_sales":
         # 切换到主播卖货页面
@@ -158,7 +147,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
 
         # 图片展示区域
         with image_col:
-            print(f"Loading {product_info['images']} ...")
+            # print(f"Loading {product_info['images']} ...")
             image = resize_image(product_info["images"], max_height=image_height)
             st.image(image, channels="bgr")
 
@@ -244,24 +233,19 @@ def main(model_dir, using_lmdeploy, enable_rag):
     返回值:
     无
     """
-
-    # 初始化 Streamlit 页面配置
-    st.set_page_config(
-        page_title="Streamer-Sales 销冠",
-        page_icon="🛒",
-        layout="wide",
-        initial_sidebar_state="expanded",
-        menu_items={
-            "Get Help": "https://github.com/PeterH0323/Streamer-Sales/tree/main",
-            "Report a bug": "https://github.com/PeterH0323/Streamer-Sales/issues",
-            "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
-        },
-    )
+    print("Starting...")
 
     # 初始化页面跳转
     if "page_switch" not in st.session_state:
         st.session_state.page_switch = "app.py"
     st.session_state.current_page = "app.py"
+
+    # 显示商品说明书
+    if "show_instruction_path" not in st.session_state:
+        st.session_state.show_instruction_path = "X-X"
+    if st.session_state.show_instruction_path != "X-X":
+        instruction_dialog(st.session_state.show_instruction_path)
+        st.session_state.show_instruction_path = "X-X"
 
     # 判断是否需要跳转页面
     if st.session_state.page_switch != st.session_state.current_page:
@@ -274,11 +258,9 @@ def main(model_dir, using_lmdeploy, enable_rag):
     else:
         load_model_func = load_hf_model
 
-    print("load model begin.")
     st.session_state.model, st.session_state.tokenizer, st.session_state.rag_retriever = load_model_func(
         model_dir, enable_rag=enable_rag, rag_config=RAG_CONFIG_PATH, db_path=RAG_VECTOR_DB_DIR
     )
-    print("load model end.")
 
     # 获取销售信息
     if "sales_info" not in st.session_state:
@@ -352,6 +334,8 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
     无。该函数直接操作UI状态，不返回任何值。
     """
 
+    # TODO 可以不输入图片和特性，大模型自动生成一版让用户自行选择
+
     # 检查入参
     if product_name_input == "" or heightlight_input == "":
         st.error("商品名称和特性不能为空")
@@ -369,14 +353,12 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         instruct_save_path = Path(PRODUCT_INSTRUCTION_DIR).joinpath(f"{save_tag}.md")
 
         st.write("图片保存中...")
-        image_data = product_image.getvalue()
         with open(image_save_path, "wb") as file:
-            file.write(image_data)
+            file.write(product_image.getvalue())
 
         st.write("说明书保存中...")
-        instruct_data = product_instruction.getvalue()
         with open(instruct_save_path, "wb") as file:
-            file.write(instruct_data)
+            file.write(product_instruction.getvalue())
 
         st.write("更新商品明细表...")
         with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
@@ -398,14 +380,12 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         shutil.copy(PRODUCT_INFO_YAML_PATH, PRODUCT_INFO_YAML_BACKUP_PATH)
 
         # 覆盖保存
-        with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+        with open(PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
             yaml.dump(product_info_dict, f, allow_unicode=True)
 
         st.write("生成数据库...")
         # 重新生成 RAG 向量数据库
         gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
-
-        # TODO 可以不输入图片和特性，大模型自动生成一版让用户自行选择
 
         # 更新状态
         status.update(label="添加商品成功!", state="complete", expanded=False)
@@ -427,6 +407,7 @@ def gen_rag_db(force_gen=False):
     if Path(RAG_VECTOR_DB_DIR).exists() and not force_gen:
         return
 
+    print("Generating rag database, pls wait ...")
     # 调用函数生成向量数据库
     gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
 
@@ -434,8 +415,7 @@ def gen_rag_db(force_gen=False):
 if __name__ == "__main__":
     # streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
-    print("Starting...")
-
+    # print("Starting...")
     if ENABLE_RAG:
         # 生成向量数据库
         gen_rag_db()
