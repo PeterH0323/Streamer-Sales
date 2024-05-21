@@ -4,6 +4,7 @@
 # @Author  : HinGwenWong
 
 import copy
+import os
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -30,6 +31,7 @@ SALES_NAME = "乐乐喵"  # 启动的角色名
 # ==================================================================
 USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
 ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
+DISABLE_UPLOAD = os.getenv("DISABLE_UPLOAD") == "true"
 
 # ==================================================================
 #                               页面配置
@@ -316,7 +318,10 @@ def main(model_dir, using_lmdeploy, enable_rag):
         heightlight_input = st.text_input(label="添加商品特性，以'、'隔开")
         product_image = st.file_uploader(label="上传商品图片", type=["png", "jpg", "jpeg", "bmp"])
         product_instruction = st.file_uploader(label="上传商品说明书", type=["md"])
-        submit_button = st.form_submit_button(label="提交")
+        submit_button = st.form_submit_button(label="提交", disabled=DISABLE_UPLOAD)
+
+        if DISABLE_UPLOAD:
+            st.info("线下启动已支持上传新商品，但开放性的页面 APP 因没有提交审核机制，暂不在此开放上传商品", icon="ℹ️")
 
         if submit_button:
             update_product_info(product_name_input, heightlight_input, product_image, product_instruction)
