@@ -106,7 +106,7 @@ or
 本地：
 ```bash
 conda env create -f environment.yml
-conda activate streamer-sales
+conda activate streamer_sales
 pip install -r requirements-raw.txt
 
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
@@ -139,7 +139,7 @@ cd Streamer-Sales
 
 ```bash
 conda env create -f environment.yml
-conda activate streamer-sales
+conda activate streamer_sales
 pip install -r requirements-raw.txt
 ```
 
@@ -439,7 +439,7 @@ OCR 识别过程中，如果图片长宽比例大于2，则会设置步长为短
 1. 切换环境
 
 ```bash
-conda activate streamer-sales
+conda activate streamer_sales
 ```
 
 2. 生成向量数据库，本脚本借鉴豆哥（[茴香豆](https://github.com/InternLM/HuixiangDou)），感谢豆哥！
@@ -552,6 +552,8 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ## 💕 致谢
 
 - [**xtuner**](https://github.com/InternLM/xtuner)
+-[LMDeploy](https://github.com/InternLM/LMDeploy)
+-[HuixiangDou](https://github.com/InternLM/HuixiangDou)
 
 感谢上海人工智能实验室推出的书生·浦语大模型实战营，为我们的项目提供宝贵的技术指导和强大的算力支持。
 

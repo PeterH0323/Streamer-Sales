@@ -1,4 +1,4 @@
-name: streamer-sales
+name: streamer_sales
 channels:
   - pytorch
   - nvidia
@@ -8,57 +8,57 @@ dependencies:
   - _openmp_mutex=5.1=1_gnu
   - blas=1.0=mkl
   - brotli-python=1.0.9=py310h6a678d5_7
-  - bzip2=1.0.8=h7b6447c_0
-  - ca-certificates=2023.08.22=h06a4308_0
-  - certifi=2023.11.17=py310h06a4308_0
-  - cffi=1.16.0=py310h5eee18b_0
+  - bzip2=1.0.8=h5eee18b_5
+  - ca-certificates=2024.3.11=h06a4308_0
+  - certifi=2024.2.2=py310h06a4308_0
   - charset-normalizer=2.0.4=pyhd3eb1b0_0
-  - cryptography=41.0.3=py310hdda0065_0
-  - cuda-cudart=11.7.99=0
-  - cuda-cupti=11.7.101=0
-  - cuda-libraries=11.7.1=0
-  - cuda-nvrtc=11.7.99=0
-  - cuda-nvtx=11.7.91=0
-  - cuda-runtime=11.7.1=0
+  - cuda-cudart=12.1.105=0
+  - cuda-cupti=12.1.105=0
+  - cuda-libraries=12.1.0=0
+  - cuda-nvrtc=12.1.105=0
+  - cuda-nvtx=12.1.105=0
+  - cuda-opencl=12.4.127=0
+  - cuda-runtime=12.1.0=0
   - ffmpeg=4.3=hf484d3e_0
   - filelock=3.13.1=py310h06a4308_0
   - freetype=2.12.1=h4a9f257_0
-  - giflib=5.2.1=h5eee18b_3
   - gmp=6.2.1=h295c915_3
   - gmpy2=2.1.2=py310heeb90bb_0
   - gnutls=3.6.15=he1e5248_0
   - idna=3.4=py310h06a4308_0
   - intel-openmp=2023.1.0=hdb19cb5_46306
-  - jinja2=3.1.2=py310h06a4308_0
+  - jinja2=3.1.3=py310h06a4308_0
   - jpeg=9e=h5eee18b_1
   - lame=3.100=h7b6447c_0
   - lcms2=2.12=h3be6417_0
   - ld_impl_linux-64=2.38=h1181459_1
   - lerc=3.0=h295c915_0
-  - libcublas=11.10.3.66=0
-  - libcufft=10.7.2.124=h4fbf590_0
-  - libcufile=1.8.1.2=0
-  - libcurand=10.3.4.101=0
-  - libcusolver=11.4.0.1=0
-  - libcusparse=11.7.4.91=0
+  - libcublas=12.1.0.26=0
+  - libcufft=11.0.2.4=0
+  - libcufile=1.9.0.20=0
+  - libcurand=10.3.5.119=0
+  - libcusolver=11.4.4.55=0
+  - libcusparse=12.0.2.55=0
   - libdeflate=1.17=h5eee18b_1
   - libffi=3.4.4=h6a678d5_0
   - libgcc-ng=11.2.0=h1234567_1
   - libgomp=11.2.0=h1234567_1
   - libiconv=1.16=h7f8727e_2
   - libidn2=2.3.4=h5eee18b_0
-  - libnpp=11.7.4.75=0
-  - libnvjpeg=11.8.0.2=0
+  - libjpeg-turbo=2.0.0=h9bf148f_0
+  - libnpp=12.0.2.50=0
+  - libnvjitlink=12.1.105=0
+  - libnvjpeg=12.1.1.14=0
   - libpng=1.6.39=h5eee18b_0
   - libstdcxx-ng=11.2.0=h1234567_1
   - libtasn1=4.19.0=h5eee18b_0
   - libtiff=4.5.1=h6a678d5_0
   - libunistring=0.9.10=h27cfd23_0
   - libuuid=1.41.5=h5eee18b_0
-  - libwebp=1.3.2=h11a3e52_0
   - libwebp-base=1.3.2=h5eee18b_0
+  - llvm-openmp=14.0.6=h9e868ea_0
   - lz4-c=1.9.4=h6a678d5_0
-  - markupsafe=2.1.1=py310h7f8727e_0
+  - markupsafe=2.1.3=py310h5eee18b_0
   - mkl=2023.1.0=h213fc3f_46344
   - mkl-service=2.4.0=py310h5eee18b_1
   - mkl_fft=1.3.8=py310h5eee18b_0
@@ -69,35 +69,205 @@ dependencies:
   - ncurses=6.4=h6a678d5_0
   - nettle=3.7.3=hbbd107a_1
   - networkx=3.1=py310h06a4308_0
-  - numpy=1.26.2=py310h5f9d8c6_0
-  - numpy-base=1.26.2=py310hb5e798b_0
+  - numpy=1.26.4=py310h5f9d8c6_0
+  - numpy-base=1.26.4=py310hb5e798b_0
   - openh264=2.1.1=h4ff587b_0
   - openjpeg=2.4.0=h3ad879b_0
-  - openssl=3.0.12=h7f8727e_0
-  - pillow=10.0.1=py310ha6cbd5a_0
+  - openssl=3.0.13=h7f8727e_0
+  - pillow=10.2.0=py310h5eee18b_0
   - pip=23.3.1=py310h06a4308_0
-  - pycparser=2.21=pyhd3eb1b0_0
-  - pyopenssl=23.2.0=py310h06a4308_0
   - pysocks=1.7.1=py310h06a4308_0
-  - python=3.10.13=h955ad1f_0
-  - pytorch=2.0.1=py3.10_cuda11.7_cudnn8.5.0_0
-  - pytorch-cuda=11.7=h778d358_5
+  - python=3.10.14=h955ad1f_0
+  - pytorch=2.1.2=py3.10_cuda12.1_cudnn8.9.2_0
+  - pytorch-cuda=12.1=ha16c6d3_5
   - pytorch-mutex=1.0=cuda
+  - pyyaml=6.0.1=py310h5eee18b_0
   - readline=8.2=h5eee18b_0
-  - requests=2.31.0=py310h06a4308_0
-  - setuptools=68.0.0=py310h06a4308_0
+  - requests=2.31.0=py310h06a4308_1
+  - setuptools=68.2.2=py310h06a4308_0
   - sqlite=3.41.2=h5eee18b_0
-  - sympy=1.11.1=py310h06a4308_0
+  - sympy=1.12=py310h06a4308_0
   - tbb=2021.8.0=hdb19cb5_0
   - tk=8.6.12=h1ccaba5_0
-  - torchaudio=2.0.2=py310_cu117
-  - torchtriton=2.0.0=py310
-  - torchvision=0.15.2=py310_cu117
-  - typing_extensions=4.7.1=py310h06a4308_0
-  - tzdata=2023c=h04d1e81_0
-  - urllib3=1.26.18=py310h06a4308_0
+  - torchaudio=2.1.2=py310_cu121
+  - torchtriton=2.1.0=py310
+  - torchvision=0.16.2=py310_cu121
+  - typing_extensions=4.9.0=py310h06a4308_1
+  - urllib3=2.1.0=py310h06a4308_1
   - wheel=0.41.2=py310h06a4308_0
-  - xz=5.4.2=h5eee18b_0
+  - xz=5.4.6=h5eee18b_0
+  - yaml=0.2.5=h7b6447c_0
   - zlib=1.2.13=h5eee18b_0
   - zstd=1.5.5=hc292b87_0
-prefix: /root/.conda/envs/streamer-sales
+  - pip:
+      - accelerate==0.30.1
+      - addict==2.4.0
+      - aiohttp==3.9.5
+      - aiosignal==1.3.1
+      - aliyun-python-sdk-core==2.15.1
+      - aliyun-python-sdk-kms==2.16.3
+      - altair==5.3.0
+      - annotated-types==0.7.0
+      - anyio==4.3.0
+      - argcomplete==1.10.3
+      - asttokens==2.4.1
+      - async-timeout==4.0.3
+      - attrs==23.2.0
+      - bcembedding==0.1.5
+      - beautifulsoup4==4.8.2
+      - blinker==1.8.2
+      - cachetools==5.3.3
+      - cffi==1.16.0
+      - chardet==3.0.4
+      - click==8.1.7
+      - comm==0.2.2
+      - compressed-rtf==1.0.6
+      - crcmod==1.7
+      - cryptography==42.0.7
+      - dataclasses-json==0.6.6
+      - datasets==2.18.0
+      - debugpy==1.8.1
+      - decorator==5.1.1
+      - dill==0.3.8
+      - dnspython==2.6.1
+      - docx2txt==0.8
+      - ebcdic==1.1.1
+      - einops==0.7.0
+      - email-validator==2.1.1
+      - exceptiongroup==1.2.1
+      - executing==2.0.1
+      - extract-msg==0.28.7
+      - faiss-gpu==1.7.2
+      - fastapi==0.111.0
+      - fastapi-cli==0.0.4
+      - fire==0.6.0
+      - frozenlist==1.4.1
+      - fsspec==2024.2.0
+      - gast==0.5.4
+      - gitdb==4.0.11
+      - gitpython==3.1.43
+      - greenlet==3.0.3
+      - h11==0.14.0
+      - httpcore==1.0.5
+      - httptools==0.6.1
+      - httpx==0.27.0
+      - huggingface-hub==0.23.0
+      - imapclient==2.1.0
+      - importlib-metadata==7.1.0
+      - ipykernel==6.29.4
+      - ipython==8.24.0
+      - jedi==0.19.1
+      - jmespath==0.10.0
+      - joblib==1.4.2
+      - jsonpatch==1.33
+      - jsonpointer==2.4
+      - jsonschema==4.22.0
+      - jsonschema-specifications==2023.12.1
+      - jupyter-client==8.6.1
+      - jupyter-core==5.7.2
+      - langchain==0.2.0
+      - langchain-community==0.2.0
+      - langchain-core==0.2.0
+      - langchain-text-splitters==0.2.0
+      - langsmith==0.1.60
+      - lmdeploy==0.4.0
+      - loguru==0.7.2
+      - lxml==5.2.2
+      - markdown-it-py==3.0.0
+      - marshmallow==3.21.2
+      - matplotlib-inline==0.1.7
+      - mdurl==0.1.2
+      - mmengine-lite==0.10.4
+      - modelscope==1.14.0
+      - multidict==6.0.5
+      - multiprocess==0.70.16
+      - mypy-extensions==1.0.0
+      - nest-asyncio==1.6.0
+      - nvidia-cublas-cu12==12.4.5.8
+      - nvidia-cuda-runtime-cu12==12.4.127
+      - nvidia-curand-cu12==10.3.5.147
+      - nvidia-nccl-cu12==2.21.5
+      - olefile==0.47
+      - opencv-python==4.9.0.80
+      - orjson==3.10.3
+      - oss2==2.18.5
+      - packaging==23.2
+      - pandas==2.2.2
+      - parso==0.8.4
+      - pdfminer-six==20191110
+      - peft==0.9.0
+      - pexpect==4.9.0
+      - platformdirs==4.2.2
+      - prompt-toolkit==3.0.43
+      - protobuf==4.25.3
+      - psutil==5.9.8
+      - ptyprocess==0.7.0
+      - pure-eval==0.2.2
+      - pyarrow==16.1.0
+      - pyarrow-hotfix==0.6
+      - pycparser==2.22
+      - pycryptodome==3.20.0
+      - pydantic==2.7.1
+      - pydantic-core==2.18.2
+      - pydeck==0.9.1
+      - pygments==2.18.0
+      - pynvml==11.5.0
+      - python-dateutil==2.9.0.post0
+      - python-dotenv==1.0.1
+      - python-multipart==0.0.9
+      - python-pptx==0.6.23
+      - pytz==2024.1
+      - pyzmq==26.0.3
+      - referencing==0.35.1
+      - regex==2024.5.15
+      - rich==13.7.1
+      - rpds-py==0.18.1
+      - safetensors==0.4.3
+      - scikit-learn==1.4.2
+      - scipy==1.13.0
+      - sentence-transformers==2.7.0
+      - sentencepiece==0.2.0
+      - shellingham==1.5.4
+      - shortuuid==1.0.13
+      - simplejson==3.19.2
+      - six==1.12.0
+      - smmap==5.0.1
+      - sniffio==1.3.1
+      - sortedcontainers==2.4.0
+      - soupsieve==2.5
+      - speechrecognition==3.8.1
+      - sqlalchemy==2.0.30
+      - stack-data==0.6.3
+      - starlette==0.37.2
+      - streamlit==1.34.0
+      - tenacity==8.3.0
+      - termcolor==2.4.0
+      - textract==1.6.5
+      - threadpoolctl==3.5.0
+      - tiktoken==0.7.0
+      - tokenizers==0.15.2
+      - toml==0.10.2
+      - tomli==2.0.1
+      - toolz==0.12.1
+      - tornado==6.4
+      - tqdm==4.66.4
+      - traitlets==5.14.3
+      - transformers==4.36.2
+      - typer==0.12.3
+      - typing-inspect==0.9.0
+      - tzdata==2024.1
+      - tzlocal==5.2
+      - ujson==5.10.0
+      - uvicorn==0.29.0
+      - uvloop==0.19.0
+      - watchdog==4.0.0
+      - watchfiles==0.21.0
+      - wcwidth==0.2.13
+      - websockets==12.0
+      - xlrd==1.2.0
+      - xlsxwriter==3.2.0
+      - xxhash==3.4.1
+      - yapf==0.40.2
+      - yarl==1.9.4
+      - zipp==3.18.2
+prefix: /root/.conda/envs/streamer_sales
