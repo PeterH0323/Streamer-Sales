@@ -1,26 +1,37 @@
 """extract feature and search with user query."""
 
+
 import argparse
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 from multiprocessing import Pool
+from pathlib import Path
 from typing import Any, List, Optional
 
 import yaml
 
+# 解决 Warning：huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks…
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 from BCEmbedding.tools.langchain import BCERerank
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import MarkdownHeaderTextSplitter, MarkdownTextSplitter, RecursiveCharacterTextSplitter
+from langchain.text_splitter import (MarkdownHeaderTextSplitter,
+                                     MarkdownTextSplitter,
+                                     RecursiveCharacterTextSplitter)
 from langchain.vectorstores.faiss import FAISS as Vectorstore
 from langchain_core.documents import Document
 from loguru import logger
 from torch.cuda import empty_cache
 
-from file_operation import FileName, FileOperation
-from retriever import CacheRetriever, Retriever
+try:
+    from utils.rag.file_operation import FileName, FileOperation
+    from utils.rag.retriever import CacheRetriever, Retriever
+except:
+    # 用于 DEBUG
+    from file_operation import FileName, FileOperation
+    from retriever import CacheRetriever, Retriever
 
 
 def read_and_save(file: FileName):
@@ -485,9 +496,10 @@ def fix_system_error():
     """
     Fix `No module named 'faiss.swigfaiss_avx2`
     """
-    import faiss
-    from pathlib import Path
     import os
+    from pathlib import Path
+
+    import faiss
 
     if Path(faiss.__file__).parent.joinpath("swigfaiss_avx2.py").exists():
         return

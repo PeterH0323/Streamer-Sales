@@ -6,7 +6,7 @@ from lmdeploy import GenerationConfig, TurbomindEngineConfig, pipeline
 from modelscope import snapshot_download
 
 from utils.rag.retriever import CacheRetriever
-from utils.rag.rag_worker import build_rag_prompt
+from utils.tools import build_rag_prompt
 
 
 def prepare_generation_config():
@@ -22,6 +22,7 @@ def prepare_generation_config():
 @st.cache_resource
 def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=None):  # hf awq
 
+    print("load model begin.")
     model_format = "hf"
     if Path(model_dir).stem.endswith("-4bit"):
         model_format = "awq"
@@ -35,6 +36,7 @@ def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=No
         # 加载 rag 模型
         retriever = CacheRetriever(config_path=rag_config).get(config_path=rag_config, work_dir=db_path)
 
+    print("load model end.")
     return pipe, None, retriever
 
 

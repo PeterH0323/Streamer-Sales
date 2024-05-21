@@ -8,13 +8,15 @@ import streamlit as st
 import torch
 from modelscope import snapshot_download
 from torch import nn
-from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList
+from transformers.generation.utils import (LogitsProcessorList,
+                                           StoppingCriteriaList)
 from transformers.utils import logging
+
+from utils.rag.retriever import CacheRetriever
+from utils.tools import build_rag_prompt
 
 from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
 
-from utils.rag.retriever import CacheRetriever
-from utils.rag.rag_worker import build_rag_prompt
 
 
 logger = logging.get_logger(__name__)
@@ -28,7 +30,7 @@ cur_query_prompt = "<|im_start|>user\n{user}<|im_end|>\n\
 
 @st.cache_resource
 def load_hf_model(model_dir, enable_rag=True, rag_config=None, db_path=None):
-
+    print("load model begin.")
     model_dir = snapshot_download(model_dir, revision="master")
     model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(torch.bfloat16).cuda()
     tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
@@ -38,6 +40,7 @@ def load_hf_model(model_dir, enable_rag=True, rag_config=None, db_path=None):
         # 加载 rag 模型
         retriever = CacheRetriever(config_path=rag_config).get(config_path=rag_config, work_dir=db_path)
 
+    print("load model end.")
     return model, tokenizer, retriever
 
 

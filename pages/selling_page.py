@@ -8,9 +8,9 @@ import random
 import streamlit as st
 from transformers.utils import logging
 
-from app import resize_image
 from utils.infer.lmdeploy_infer import get_turbomind_response
 from utils.infer.transformers_infer import get_hf_response
+from utils.tools import resize_image
 
 logger = logging.get_logger(__name__)
 
@@ -76,18 +76,7 @@ def init_sidebar():
 
 def main(meta_instruction):
 
-    # 设置页面配置，包括标题、图标、布局和菜单项
-    st.set_page_config(
-        page_title="Streamer-Sales 销冠",
-        page_icon="🛒",
-        layout="wide",
-        initial_sidebar_state="expanded",
-        menu_items={
-            "Get Help": "https://github.com/PeterH0323/Streamer-Sales/tree/main",
-            "Report a bug": "https://github.com/PeterH0323/Streamer-Sales/issues",
-            "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
-        },
-    )
+
 
     # 检查页面切换状态并进行切换
     if st.session_state.page_switch != st.session_state.current_page:
@@ -172,6 +161,20 @@ def main(meta_instruction):
 
 # META_INSTRUCTION = ("现在你是一位金牌带货主播，你的名字叫乐乐喵，你的说话方式是甜美、可爱、熟练使用各种网络热门梗造句、称呼客户为[家人们]。你能够根据产品信息讲解产品并且结合商品信息解答用户提出的疑问。")
 
+print("into sales page")
+
+# 设置页面配置，包括标题、图标、布局和菜单项
+st.set_page_config(
+    page_title="Streamer-Sales 销冠",
+    page_icon="🛒",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        "Get Help": "https://github.com/PeterH0323/Streamer-Sales/tree/main",
+        "Report a bug": "https://github.com/PeterH0323/Streamer-Sales/issues",
+        "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
+    },
+)
 st.session_state.current_page = "pages/selling_page.py"
 
 if "model" not in st.session_state or "sales_info" not in st.session_state or st.session_state.sales_info == "":
