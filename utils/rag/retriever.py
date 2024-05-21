@@ -1,16 +1,17 @@
 """extract feature and search with user query."""
+
 import os
 import time
 
 import numpy as np
 import yaml
 from BCEmbedding.tools.langchain import BCERerank
-# from langchain.embeddings import HuggingFaceEmbeddings
-from langchain_community.embeddings import ModelScopeEmbeddings
+from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.vectorstores.faiss import FAISS as Vectorstore
 from langchain_community.vectorstores.utils import DistanceStrategy
 from loguru import logger
+from modelscope import snapshot_download
 from sklearn.metrics import precision_recall_curve
 
 try:
@@ -191,10 +192,12 @@ class CacheRetriever:
             embedding_model_path = config["embedding_model_path"]
             reranker_model_path = config["reranker_model_path"]
 
+        embedding_model_path = snapshot_download(embedding_model_path, revision="master")
+        reranker_model_path = snapshot_download(reranker_model_path, revision="master")
+
         # load text2vec and rerank model
         logger.info("loading test2vec and rerank models")
-        # self.embeddings = HuggingFaceEmbeddings(
-        self.embeddings = ModelScopeEmbeddings(
+        self.embeddings = HuggingFaceEmbeddings(
             model_name=embedding_model_path,
             model_kwargs={"device": "cuda"},
             encode_kwargs={"batch_size": 1, "normalize_embeddings": True},

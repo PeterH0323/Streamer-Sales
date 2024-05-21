@@ -2,4 +2,4 @@ feature_store:
   reject_throttle: 0.3612170956128262
   embedding_model_path: "maidalun/bce-embedding-base_v1"
   reranker_model_path: "maidalun/bce-reranker-base_v1"
-  work_dir: "work_dir/instructions_db"
+  work_dir: "./work_dirs/instruction_db"
