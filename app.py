@@ -7,6 +7,7 @@ import copy
 import shutil
 from datetime import datetime
 from pathlib import Path
+import time
 
 import streamlit as st
 import yaml
@@ -70,6 +71,7 @@ st.set_page_config(
         "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
     },
 )
+
 
 @st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
@@ -311,10 +313,10 @@ def main(model_dir, using_lmdeploy, enable_rag):
     # 添加新商品上传表单
     with st.form(key="add_product_form"):
         product_name_input = st.text_input(label="添加商品名称")
-        heightlight_input = st.text_input(label="添加商品特性")
+        heightlight_input = st.text_input(label="添加商品特性，以'、'隔开")
         product_image = st.file_uploader(label="上传商品图片", type=["png", "jpg", "jpeg", "bmp"])
         product_instruction = st.file_uploader(label="上传商品说明书", type=["md"])
-        submit_button = st.form_submit_button(label="提交(后续开放)", disabled=True)
+        submit_button = st.form_submit_button(label="提交")
 
         if submit_button:
             update_product_info(product_name_input, heightlight_input, product_image, product_instruction)
@@ -348,9 +350,9 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
     # 显示上传状态，并执行上传操作
     with st.status("正在上传商品...", expanded=True) as status:
 
-        save_tag = datetime().now().strftime("%Y-%m-%d-%H-%M-%S")
-        image_save_path = Path(PRODUCT_IMAGES_DIR).joinpath(f"{save_tag}.{Path(product_image.name).suffix}")
-        instruct_save_path = Path(PRODUCT_INSTRUCTION_DIR).joinpath(f"{save_tag}.md")
+        save_tag = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        image_save_path = Path(PRODUCT_IMAGES_DIR).joinpath(f"{save_tag}{Path(product_image.name).suffix}")
+        instruct_save_path = Path(PRODUCT_INSTRUCTION_DIR).joinpath(f"{save_tag}{Path(product_instruction.name).suffix}")
 
         st.write("图片保存中...")
         with open(image_save_path, "wb") as file:
@@ -359,6 +361,15 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         st.write("说明书保存中...")
         with open(instruct_save_path, "wb") as file:
             file.write(product_instruction.getvalue())
+
+        st.write("生成数据库...")
+        if ENABLE_RAG:
+            # 重新生成 RAG 向量数据库
+            gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
+
+            # 重新加载 retriever
+            st.session_state.rag_retriever.pop("default")
+            st.session_state.rag_retriever.get(fs_id="default", config_path=RAG_CONFIG_PATH, work_dir=RAG_VECTOR_DB_DIR)
 
         st.write("更新商品明细表...")
         with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
@@ -383,12 +394,13 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         with open(PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
             yaml.dump(product_info_dict, f, allow_unicode=True)
 
-        st.write("生成数据库...")
-        # 重新生成 RAG 向量数据库
-        gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
-
         # 更新状态
         status.update(label="添加商品成功!", state="complete", expanded=False)
+
+        st.toast("添加商品成功!", icon="🎉")
+
+        with st.spinner("准备刷新页面..."):
+            time.sleep(3)
 
         # 刷新页面
         st.rerun()

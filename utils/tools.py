@@ -1,14 +1,19 @@
 """处理函数"""
 
 import cv2
+import torch
+
+from utils.rag.retriever import CacheRetriever
 
 # 基础配置
 CONTEXT_MAX_LENGTH = 3000  # 上下文最大长度
 GENERATE_TEMPLATE = "这是说明书：“{}”\n 客户的问题：“{}” \n 请阅读说明并运用你的性格进行解答。"  # RAG prompt 模板
 
 
-def build_rag_prompt(rag_retriever, product_name, prompt):
-    chunk, db_context, references = rag_retriever.query(
+def build_rag_prompt(rag_retriever: CacheRetriever, product_name, prompt):
+    
+    real_retriever = rag_retriever.get(fs_id="default")
+    chunk, db_context, references = real_retriever.query(
         f"商品名：{product_name}。{prompt}", context_max_length=CONTEXT_MAX_LENGTH - 2 * len(GENERATE_TEMPLATE)
     )
     print(f"db_context = {db_context}")
@@ -23,6 +28,17 @@ def build_rag_prompt(rag_retriever, product_name, prompt):
     print("=" * 20)
 
     return prompt_rag
+
+
+def init_rag_retriever(rag_config: str, db_path: str):
+    torch.cuda.empty_cache()
+
+    retriever = CacheRetriever(config_path=rag_config)
+
+    # 初始化
+    retriever.get(fs_id="default", config_path=rag_config, work_dir=db_path)
+
+    return retriever
 
 
 def resize_image(image_path, max_height):

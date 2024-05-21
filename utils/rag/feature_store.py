@@ -1,6 +1,5 @@
 """extract feature and search with user query."""
 
-
 import argparse
 import json
 import os
@@ -17,9 +16,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 from BCEmbedding.tools.langchain import BCERerank
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.text_splitter import (MarkdownHeaderTextSplitter,
-                                     MarkdownTextSplitter,
-                                     RecursiveCharacterTextSplitter)
+from langchain.text_splitter import MarkdownHeaderTextSplitter, MarkdownTextSplitter, RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS as Vectorstore
 from langchain_core.documents import Document
 from loguru import logger

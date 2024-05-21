@@ -64,7 +64,7 @@ class Retriever:
             reject = False if len(ret) > 0 else True
             return reject, [top1]
 
-    def update_throttle(self, config_path: str = "config.ini", good_questions=[], bad_questions=[]):
+    def update_throttle(self, config_path: str = "config.yaml", good_questions=[], bad_questions=[]):
         """Update reject throttle based on positive and negative examples."""
 
         if len(good_questions) == 0 or len(bad_questions) == 0:
@@ -192,8 +192,8 @@ class CacheRetriever:
             embedding_model_path = config["embedding_model_path"]
             reranker_model_path = config["reranker_model_path"]
 
-        embedding_model_path = snapshot_download(embedding_model_path, revision="master")
-        reranker_model_path = snapshot_download(reranker_model_path, revision="master")
+        embedding_model_path = snapshot_download(embedding_model_path)
+        reranker_model_path = snapshot_download(reranker_model_path)
 
         # load text2vec and rerank model
         logger.info("loading test2vec and rerank models")
@@ -206,13 +206,13 @@ class CacheRetriever:
         reranker_args = {"model": reranker_model_path, "top_n": 7, "device": "cuda", "use_fp16": True}
         self.reranker = BCERerank(**reranker_args)
 
-    def get(self, fs_id: str = "default", config_path="config.ini", work_dir="workdir"):
+    def get(self, fs_id: str = "default", config_path="config.yaml", work_dir="workdir"):
         if fs_id in self.cache:
             self.cache[fs_id]["time"] = time.time()
             return self.cache[fs_id]["retriever"]
 
         if not os.path.exists(work_dir) or not os.path.exists(config_path):
-            return None, "workdir or config.ini not exist"
+            return None, "workdir or config.yaml not exist"
 
         with open(config_path, "r", encoding="utf-8") as f:
             reject_throttle = yaml.safe_load(f)["feature_store"]["reject_throttle"]
