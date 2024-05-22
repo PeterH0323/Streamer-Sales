@@ -17,6 +17,7 @@ from utils.infer.lmdeploy_infer import load_turbomind_model
 from utils.infer.transformers_infer import load_hf_model
 from utils.rag.feature_store import gen_vector_db
 from utils.tools import resize_image
+from utils.tts_worker import get_tts_model
 
 # ==================================================================
 #                               模型配置
@@ -31,6 +32,7 @@ SALES_NAME = "乐乐喵"  # 启动的角色名
 # ==================================================================
 USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
 ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
+ENABLE_TTS = True  # True 启动 tts，False 不启用
 DISABLE_UPLOAD = os.getenv("DISABLE_UPLOAD") == "true"
 
 # ==================================================================
@@ -60,6 +62,10 @@ PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
 RAG_CONFIG_PATH = r"./configs/rag_config.yaml"
 RAG_VECTOR_DB_DIR = r"./work_dirs/instruction_db"
 
+# ==================================================================
+#                               RAG 配置
+# ==================================================================
+TTS_WAV_GEN_PATH = r"./work_dirs/tts_wavs"
 
 # 初始化 Streamlit 页面配置
 st.set_page_config(
@@ -124,6 +130,13 @@ def on_btton_click(*args, **kwargs):
         # 更新图片路径和产品名称
         st.session_state.image_path = kwargs["image_path"]
         st.session_state.product_name = kwargs["product_name"]
+
+        # # 清空语音
+        # if ENABLE_TTS:
+        #     for message in st.session_state.messages:
+        #         if "wav" not in message:
+        #             continue
+        #         Path(message["wav"]).unlink()
 
         # 清空历史对话
         st.session_state.messages = []
@@ -239,6 +252,10 @@ def main(model_dir, using_lmdeploy, enable_rag):
     """
     print("Starting...")
 
+    if enable_rag:
+        # 生成向量数据库
+        gen_rag_db()
+
     # 初始化页面跳转
     if "page_switch" not in st.session_state:
         st.session_state.page_switch = "app.py"
@@ -255,7 +272,18 @@ def main(model_dir, using_lmdeploy, enable_rag):
     if st.session_state.page_switch != st.session_state.current_page:
         st.switch_page(st.session_state.page_switch)
 
-    # 加载模型
+    # TTS 初始化
+    st.session_state.tts_model = None
+    st.session_state.tts_wav_root = TTS_WAV_GEN_PATH
+
+    if "gen_tts_checkbox" not in st.session_state:
+        st.session_state.gen_tts_checkbox = True
+    if ENABLE_TTS:
+        st.session_state.tts_model = get_tts_model()
+        Path(st.session_state.tts_wav_root).mkdir(parents=True, exist_ok=True)
+        # TODO 清除2小时之前的所有语音
+
+    # 加载 LLM 模型
     st.session_state.using_lmdeploy = using_lmdeploy
     if st.session_state.using_lmdeploy:
         load_model_func = load_turbomind_model
@@ -293,15 +321,20 @@ def main(model_dir, using_lmdeploy, enable_rag):
     # 侧边栏显示产品数量，入驻品牌方
     with st.sidebar:
         # 标题
-        st.markdown("## 销冠 —— 卖货主播大模型")
+        st.header("销冠 —— 卖货主播大模型", divider="grey")
         st.markdown("[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)")
 
-        st.markdown(f"## 主播后台信息")
+        st.subheader(f"主播后台信息", divider="grey")
         st.markdown(f"共有商品：{len(product_name_list)} 件")
         st.markdown(f"共有品牌方：{len(product_name_list)} 个")
 
         # TODO 单品成交量
         # st.markdown(f"共有品牌方：{len(product_name_list)} 个")
+
+        if ENABLE_TTS:
+            # 是否生成 TTS
+            st.subheader(f"TTS 配置", divider="grey")
+            st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
 
     # 生成商品信息
     for row_id in range(0, len(product_name_list), EACH_ROW_COL):
@@ -436,8 +469,4 @@ if __name__ == "__main__":
     # streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
     # print("Starting...")
-    if ENABLE_RAG:
-        # 生成向量数据库
-        gen_rag_db()
-
     main(MODEL_DIR, USING_LMDEPLOY, ENABLE_RAG)

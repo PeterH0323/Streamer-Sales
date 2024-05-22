@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
@@ -6,6 +7,7 @@ from lmdeploy import GenerationConfig, TurbomindEngineConfig, pipeline
 from modelscope import snapshot_download
 
 from utils.tools import build_rag_prompt, init_rag_retriever
+from utils.tts.ts_worker import gen_tts_wav
 
 
 def prepare_generation_config():
@@ -22,7 +24,7 @@ def prepare_generation_config():
 def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=None):  # hf awq
 
     print("load model begin.")
-    
+
     retriever = None
     if enable_rag:
         # 加载 rag 模型
@@ -33,13 +35,12 @@ def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=No
         model_format = "awq"
 
     model_dir = snapshot_download(model_dir, revision="master")
-    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.4)
+    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.6)
     pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO", model_name="internlm2")
 
     print("load model end.")
     return pipe, None, retriever
 
-    
 
 def combine_history(prompt, meta_instruction, history_msg=None, first_input_str=""):
     total_prompt = [{"role": "system", "content": meta_instruction}]
@@ -96,12 +97,29 @@ def get_turbomind_response(
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
 
-    # Add robot response to chat history
-    session_messages.append(
-        {
-            "role": "assistant",
-            "content": cur_response,  # pylint: disable=undefined-loop-variable
-            "avatar": robot_avator,
-        }
-    )
+        tts_save_path = None
+        if st.session_state.tts_model is not None and st.session_state.gen_tts_checkbox:
+            with st.spinner("正在生成语音，请稍等... 如果觉得生成时间太久，可以将侧边栏的【生成语音】按钮取消选中"):
+                tts_save_path = str(
+                    Path(st.session_state.tts_wav_root).joinpath(datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".wav").absolute()
+                )
+                gen_tts_wav(
+                    st.session_state.tts_model,
+                    cur_response,
+                    tts_save_path,
+                )
+                with open(tts_save_path, "rb") as f_wav:
+                    audio_bytes = f_wav.read()
+                st.audio(audio_bytes, format="audio/wav")
+                st.success('生成语音成功!')
+
+        # Add robot response to chat history
+        session_messages.append(
+            {
+                "role": "assistant",
+                "content": cur_response,  # pylint: disable=undefined-loop-variable
+                "avatar": robot_avator,
+                "wav": tts_save_path,
+            }
+        )
     torch.cuda.empty_cache()

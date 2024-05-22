@@ -64,8 +64,16 @@ def init_sidebar():
         # 卖出 xxx 个
         # 成交额
 
-        st.button("清除对话历史", on_click=on_btn_click, kwargs={"info": "清除对话历史"})
+        st.subheader("页面切换", divider="grey")
         st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
+
+        st.subheader("对话设置", divider="grey")
+        st.button("清除对话历史", on_click=on_btn_click, kwargs={"info": "清除对话历史"})
+
+        # 是否生成 TTS
+        if st.session_state.tts_model is not None:
+            st.subheader("TTS 配置", divider="grey")
+            st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
 
         # 模型配置
         # st.markdown("## 模型配置")
@@ -104,6 +112,13 @@ def main(meta_instruction):
     for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=message.get("avatar")):
             st.markdown(message["content"])
+
+            if "wav" in message and message["wav"] is not None:
+                # 展示
+                print(f"Load wav {message['wav']}")
+                with open(message["wav"], "rb") as f_wav:
+                    audio_bytes = f_wav.read()
+                st.audio(audio_bytes, format="audio/wav")
 
     # 如果聊天历史为空，则显示产品介绍
     if len(st.session_state.messages) == 0:
