@@ -214,10 +214,15 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
     # 设置 api key
     api_key = set_api_key(model_name, api_yaml_path)
 
+    data_gen_setting = dataset_yaml["data_generation_setting"]
+    gen_num = data_gen_setting["each_product_gen"]
+    each_pick_hightlight = data_gen_setting["each_pick_hightlight"]
+    each_pick_question = data_gen_setting["each_pick_question"]
+
     # qwen 配置调取的模型种类，确保有个一是最强模型
     # gen_model_type = [dashscope.Generation.Models.qwen_plus] * (gen_num - 2)
     # gen_model_type += [dashscope.Generation.Models.qwen_max] * 2
-    qwen_model_type = [dashscope.Generation.Models.qwen_max] * 3
+    qwen_model_type = [dashscope.Generation.Models.qwen_max] * gen_num
 
     for role_type, role_character in dataset_yaml["role_type"].items():
 
@@ -266,14 +271,10 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
 
                     gen_json.update({product: []})
 
-                    data_gen_setting = dataset_yaml["data_generation_setting"]
-                    gen_num = data_gen_setting["each_product_gen"]
-
                     # 生成数据
                     for idx in range(gen_num):
 
                         # 随机抽取 ${each_pick_hightlight} 个产品特性
-                        each_pick_hightlight = data_gen_setting["each_pick_hightlight"]
                         if each_pick_hightlight >= len(hightlights):
                             # 超过打乱，增加随机性
                             hightlights_list = random.shuffle(hightlights)
@@ -282,7 +283,6 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
                         hightlight_str = "、".join(hightlights_list)
 
                         # 随机抽取 ${each_pick_question} 个提问角度
-                        each_pick_question = data_gen_setting["each_pick_question"]
                         if each_pick_question >= len(dataset_yaml["customer_question_type"]):
                             # 超过打乱，增加随机性
                             customer_question_type = random.shuffle(dataset_yaml["customer_question_type"])
@@ -320,9 +320,7 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
                             # 第一个结果因为节省 token，需要将 system 和 input 放回去
                             conversation_setting = deepcopy(dataset_yaml["conversation_setting"])
                             system_str = (
-                                conversation_setting["system"]
-                                .replace("{role_type}", role_type)
-                                .replace("{character}", character)
+                                conversation_setting["system"].replace("{role_type}", role_type).replace("{character}", character)
                             )
                             input_str = conversation_setting["first_input"].replace("{product_info}", product_info_str)
 
