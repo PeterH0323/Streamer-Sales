@@ -1,5 +1,4 @@
 import copy
-import random
 import warnings
 from dataclasses import asdict, dataclass
 from typing import Callable, List, Optional
@@ -8,16 +7,13 @@ import streamlit as st
 import torch
 from modelscope import snapshot_download
 from torch import nn
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation.utils import (LogitsProcessorList,
                                            StoppingCriteriaList)
 from transformers.utils import logging
 
-from utils.rag.retriever import CacheRetriever
 from utils.tools import build_rag_prompt, init_rag_retriever
-
-from transformers import AutoTokenizer, AutoModelForCausalLM  # isort: skip
-
-
+from utils.tts.tts_worker import gen_tts_in_spinner
 
 logger = logging.get_logger(__name__)
 
@@ -31,12 +27,12 @@ cur_query_prompt = "<|im_start|>user\n{user}<|im_end|>\n\
 @st.cache_resource
 def load_hf_model(model_dir, enable_rag=True, rag_config=None, db_path=None):
     print("load model begin.")
-    
+
     retriever = None
     if enable_rag:
         # 加载 rag 模型
         retriever = init_rag_retriever(rag_config=rag_config, db_path=db_path)
-    
+
     model_dir = snapshot_download(model_dir, revision="master")
     model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(torch.bfloat16).cuda()
     tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
@@ -251,12 +247,17 @@ def get_hf_response(
 
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
-    # Add robot response to chat history
-    session_messages.append(
-        {
-            "role": "assistant",
-            "content": cur_response,  # pylint: disable=undefined-loop-variable
-            "avatar": robot_avator,
-        }
-    )
+
+        # 生成 TTS 文字转语音
+        tts_save_path = gen_tts_in_spinner()
+
+        # Add robot response to chat history
+        session_messages.append(
+            {
+                "role": "assistant",
+                "content": cur_response,  # pylint: disable=undefined-loop-variable
+                "avatar": robot_avator,
+                "wav": tts_save_path,
+            }
+        )
     torch.cuda.empty_cache()

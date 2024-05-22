@@ -1,4 +1,3 @@
-from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
@@ -7,7 +6,7 @@ from lmdeploy import GenerationConfig, TurbomindEngineConfig, pipeline
 from modelscope import snapshot_download
 
 from utils.tools import build_rag_prompt, init_rag_retriever
-from utils.tts.ts_worker import gen_tts_wav
+from utils.tts.tts_worker import gen_tts_in_spinner
 
 
 def prepare_generation_config():
@@ -97,21 +96,8 @@ def get_turbomind_response(
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
 
-        tts_save_path = None
-        if st.session_state.tts_model is not None and st.session_state.gen_tts_checkbox:
-            with st.spinner("正在生成语音，请稍等... 如果觉得生成时间太久，可以将侧边栏的【生成语音】按钮取消选中"):
-                tts_save_path = str(
-                    Path(st.session_state.tts_wav_root).joinpath(datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".wav").absolute()
-                )
-                gen_tts_wav(
-                    st.session_state.tts_model,
-                    cur_response,
-                    tts_save_path,
-                )
-                with open(tts_save_path, "rb") as f_wav:
-                    audio_bytes = f_wav.read()
-                st.audio(audio_bytes, format="audio/wav")
-                st.success('生成语音成功!')
+        # 生成 TTS 文字转语音
+        tts_save_path = gen_tts_in_spinner()
 
         # Add robot response to chat history
         session_messages.append(

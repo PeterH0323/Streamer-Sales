@@ -17,7 +17,7 @@ from utils.infer.lmdeploy_infer import load_turbomind_model
 from utils.infer.transformers_infer import load_hf_model
 from utils.rag.feature_store import gen_vector_db
 from utils.tools import resize_image
-from utils.tts_worker import get_tts_model
+from utils.tts.tts_worker import get_tts_model
 
 # ==================================================================
 #                               模型配置
