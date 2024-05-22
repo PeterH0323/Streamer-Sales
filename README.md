@@ -290,7 +290,7 @@ python gen_dataset.py ${model_type} --specific_name 乐乐喵
 4. 进行数据清洗并合并，以及生成自我认知数据
 
 ```bash
-python merge_dataset.py dataset/trainval_dataset/response dataset/trainval_dataset/train.jsonl
+python merge_dataset.py dataset/gen_dataset/trainval_dataset/response dataset/gen_dataset/trainval_dataset/train.jsonl
 ```
 
 生成之后可以在 ${output_path} 设置的路径看到 jsonl 文件，脚本会自动加上 conversion 的个数，例如 `1479_train.jsonl` ，jsonl 数据集样例如下：
@@ -408,6 +408,9 @@ xtuner train finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_d
 
 注意：如果显存不够了，优先调小 `batch_size`， 如果 `bs = 1` 还不够则调小 `max_length`，反之还剩很多，调大这两个值
 
+
+如果出现错误： `ValueError: The features can't be aligned because the key conversation of features {'conversation': [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}]} has unexpected type - [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='string', id=None), 'system': Value(dtype='string', id=None)}] (expected either [{'input': Value(dtype='string', id=None), 'need_eos_token': Value(dtype='bool', id=None), 'output': Value(dtype='string', id=None), 'sep': Value(dtype='string', id=None), 'space': Value(dtype='null', id=None), 'system': Value(dtype='string', id=None)}] or Value("null").
+` ，则需要检查 jsonl 文件里面 input output 是否成对出现
 
 ### 四、说明书生成
 

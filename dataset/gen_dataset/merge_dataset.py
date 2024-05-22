@@ -64,22 +64,39 @@ def merge_dataset(save_json_root: Path, final_save_json_path: Path):
             json_list.append(json.load(f))
 
     filter_json_list = []
+
+    dirty_conversion = []
     for model_name in json_list:
         for product_name, gen_data_list in model_name.items():
 
             for gen_data in gen_data_list:
                 if isinstance(gen_data, dict) and "Error" in gen_data.keys():
                     print(f"Got error data in {product_name}")
+                    dirty_conversion.append(gen_data)
                     continue
 
                 # 洗掉一些没有 input 的数据
                 sub_filter_list = {"conversation": []}
                 for sub_list in gen_data["conversation"]:
-                    if len(sub_list.keys()) < 2 or "input" not in sub_list or "output" not in sub_list:
+
+                    # 剔除不合适的 key
+                    accept_keys = ["input", "output", "system"]
+                    sub_list = {key: value for key, value in sub_list.items() if key in accept_keys}
+
+                    if len(sub_list.keys()) < 2:
+                        # 如果只有单个 input output 出现，跳过
+                        dirty_conversion.append(sub_list)
                         continue
+
+                    if "input" not in sub_list or "output" not in sub_list:
+                        # 如果没有 input 或者 output，跳过
+                        dirty_conversion.append(sub_list)
+                        continue
+
                     sub_filter_list["conversation"].append(sub_list)
 
-                filter_json_list.append(sub_filter_list)
+                if len(sub_filter_list["conversation"]) > 0:
+                    filter_json_list.append(sub_filter_list)
 
     # 修复数据集
     for idx in range(len(filter_json_list)):
@@ -96,14 +113,24 @@ def merge_dataset(save_json_root: Path, final_save_json_path: Path):
     ) as f:
         json.dump(filter_json_list, f, ensure_ascii=False, indent=4)
 
+    if len(dirty_conversion) > 0:
+        # 保存错误的过滤数据，方便用户自行解决
+        with open(final_save_json_path.parent.joinpath(f"error_{final_save_json_path.name}"), "w", encoding="utf-8") as f:
+            json.dump(dirty_conversion, f, ensure_ascii=False, indent=4)
+
+    print(
+        f"总生成有效 conversion 数据 {len(filter_json_list)} 个，剔除脏数据 {len(dirty_conversion)} 条，保存到 error_{final_save_json_path.name} 中。"
+    )
+
 
 if __name__ == "__main__":
     # 命令行输入参数
+    # TODO 目前仅仅支持 乐乐喵
     parser = argparse.ArgumentParser(description="Merge Dataset")
     parser.add_argument("data_root", type=str, help="path to response dir")
     parser.add_argument("output_path", type=str, help="path to response dir")
     args = parser.parse_args()
-    
+
     save_json_root = Path(args.data_root)
     final_save_json_path = Path(args.output_path)
     merge_dataset(save_json_root, final_save_json_path)
