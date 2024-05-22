@@ -33,7 +33,7 @@ def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=No
         model_format = "awq"
 
     model_dir = snapshot_download(model_dir, revision="master")
-    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.6)
+    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.4)
     pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO", model_name="internlm2")
 
     print("load model end.")
