@@ -321,7 +321,10 @@ def main(model_dir, using_lmdeploy, enable_rag):
         submit_button = st.form_submit_button(label="提交", disabled=DISABLE_UPLOAD)
 
         if DISABLE_UPLOAD:
-            st.info("线下启动已支持上传新商品，但开放性的页面 APP 因没有提交审核机制，暂不在此开放上传商品", icon="ℹ️")
+            st.info(
+                "Github 上面的代码已支持上传新商品逻辑。\n但因开放性的 Web APP 没有新增商品审核机制，暂不在此开放上传商品。\n您可以 clone 本项目到您的机器启动即可使能上传按钮",
+                icon="ℹ️",
+            )
 
         if submit_button:
             update_product_info(product_name_input, heightlight_input, product_image, product_instruction)
