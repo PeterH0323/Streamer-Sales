@@ -110,7 +110,7 @@ or
 ```bash
 conda env create -f environment.yml
 conda activate streamer_sales
-pip install -r requirements-raw.txt
+pip install -r requirements.txt
 
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
