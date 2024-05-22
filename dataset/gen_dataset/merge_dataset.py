@@ -118,8 +118,11 @@ def merge_dataset(save_json_root: Path, final_save_json_path: Path):
         with open(final_save_json_path.parent.joinpath(f"error_{final_save_json_path.name}"), "w", encoding="utf-8") as f:
             json.dump(dirty_conversion, f, ensure_ascii=False, indent=4)
 
+    sum_input_output_count = 0
+    for conversion in filter_json_list:
+        sum_input_output_count += len(conversion["conversation"])
     print(
-        f"总生成有效 conversion 数据 {len(filter_json_list)} 个，剔除脏数据 {len(dirty_conversion)} 条，保存到 error_{final_save_json_path.name} 中。"
+        f"总生成有效 conversion 数据 {len(filter_json_list)} 组，内含 {sum_input_output_count} 条对话，剔除脏对话 {len(dirty_conversion)} 条，保存到 error_{final_save_json_path.name} 中。"
     )
 
 
