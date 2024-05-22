@@ -143,7 +143,7 @@ cd Streamer-Sales
 ```bash
 conda env create -f environment.yml
 conda activate streamer_sales
-pip install -r requirements-raw.txt
+pip install -r requirements.txt
 ```
 
 ### 二、微调数据集准备
