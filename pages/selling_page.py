@@ -34,7 +34,7 @@ def init_sidebar():
     with st.sidebar:
         # 标题
         st.markdown("## 销冠 —— 卖货主播大模型")
-        "[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)"
+        st.markdown("[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)")
 
         st.subheader("目前讲解")
         with st.container(height=400, border=True):
@@ -75,8 +75,6 @@ def init_sidebar():
 
 
 def main(meta_instruction):
-
-
 
     # 检查页面切换状态并进行切换
     if st.session_state.page_switch != st.session_state.current_page:
