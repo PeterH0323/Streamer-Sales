@@ -349,7 +349,7 @@ def main(model_dir, using_lmdeploy, enable_rag):
     # st.sidebar.page_link("./pages/selling_page.py", label="主播卖货")
 
     # 主页标题
-    st.title("Streamer-Sales 销冠 —— 卖货主播大模型")
+    st.title("Streamer-Sales 销冠 —— 卖货主播大模型⭐🛒🏆")
     st.header("商品页")
 
     # 说明
@@ -369,6 +369,10 @@ def main(model_dir, using_lmdeploy, enable_rag):
         # 标题
         st.header("销冠 —— 卖货主播大模型", divider="grey")
         st.markdown("[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)")
+        st.subheader("功能点：", divider="grey")
+        st.markdown(
+            "1. 📜**主播文案一键生成**\n2. 🚀KV cache + Turbomind **推理加速**\n3. 📚RAG **检索增强生成**\n4. 🔊TTS **文字转语音**"
+        )
 
         st.subheader(f"主播后台信息", divider="grey")
         st.markdown(f"共有商品：{len(product_name_list)} 件")
