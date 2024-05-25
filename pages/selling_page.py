@@ -66,16 +66,16 @@ def init_sidebar():
         # 卖出 xxx 个
         # 成交额
 
+        # 是否生成 TTS
+        if st.session_state.tts_model is not None or st.session_state.bert_tokenizer is not None:
+            st.subheader("TTS 配置", divider="grey")
+            st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
+
         st.subheader("页面切换", divider="grey")
         st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
 
         st.subheader("对话设置", divider="grey")
         st.button("清除对话历史", on_click=on_btn_click, kwargs={"info": "清除对话历史"})
-
-        # 是否生成 TTS
-        if st.session_state.tts_model is not None or st.session_state.bert_tokenizer is not None:
-            st.subheader("TTS 配置", divider="grey")
-            st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
 
         # 模型配置
         # st.markdown("## 模型配置")
