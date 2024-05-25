@@ -558,15 +558,15 @@ def gen_tts_wav(
 def demo():
 
     # https://huggingface.co/baicai1145/GPT-SoVITS-STAR/tree/main
-    gpt_path = "/root/hingwen_camp/utils/tts/gpt_sovits/weights/GPT_weights/艾丝妲-e10.ckpt"
-    sovits_path = "/root/hingwen_camp/utils/tts/gpt_sovits/weights/SoVITS_weights/艾丝妲_e25_s925.pth"
+    gpt_path = "./work_dirs/gpt_sovits/weights/GPT_weights/艾丝妲-e10.ckpt"
+    sovits_path = "./work_dirs/gpt_sovits/weights/SoVITS_weights/艾丝妲_e25_s925.pth"
 
     # https://huggingface.co/lj1995/GPT-SoVITS/tree/main
-    cnhubert_base_path = "/root/hingwen_camp/utils/tts/gpt_sovits/weights/pretrained_models/chinese-hubert-base"
-    bert_path = "/root/hingwen_camp/utils/tts/gpt_sovits/weights/pretrained_models/chinese-roberta-wwm-ext-large"
+    cnhubert_base_path = "./work_dirs/gpt_sovits/weights/pretrained_models/chinese-hubert-base"
+    bert_path = "./work_dirs/utils/tts/gpt_sovits/weights/pretrained_models/chinese-roberta-wwm-ext-large"
 
     inp_ref = (
-        r"/root/hingwen_camp/utils/tts/gpt_sovits/weights/ref_wav/【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"
+        r"./work_dirs/ref_wav/【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"
     )
 
     bert_tokenizer, bert_model, ssl_model, max_sec, t2s_model, vq_model, hps = get_tts_model(
@@ -599,7 +599,7 @@ def demo():
         max_sec,
         t2s_model,
         inp_ref,
-        wav_path_output=r"/root/hingwen_camp/work_dirs/tts_wavs/gpt-sovits-test.wav",
+        wav_path_output=r"./work_dirs/tts_wavs/gpt-sovits-test.wav",
     )
 
 
