@@ -284,7 +284,6 @@ dependencies:
       - pydeck==0.9.1
       - pygments==2.18.0
       - pynvml==11.5.0
-      - pyopenjtalk==0.3.3
       - pyparsing==3.1.2
       - pypinyin==0.51.0
       - python-dateutil==2.9.0.post0
