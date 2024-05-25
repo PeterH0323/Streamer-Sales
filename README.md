@@ -112,7 +112,7 @@ license: Apache License 2.0
 
 or 
 
-本地：
+**本地**：
 ```bash
 conda env create -f environment.yml
 conda activate streamer-sales
@@ -121,7 +121,7 @@ pip install -r requirements.txt
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
-## 📖 指南
+## 🧭 指南
 
 本指南会从以下几点进行说明：
 
