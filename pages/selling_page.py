@@ -36,7 +36,9 @@ def init_sidebar():
         st.markdown("## 销冠 —— 卖货主播大模型")
         st.markdown("[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)")
         st.subheader("功能点：", divider="grey")
-        st.markdown("1. 📜**主播文案一键生成**\n2. 🚀KV cache + Turbomind **推理加速**\n3. 📚RAG **检索增强生成**\n4. 🔊TTS **文字转语音**")
+        st.markdown(
+            "1. 📜 **主播文案一键生成**\n2. 🚀 KV cache + Turbomind **推理加速**\n3. 📚 RAG **检索增强生成**\n4. 🔊 TTS **文字转语音**"
+        )
 
         st.subheader("目前讲解")
         with st.container(height=400, border=True):

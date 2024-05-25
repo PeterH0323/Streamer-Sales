@@ -72,9 +72,9 @@ license: Apache License 2.0
 **Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
 
 <p align="center">
-    <img src="assets/demo2.png" alt="Demo1" width="90%">
-    <img src="assets/demo3.png" alt="Demo2" width="90%">
-    <img src="assets/demo.png" alt="Demo3" width="70%">
+    <img src="doc/demo2.png" alt="Demo1" width="90%">
+    <img src="doc/demo3.png" alt="Demo2" width="90%">
+    <img src="doc/demo.png" alt="Demo3" width="70%">
 </p>
 
 
