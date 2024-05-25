@@ -33,7 +33,9 @@ license: Apache License 2.0
 
 ## 简介
 
-**Streamer-Sales 销冠 —— 卖货主播大模型** 是一个能够根据给定的商品特点对商品进行解说并激发用户的购买意愿的卖货主播模型，模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**，同时支持 **RAG 检索增强**做到可以随时更新说明书指导主播生成文案，另外还加入带有感情的 **TTS 文字转语音**生成，让主播不止于文字介绍。
+**Streamer-Sales 销冠 —— 卖货主播大模型** 是一个能够根据给定的商品特点对商品进行解说并激发用户的购买意愿的卖货主播模型。
+
+模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**，同时支持 **RAG 检索增强**做到可以随时更新说明书指导主播生成文案，另外还加入带有感情的 **TTS 文字转语音**生成，让主播不止于文字介绍。
 
 **开源不易，如果本项目帮到大家，可以右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐是我们最大的鼓励，谢谢各位！**  
 
