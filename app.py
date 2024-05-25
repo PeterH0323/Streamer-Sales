@@ -6,9 +6,9 @@
 import copy
 import os
 import shutil
+import time
 from datetime import datetime
 from pathlib import Path
-import time
 
 import streamlit as st
 import yaml
@@ -17,7 +17,9 @@ from utils.infer.lmdeploy_infer import load_turbomind_model
 from utils.infer.transformers_infer import load_hf_model
 from utils.rag.feature_store import gen_vector_db
 from utils.tools import resize_image
-from utils.tts.tts_worker import get_tts_model
+
+# from utils.tts.sambert_hifigan.tts_sambert_hifigan import get_tts_model
+from utils.tts.gpt_sovits.inference_gpt_sovits import get_tts_model
 
 # ==================================================================
 #                               模型配置
@@ -48,13 +50,13 @@ EACH_ROW_COL = 2  # 商品页显示多少列
 PRODUCT_INSTRUCTION_DIR = r"./product_info/instructions"
 PRODUCT_IMAGES_DIR = r"./product_info/images"
 
+PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
+PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
+
 # ==================================================================
 #                             配置文件路径
 # ==================================================================
-PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
 CONVERSATION_CFG_YAML_PATH = r"./configs/conversation_cfg.yaml"
-
-PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
 
 # ==================================================================
 #                               RAG 配置
@@ -206,6 +208,34 @@ def make_product_container(product_name, product_info, image_height, each_card_o
             )
 
 
+def delete_old_files(directory, limit_time_s=60 * 60 * 1):
+    """
+    删除指定目录下超过一定时间的文件。
+
+    :param directory: 要检查和删除文件的目录路径
+    """
+    # 获取当前时间戳
+    current_time = time.time()
+
+    # 遍历目录下的所有文件和子目录
+    for file_path in Path(directory).iterdir():
+
+        # 获取文件的修改时间戳
+        file_mtime = os.path.getmtime(file_path)
+
+        # 计算文件的年龄（以秒为单位）
+        file_age_seconds = current_time - file_mtime
+
+        # 检查文件是否超过 n 秒
+        if file_age_seconds > limit_time_s:
+            try:
+                # 删除文件
+                file_path.unlink()
+                print(f"Deleted: {file_path}")
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
+
+
 def get_sales_info():
     """
     从配置文件中加载销售相关信息，并存储到session状态中。
@@ -279,9 +309,25 @@ def main(model_dir, using_lmdeploy, enable_rag):
     if "gen_tts_checkbox" not in st.session_state:
         st.session_state.gen_tts_checkbox = True
     if ENABLE_TTS:
-        st.session_state.tts_model = get_tts_model()
+        # samber
+        # st.session_state.tts_model = get_tts_model()
+
+        # gpt_sovits
+        (
+            st.session_state.bert_tokenizer,
+            st.session_state.bert_model,
+            st.session_state.ssl_model,
+            st.session_state.max_sec,
+            st.session_state.t2s_model,
+            st.session_state.vq_model,
+            st.session_state.hps,
+            st.session_state.inp_ref,
+            st.session_state.prompt_text,
+        ) = get_tts_model()
+
+        # 清除 1 小时之前的所有语音
         Path(st.session_state.tts_wav_root).mkdir(parents=True, exist_ok=True)
-        # TODO 清除2小时之前的所有语音
+        delete_old_files(st.session_state.tts_wav_root)
 
     # 加载 LLM 模型
     st.session_state.using_lmdeploy = using_lmdeploy
@@ -342,6 +388,8 @@ def main(model_dir, using_lmdeploy, enable_rag):
             with col_handler:
                 if row_id + col_id >= len(product_name_list):
                     continue
+
+                # TODO yaml 改为 ID 为 key，防止乱了顺序，用 ID 方便后面对商品进行修改
                 product_name = product_name_list[row_id + col_id]
                 make_product_container(product_name, product_info_dict[product_name], PRODUCT_IMAGE_HEIGHT, EACH_CARD_OFFSET)
 

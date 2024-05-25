@@ -90,14 +90,14 @@ def get_turbomind_response(
         for item in model_pipe.stream_infer(real_prompt, gen_config=prepare_generation_config()):
 
             if "~" in item.text:
-                item.text = item.text.replace("~", "")
+                item.text = item.text.replace("~", "。").replace("。。", "。")
 
             cur_response += item.text
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
 
         # 生成 TTS 文字转语音
-        tts_save_path = gen_tts_in_spinner()
+        tts_save_path = gen_tts_in_spinner(cur_response)
 
         # Add robot response to chat history
         session_messages.append(

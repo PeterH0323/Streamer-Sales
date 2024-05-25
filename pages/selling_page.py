@@ -71,7 +71,7 @@ def init_sidebar():
         st.button("清除对话历史", on_click=on_btn_click, kwargs={"info": "清除对话历史"})
 
         # 是否生成 TTS
-        if st.session_state.tts_model is not None:
+        if st.session_state.tts_model is not None or st.session_state.bert_tokenizer is not None:
             st.subheader("TTS 配置", divider="grey")
             st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
 

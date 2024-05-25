@@ -249,7 +249,7 @@ def get_hf_response(
         message_placeholder.markdown(cur_response)
 
         # 生成 TTS 文字转语音
-        tts_save_path = gen_tts_in_spinner()
+        tts_save_path = gen_tts_in_spinner(cur_response)
 
         # Add robot response to chat history
         session_messages.append(

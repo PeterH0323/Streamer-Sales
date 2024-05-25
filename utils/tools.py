@@ -37,7 +37,7 @@ def init_rag_retriever(rag_config: str, db_path: str):
 
     # 初始化
     retriever.get(fs_id="default", config_path=rag_config, work_dir=db_path)
-
+    
     return retriever
 
 
