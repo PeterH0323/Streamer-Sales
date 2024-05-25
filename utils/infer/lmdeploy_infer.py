@@ -8,6 +8,8 @@ from modelscope import snapshot_download
 from utils.tools import build_rag_prompt, init_rag_retriever
 from utils.tts.tts_worker import gen_tts_in_spinner
 
+CACHE_MAX_ENTRY_COUNT = 0.2  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
+
 
 def prepare_generation_config():
 
@@ -34,7 +36,7 @@ def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=No
         model_format = "awq"
 
     model_dir = snapshot_download(model_dir, revision="master")
-    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=0.6)
+    backend_config = TurbomindEngineConfig(model_format=model_format, session_len=32768, cache_max_entry_count=CACHE_MAX_ENTRY_COUNT)
     pipe = pipeline(model_dir, backend_config=backend_config, log_level="INFO", model_name="internlm2")
 
     print("load model end.")
