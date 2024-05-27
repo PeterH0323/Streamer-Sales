@@ -63,6 +63,7 @@ CONVERSATION_CFG_YAML_PATH = r"./configs/conversation_cfg.yaml"
 # ==================================================================
 RAG_CONFIG_PATH = r"./configs/rag_config.yaml"
 RAG_VECTOR_DB_DIR = r"./work_dirs/instruction_db"
+PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP = r"./work_dirs/instructions_gen_db_tmp"
 
 # ==================================================================
 #                               RAG 配置
@@ -467,7 +468,7 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         st.write("生成数据库...")
         if ENABLE_RAG:
             # 重新生成 RAG 向量数据库
-            gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
+            gen_rag_db(force_gen=True)
 
             # 重新加载 retriever
             st.session_state.rag_retriever.pop("default")
@@ -513,7 +514,6 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         st.rerun()
 
 
-@st.cache_resource
 def gen_rag_db(force_gen=False):
     """
     生成向量数据库。
@@ -526,9 +526,26 @@ def gen_rag_db(force_gen=False):
     if Path(RAG_VECTOR_DB_DIR).exists() and not force_gen:
         return
 
+    if force_gen and Path(RAG_VECTOR_DB_DIR).exists():
+        shutil.rmtree(RAG_VECTOR_DB_DIR)
+
+    # 仅仅遍历 instructions 字段里面的文件
+    if Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).exists():
+        shutil.rmtree(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
+    Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).mkdir(exist_ok=True, parents=True)
+
+    # 读取 yaml 文件，获取所有说明书路径，并移动到 tmp 目录
+    with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+        product_info_dict = yaml.safe_load(f)
+    for _, info in product_info_dict.items():
+        shutil.copyfile(info["instruction"], Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name))
+
     print("Generating rag database, pls wait ...")
     # 调用函数生成向量数据库
-    gen_vector_db(RAG_CONFIG_PATH, PRODUCT_INSTRUCTION_DIR, RAG_VECTOR_DB_DIR)
+    gen_vector_db(RAG_CONFIG_PATH, str(Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).absolute()), RAG_VECTOR_DB_DIR)
+
+    # 删除过程文件
+    shutil.rmtree(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
 
 
 if __name__ == "__main__":
