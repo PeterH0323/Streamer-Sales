@@ -268,6 +268,29 @@ def get_sales_info():
     st.session_state.product_info_struct_template = product_info_struct
 
 
+def init_product_info():
+    # 读取 yaml 文件
+    with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+        product_info_dict = yaml.safe_load(f)
+
+    # 根据 ID 排序，避免乱序
+    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
+
+    product_name_list = list(product_info_dict.keys())
+
+    # 生成商品信息
+    for row_id in range(0, len(product_name_list), EACH_ROW_COL):
+        for col_id, col_handler in enumerate(st.columns(EACH_ROW_COL)):
+            with col_handler:
+                if row_id + col_id >= len(product_name_list):
+                    continue
+
+                product_name = product_name_list[row_id + col_id]
+                make_product_container(product_name, product_info_dict[product_name], PRODUCT_IMAGE_HEIGHT, EACH_CARD_OFFSET)
+
+    return len(product_name_list)
+
+
 def main(model_dir, using_lmdeploy, enable_rag):
     """
     初始化页面配置，加载模型，处理页面跳转，并展示商品信息。
@@ -358,11 +381,8 @@ def main(model_dir, using_lmdeploy, enable_rag):
         icon="ℹ️",
     )
 
-    # 读取 yaml 文件
-    with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-
-    product_name_list = list(product_info_dict.keys())
+    # 初始化商品列表
+    product_num = init_product_info()
 
     # 侧边栏显示产品数量，入驻品牌方
     with st.sidebar:
@@ -375,8 +395,8 @@ def main(model_dir, using_lmdeploy, enable_rag):
         )
 
         st.subheader(f"主播后台信息", divider="grey")
-        st.markdown(f"共有商品：{len(product_name_list)} 件")
-        st.markdown(f"共有品牌方：{len(product_name_list)} 个")
+        st.markdown(f"共有商品：{product_num} 件")
+        st.markdown(f"共有品牌方：{product_num} 个")
 
         # TODO 单品成交量
         # st.markdown(f"共有品牌方：{len(product_name_list)} 个")
@@ -385,17 +405,6 @@ def main(model_dir, using_lmdeploy, enable_rag):
             # 是否生成 TTS
             st.subheader(f"TTS 配置", divider="grey")
             st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
-
-    # 生成商品信息
-    for row_id in range(0, len(product_name_list), EACH_ROW_COL):
-        for col_id, col_handler in enumerate(st.columns(EACH_ROW_COL)):
-            with col_handler:
-                if row_id + col_id >= len(product_name_list):
-                    continue
-
-                # TODO yaml 改为 ID 为 key，防止乱了顺序，用 ID 方便后面对商品进行修改
-                product_name = product_name_list[row_id + col_id]
-                make_product_container(product_name, product_info_dict[product_name], PRODUCT_IMAGE_HEIGHT, EACH_CARD_OFFSET)
 
     # 添加新商品上传表单
     with st.form(key="add_product_form"):
@@ -468,12 +477,17 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
             product_info_dict = yaml.safe_load(f)
 
+        # 排序防止乱序
+        product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
+        max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["id"])
+
         product_info_dict.update(
             {
                 product_name_input: {
                     "heighlights": heightlight_input.split("、"),
                     "images": str(image_save_path),
                     "instruction": str(instruct_save_path),
+                    "id": product_info_dict[max_id_key]["id"] + 1,
                 }
             }
         )
