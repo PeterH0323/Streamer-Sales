@@ -233,6 +233,7 @@ def get_tts_wav(
     temperature=0.6,
     ref_free=False,
     is_half=True,
+    process_bar=None,
 ):
 
     dict_language = {
@@ -293,7 +294,12 @@ def get_tts_wav(
     if not ref_free:
         phones1, bert1, _ = get_phones_and_bert(prompt_text, bert_tokenizer, bert_model, prompt_language, is_half)
 
-    for text in texts:
+    for text_idx, text in enumerate(texts):
+
+        if process_bar is not None:
+            percent_complete = (text_idx + 1) / len(texts)
+            process_bar.progress(percent_complete, text=f"正在生成语音 {round(percent_complete * 100, 2)} % ...")
+
         # 解决输入目标文本的空行导致报错的问题
         if len(text.strip()) == 0:
             continue
@@ -522,6 +528,8 @@ def gen_tts_wav(
     wav_path_output,
 ):
 
+    process_bar = st.progress(0, text="正在生成语音...")
+
     # 推理
     output_tts = get_tts_wav(
         text,
@@ -542,8 +550,12 @@ def gen_tts_wav(
         temperature=1,  # 0. ~ 1.
         ref_free=False,
         is_half=True,
+        process_bar=process_bar,
     )
     sampling_rate, audio_data = next(output_tts)
+
+    process_bar.progress(1, text=f"正在生成语音 100.00 % ...")
+    process_bar.empty()
 
     # 保存
     wav = BytesIO()
@@ -565,9 +577,7 @@ def demo():
     cnhubert_base_path = "./work_dirs/gpt_sovits/weights/pretrained_models/chinese-hubert-base"
     bert_path = "./work_dirs/utils/tts/gpt_sovits/weights/pretrained_models/chinese-roberta-wwm-ext-large"
 
-    inp_ref = (
-        r"./work_dirs/ref_wav/【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"
-    )
+    inp_ref = r"./work_dirs/ref_wav/【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"
 
     bert_tokenizer, bert_model, ssl_model, max_sec, t2s_model, vq_model, hps = get_tts_model(
         bert_path, cnhubert_base_path, gpt_path, sovits_path, is_half=True
