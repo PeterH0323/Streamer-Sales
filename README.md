@@ -436,7 +436,7 @@ cd ./dataset/gen_instructions
 python gen_instructions.py --image_dir /path/to/image_dir --ocr_output_dir ./ocr_res --instruction_output_dir ./instructions
 ```
 
-调取上面的脚本会生成 ocr 识别结果，以及最终的 markdown 说明书文件。`ocr_output_dir` 里面会生成 `work_dir` 文件夹，里面有识别结果图。
+调取上面的脚本会生成 OCR 识别结果，以及最终的 markdown 说明书文件。`ocr_output_dir` 里面会生成 `work_dir` 文件夹，里面有识别结果图。
 
 OCR 识别过程中，如果图片长宽比例大于2，则会设置步长为短边滑动窗口对长边进行切图，确保识别结果比较准确
 
@@ -455,7 +455,7 @@ cd utils/rag
 python feature_store.py
 ```
 
-代码中的 里面会自动解决 `No module named 'faiss.swigfaiss_avx2` 的问题
+代码中的 `fix_system_error` 方法会自动解决 `No module named 'faiss.swigfaiss_avx2` 的问题
 
 ### 六、部署
 
@@ -536,6 +536,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     heighlights: [亮点1, 亮点2, 亮点3]
     images: 商品图片路径，必须位于 product_info/images/ 中
     instruction: 商品说明书路径，必须位于 product_info/instructions/ 中，说明书需要时 markdown 格式
+    id: int 数字，用于排序，越小越靠前
 
 # 例子：
 
@@ -543,6 +544,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
     images: "./product_info/images/lip_stick.png"
     instruction: "./product_info/instructions/lip_stick.md"
+    id: 1
 ...
 ```
 
