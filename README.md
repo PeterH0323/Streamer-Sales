@@ -39,6 +39,7 @@ license: Apache License 2.0
 
 **文档最后有微信群，欢迎加入一起探讨更多的可能！** 🎉
 
+
 **开源不易，如果本项目帮到大家，可以右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐是我们最大的鼓励，谢谢各位！**  
 
 ## 🎉 NEWS
@@ -72,6 +73,8 @@ license: Apache License 2.0
 ## 🖼 演示
 
 **Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+
+项目介绍视频已经发布，大家可以去看一下，[爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 
 <p align="center">
     <img src="doc/demo2.png" alt="Demo1" width="90%">
@@ -553,6 +556,14 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 欢迎大家一起讨论，如果大家有数据集，可以在 issue 留言讨论。
 
+
+## 加群讨论
+
+欢迎加入我们的微信群，一起探索更多的可能！🎉
+
+![wechat_group](./doc/wechat_group.jpg)
+
+
 ## 💕 致谢
 
 - [InternLM](https://github.com/InternLM/InternLM)
@@ -588,9 +599,3 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 We do not hold any responsibility for any illegal usage of the codebase. Please refer to your local laws about DMCA and other related laws.
 我们不对代码库的任何非法使用承担任何责任. 请参阅您当地关于 DMCA (数字千年法案) 和其他相关法律法规.
-
-## 加群讨论
-
-欢迎加入我们的微信群，一起探索更多的可能！🎉
-
-![wechat_group](./doc/wechat_group.jpg)
