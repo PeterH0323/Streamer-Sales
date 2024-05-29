@@ -44,6 +44,7 @@ license: Apache License 2.0
 
 ## 🎉 NEWS
 
+- [2024.05.28] **项目介绍视频发布**：[B站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 - [2024.05.25] 发布 **TTS 2.0** 版本，**生成的语音在语气和情感方面有大大增强！**
 - [2024.05.23] 发布 TTS 1.0 版本，并支持开放用户自由选择该项功能，但有机器人的感觉
 - [2024.05.22] **支持上传新商品**，上传后会自动生成数据库
@@ -73,8 +74,6 @@ license: Apache License 2.0
 ## 🖼 演示
 
 **Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
-
-项目介绍视频已经发布，大家可以去看一下，[爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 
 <p align="center">
     <img src="doc/demo2.png" alt="Demo1" width="90%">
