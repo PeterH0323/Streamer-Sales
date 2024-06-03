@@ -1,4 +1,4 @@
-# 部署
+# Deploy
 streamlit==1.34.0
 lmdeploy==0.4.0
 modelscope==1.14.0
@@ -12,10 +12,10 @@ loguru==0.7.2
 textract==1.6.5
 faiss-gpu==1.7.2
 
-# 训练
+# Train
 xtuner[deepspeed]==0.1.19
 
-# TTS 1.0 文字转语音
+# TTS 1.0 Text to Speech
 # pytorch_wavelets==1.3.0
 # tensorboardX==2.6.2.2
 # scipy==1.12.0
