@@ -611,8 +611,9 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 欢迎加入我们的微信群，一起探索更多的可能！🎉
 
-![wechat_group](./doc/wechat_group.jpg)
-
+<p align="center">
+  <img src="doc/wechat_group.jpg" alt="wechat_group" width=30%>
+</p>
 
 ## 💕 致谢
 
