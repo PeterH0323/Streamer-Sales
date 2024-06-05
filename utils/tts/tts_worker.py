@@ -19,7 +19,7 @@ def gen_tts_in_spinner(cur_response):
             tts_save_path = str(Path(st.session_state.tts_wav_root).joinpath(save_tag).absolute())
             # gen_tts_wav(st.session_state.tts_handler, cur_response, tts_save_path)
 
-            # inp_ref = r"/root/hingwen_camp/utils/tts/gpt_sovits/weights/ref_wav/【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"
+            # inp_ref = r"【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"
             text_language = "中英混合"
             gen_tts_wav(
                 cur_response,

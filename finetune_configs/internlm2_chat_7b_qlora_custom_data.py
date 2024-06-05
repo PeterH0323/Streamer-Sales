@@ -24,11 +24,11 @@ from xtuner.utils import PROMPT_TEMPLATE
 #                          PART 1  Settings                           #
 #######################################################################
 # Model
-pretrained_model_name_or_path = '/share/model_repos/internlm2-chat-7b'
+pretrained_model_name_or_path = '/path/to/internlm2-chat-7b'
 use_varlen_attn = False
 
 # Data
-data_path = '/root/hingwen_camp/dataset/1479_train.jsonl'
+data_path = '/path/to/dataset/1479_train.jsonl'
 prompt_template = PROMPT_TEMPLATE.internlm2_chat
 max_length = 2048
 pack_to_max_length = True

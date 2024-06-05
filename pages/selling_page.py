@@ -8,6 +8,7 @@ import random
 import streamlit as st
 from transformers.utils import logging
 
+from utils.digital_human.digital_human_worker import show_video
 from utils.infer.lmdeploy_infer import get_turbomind_response
 from utils.infer.transformers_infer import get_hf_response
 from utils.tools import resize_image
@@ -69,9 +70,16 @@ def init_sidebar():
         # 成交额
 
         # 是否生成 TTS
-        if st.session_state.tts_model is not None or st.session_state.bert_tokenizer is not None:
+        if st.session_state.tts_handler is not None:
             st.subheader("TTS 配置", divider="grey")
-            st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
+            st.session_state.gen_tts_checkbox = st.toggle("生成语音", value=st.session_state.gen_tts_checkbox)
+
+        if st.session_state.digital_human_handler is not None:
+            # 是否生成 数字人
+            st.subheader(f"数字人 配置", divider="grey")
+            st.session_state.gen_digital_human_checkbox = st.toggle(
+                "生成数字人视频", value=st.session_state.gen_digital_human_checkbox
+            )
 
         st.subheader("页面切换", divider="grey")
         st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
@@ -86,39 +94,15 @@ def init_sidebar():
         # temperature = st.slider("Temperature", 0.0, 1.0, 0.7, step=0.01)
 
 
-def main(meta_instruction):
-
-    # 检查页面切换状态并进行切换
-    if st.session_state.page_switch != st.session_state.current_page:
-        st.switch_page(st.session_state.page_switch)
-
-    # 定义用户和机器人头像路径
-    user_avator = "./assets/user.png"
-    robot_avator = "./assets/logo.png"
-
-    # 页面标题
-    st.title("Streamer-Sales 销冠 —— 卖货主播大模型⭐🛒🏆")
-
-    # 初始化侧边栏
-    init_sidebar()
-
-    # 根据是否使用lmdeploy选择响应函数
-    if st.session_state.using_lmdeploy:
-        get_response_func = get_turbomind_response
-    else:
-        get_response_func = get_hf_response
-
-    # 初始化聊天历史记录
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+def init_message_block(meta_instruction, get_response_func, user_avator, robot_avator):
 
     # 在应用重新运行时显示聊天历史消息
     for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=message.get("avatar")):
             st.markdown(message["content"])
 
-            if "wav" in message and message["wav"] is not None:
-                # 展示
+            if message.get("wav") is not None:
+                # 展示语音
                 print(f"Load wav {message['wav']}")
                 with open(message["wav"], "rb") as f_wav:
                     audio_bytes = f_wav.read()
@@ -143,6 +127,70 @@ def main(meta_instruction):
     if "button_msg" not in st.session_state:
         st.session_state.button_msg = "x-x"
 
+
+def process_message(get_response_func, user_avator, prompt, meta_instruction, robot_avator):
+    # Display user message in chat message container
+    with st.chat_message("user", avatar=user_avator):
+        st.markdown(prompt)
+
+    get_response_func(
+        prompt,
+        meta_instruction,
+        user_avator,
+        robot_avator,
+        st.session_state.model,
+        st.session_state.tokenizer,
+        session_messages=st.session_state.messages,
+        add_session_msg=True,
+        first_input_str=st.session_state.first_input,
+        rag_retriever=st.session_state.rag_retriever,
+        product_name=st.session_state.product_name,
+    )
+
+
+def main(meta_instruction):
+
+    # 检查页面切换状态并进行切换
+    if st.session_state.page_switch != st.session_state.current_page:
+        st.switch_page(st.session_state.page_switch)
+
+    # 页面标题
+    st.title("Streamer-Sales 销冠 —— 卖货主播大模型⭐🛒🏆")
+
+    # 初始化侧边栏
+    init_sidebar()
+
+    # 根据是否使用lmdeploy选择响应函数
+    if st.session_state.using_lmdeploy:
+        get_response_func = get_turbomind_response
+    else:
+        get_response_func = get_hf_response
+
+    # 定义用户和机器人头像路径
+    user_avator = "./assets/user.png"
+    robot_avator = "./assets/logo.png"
+
+    # 初始化聊天历史记录
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    message_col = None
+    if st.session_state.gen_digital_human_checkbox:
+
+        with st.container():
+            message_col, video_col = st.columns([0.6, 0.4])
+
+            with video_col:
+                # 创建 empty 控件
+                st.session_state.video_placeholder = st.empty()
+                with st.session_state.video_placeholder.container():
+                    show_video(st.session_state.digital_human_video_path, autoplay=True, loop=True, muted=True)
+
+            with message_col:
+                init_message_block(meta_instruction, get_response_func, user_avator, robot_avator)
+    else:
+        init_message_block(meta_instruction, get_response_func, user_avator, robot_avator)
+
     # 输入框显示提示信息
     hint_msg = "你好，可以问我任何关于产品的问题"
     if st.session_state.button_msg != "x-x":
@@ -154,23 +202,12 @@ def main(meta_instruction):
 
     # 接收用户输入
     if prompt:
-        # Display user message in chat message container
-        with st.chat_message("user", avatar=user_avator):
-            st.markdown(prompt)
 
-        get_response_func(
-            prompt,
-            meta_instruction,
-            user_avator,
-            robot_avator,
-            st.session_state.model,
-            st.session_state.tokenizer,
-            session_messages=st.session_state.messages,
-            add_session_msg=True,
-            first_input_str=st.session_state.first_input,
-            rag_retriever=st.session_state.rag_retriever,
-            product_name=st.session_state.product_name,
-        )
+        if message_col is None:
+            process_message(get_response_func, user_avator, prompt, meta_instruction, robot_avator)
+        else:
+            with message_col:
+                process_message(get_response_func, user_avator, prompt, meta_instruction, robot_avator)
 
 
 # st.sidebar.page_link("app.py", label="商品页")

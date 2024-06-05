@@ -13,6 +13,7 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
+from utils.digital_human.realtime_inference import digital_human_preprocess
 from utils.infer.lmdeploy_infer import load_turbomind_model
 from utils.infer.transformers_infer import load_hf_model
 from utils.rag.feature_store import gen_vector_db
@@ -35,6 +36,7 @@ SALES_NAME = "乐乐喵"  # 启动的角色名
 USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
 ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
 ENABLE_TTS = True  # True 启动 tts，False 不启用
+ENABLE_DIGITAL_HUMAN = True  # True 启动 数字人，False 不启用
 DISABLE_UPLOAD = os.getenv("DISABLE_UPLOAD") == "true"
 
 # ==================================================================
@@ -69,6 +71,15 @@ PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP = r"./work_dirs/instructions_gen_db_tmp"
 #                               RAG 配置
 # ==================================================================
 TTS_WAV_GEN_PATH = r"./work_dirs/tts_wavs"
+
+# ==================================================================
+#                             数字人 配置
+# ==================================================================
+DIGITAL_HUMAN_GEN_PATH = r"./work_dirs/digital_human"
+DIGITAL_HUMAN_MODEL_DIR = r"./work_dirs/digital_human_weights/"
+DIGITAL_HUMAN_BBOX_SHIFT = 0
+DIGITAL_HUMAN_VIDEO_PATH = r"/path/to/video.mp4"
+DIGITAL_HUMAN_FPS = 25
 
 # 初始化 Streamlit 页面配置
 st.set_page_config(
@@ -327,31 +338,49 @@ def main(model_dir, using_lmdeploy, enable_rag):
         st.switch_page(st.session_state.page_switch)
 
     # TTS 初始化
-    st.session_state.tts_model = None
+    st.session_state.tts_handler = None
     st.session_state.tts_wav_root = TTS_WAV_GEN_PATH
 
     if "gen_tts_checkbox" not in st.session_state:
         st.session_state.gen_tts_checkbox = True
     if ENABLE_TTS:
         # samber
-        # st.session_state.tts_model = get_tts_model()
+        # st.session_state.tts_handler = get_tts_model()
 
         # gpt_sovits
-        (
-            st.session_state.bert_tokenizer,
-            st.session_state.bert_model,
-            st.session_state.ssl_model,
-            st.session_state.max_sec,
-            st.session_state.t2s_model,
-            st.session_state.vq_model,
-            st.session_state.hps,
-            st.session_state.inp_ref,
-            st.session_state.prompt_text,
-        ) = get_tts_model()
+        st.session_state.tts_handler = get_tts_model()
+        print(f"id tts_handler {id(st.session_state.tts_handler)}")
 
         # 清除 1 小时之前的所有语音
         Path(st.session_state.tts_wav_root).mkdir(parents=True, exist_ok=True)
         delete_old_files(st.session_state.tts_wav_root)
+    else:
+        st.session_state.gen_tts_checkbox = False
+
+    # 数字人 初始化
+    st.session_state.digital_human_handler = None
+    st.session_state.digital_human_root = DIGITAL_HUMAN_GEN_PATH
+
+    if "digital_human_video_path" not in st.session_state:
+        st.session_state.digital_human_video_path = DIGITAL_HUMAN_VIDEO_PATH
+    if "gen_digital_human_checkbox" not in st.session_state:
+        st.session_state.gen_digital_human_checkbox = True
+    if ENABLE_DIGITAL_HUMAN:
+        # 初始化
+        st.session_state.digital_human_handler = digital_human_preprocess(
+            model_dir=DIGITAL_HUMAN_MODEL_DIR,
+            use_float16=False,
+            video_path=st.session_state.digital_human_video_path,
+            work_dir=st.session_state.digital_human_root,
+            fps=DIGITAL_HUMAN_FPS,
+            bbox_shift=DIGITAL_HUMAN_BBOX_SHIFT,
+        )
+
+        # 清除 1 小时之前的所有视频
+        Path(st.session_state.digital_human_root).mkdir(parents=True, exist_ok=True)
+        # delete_old_files(st.session_state.digital_human_root)
+    else:
+        st.session_state.gen_digital_human_checkbox = False
 
     # 加载 LLM 模型
     st.session_state.using_lmdeploy = using_lmdeploy
@@ -405,7 +434,14 @@ def main(model_dir, using_lmdeploy, enable_rag):
         if ENABLE_TTS:
             # 是否生成 TTS
             st.subheader(f"TTS 配置", divider="grey")
-            st.session_state.gen_tts_checkbox = st.checkbox("生成语音", value=st.session_state.gen_tts_checkbox)
+            st.session_state.gen_tts_checkbox = st.toggle("生成语音", value=st.session_state.gen_tts_checkbox)
+
+        if ENABLE_DIGITAL_HUMAN:
+            # 是否生成 数字人
+            st.subheader(f"数字人 配置", divider="grey")
+            st.session_state.gen_digital_human_checkbox = st.toggle(
+                "生成数字人视频", value=st.session_state.gen_digital_human_checkbox
+            )
 
     # 添加新商品上传表单
     with st.form(key="add_product_form"):

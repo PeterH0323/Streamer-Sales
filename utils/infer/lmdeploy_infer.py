@@ -5,6 +5,8 @@ import torch
 from lmdeploy import GenerationConfig, TurbomindEngineConfig, pipeline
 from modelscope import snapshot_download
 
+from utils.digital_human.digital_human_worker import \
+    gen_digital_human_video_in_spinner
 from utils.tools import build_rag_prompt, init_rag_retriever
 from utils.tts.tts_worker import gen_tts_in_spinner
 
@@ -100,6 +102,7 @@ def get_turbomind_response(
 
         # 生成 TTS 文字转语音
         tts_save_path = gen_tts_in_spinner(cur_response)
+        gen_digital_human_video_in_spinner(tts_save_path)
 
         # Add robot response to chat history
         session_messages.append(
