@@ -3,12 +3,14 @@ TTS
 https://github.com/RVC-Boss/GPT-SoVITS/blob/main/GPT_SoVITS/inference_webui.py
 """
 
-from pathlib import Path
+import os
 import re
 import shutil
 import time
+from dataclasses import dataclass
 from io import BytesIO
-import os
+from pathlib import Path
+from typing import Optional
 
 import LangSegment
 import librosa
@@ -17,14 +19,18 @@ import soundfile as sf
 import streamlit as st
 import torch
 from transformers import AutoModelForMaskedLM, AutoTokenizer
+from transformers.models.bert.modeling_bert import BertForMaskedLM
+from transformers.models.bert.tokenization_bert_fast import BertTokenizerFast
 
-from utils.tts.gpt_sovits.utils import load_audio
+from utils import HParams
 from utils.tts.gpt_sovits.AR.models.t2s_lightning_module import Text2SemanticLightningModule
 from utils.tts.gpt_sovits.module import cnhubert
+from utils.tts.gpt_sovits.module.cnhubert import CNHubert
 from utils.tts.gpt_sovits.module.mel_processing import spectrogram_torch
 from utils.tts.gpt_sovits.module.models import SynthesizerTrn
 from utils.tts.gpt_sovits.text import cleaned_text_to_sequence
 from utils.tts.gpt_sovits.text.cleaner import clean_text
+from utils.tts.gpt_sovits.utils import load_audio
 
 symbol_splits = {
     "，",
@@ -450,6 +456,19 @@ def get_gpt_and_sovits_model_path(voice_character_name: str, tts_model_root: Pat
         return None, None
 
 
+@dataclass
+class HandlerTTS:
+    bert_tokenizer: Optional[BertTokenizerFast] = None
+    bert_model: Optional[BertForMaskedLM] = None
+    ssl_model: Optional[CNHubert] = None
+    max_sec: int = 0
+    t2s_model: Optional[Text2SemanticLightningModule] = None
+    vq_model: Optional[SynthesizerTrn] = None
+    hps: Optional[HParams] = None
+    inp_ref: str = ""
+    prompt_text: str = ""
+
+
 @st.cache_resource
 def get_tts_model(voice_character_name="艾丝妲", save_dir="./work_dirs/gpt_sovits_weights/star", is_half=True):
 
@@ -510,7 +529,19 @@ def get_tts_model(voice_character_name="艾丝妲", save_dir="./work_dirs/gpt_so
     max_sec, t2s_model = change_gpt_weights(gpt_path, is_half)
     vq_model, hps = change_sovits_weights(sovits_path, is_half)
 
-    return bert_tokenizer, bert_model, ssl_model, max_sec, t2s_model, vq_model, hps, str(inp_ref), prompt_text
+    tts_handler = HandlerTTS(
+        bert_tokenizer=bert_tokenizer,
+        bert_model=bert_model,
+        ssl_model=ssl_model,
+        max_sec=max_sec,
+        t2s_model=t2s_model,
+        vq_model=vq_model,
+        hps=hps,
+        inp_ref=str(inp_ref),
+        prompt_text=prompt_text,
+    )
+
+    return tts_handler
 
 
 def gen_tts_wav(

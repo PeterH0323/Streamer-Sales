@@ -1,5 +1,4 @@
-
-class HParams: # Fix gpt-sovits torch.load 报缺少模块的问题
+class HParams:  # Fix gpt-sovits torch.load 报缺少模块的问题
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             if type(v) == dict:
