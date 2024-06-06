@@ -94,7 +94,7 @@ license: Apache License 2.0
   - [🎫 开源许可证](#-开源许可证)
   - [🔗 引用](#-引用)
   - [✨Star History](#star-history)
-  - [Disclaimer / 免责声明](#disclaimer--免责声明)
+  - [免责声明/许可](#免责声明许可)
 
 
 ## 🛠 架构图
@@ -641,7 +641,8 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PeterH0323/Streamer-Sales&type=Date)](https://star-history.com/#PeterH0323/Streamer-Sales&Date)
 
-## Disclaimer / 免责声明
+## 免责声明/许可
 
-We do not hold any responsibility for any illegal usage of the codebase. Please refer to your local laws about DMCA and other related laws.
-我们不对代码库的任何非法使用承担任何责任. 请参阅您当地关于 DMCA (数字千年法案) 和其他相关法律法规.
+1. `代码`：`Streamer-Sales` 的代码采用 `Apache` 许可证发布，学术用途和商业用途都可以。
+2. `其他开源模型`：使用的其他开源模型必须遵守他们的许可证，如 `InternLM2`、`GPT-SoVITS`、`ft-mse-vae` 等。
+3. `AIGC`：本项目旨在积极影响基于人工智能的文字、语音、视频生成领域。用户被授予使用此工具创建文字、语音、视频的自由，但他们应该遵守当地法律，并负责任地使用。开发人员不对用户可能的不当使用承担任何责任。
