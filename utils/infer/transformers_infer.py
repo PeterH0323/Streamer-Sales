@@ -5,14 +5,11 @@ from typing import Callable, List, Optional
 
 import streamlit as st
 import torch
-from modelscope import snapshot_download
 from torch import nn
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers.generation.utils import (LogitsProcessorList,
-                                           StoppingCriteriaList)
+from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList
 from transformers.utils import logging
 
-from utils.tools import build_rag_prompt, init_rag_retriever
+from utils.tools import build_rag_prompt
 from utils.tts.tts_worker import gen_tts_in_spinner
 
 logger = logging.get_logger(__name__)
@@ -22,23 +19,6 @@ user_prompt = "<|im_start|>user\n{user}<|im_end|>\n"
 robot_prompt = "<|im_start|>assistant\n{robot}<|im_end|>\n"
 cur_query_prompt = "<|im_start|>user\n{user}<|im_end|>\n\
     <|im_start|>assistant\n"
-
-
-@st.cache_resource
-def load_hf_model(model_dir, enable_rag=True, rag_config=None, db_path=None):
-    print("load model begin.")
-
-    retriever = None
-    if enable_rag:
-        # 加载 rag 模型
-        retriever = init_rag_retriever(rag_config=rag_config, db_path=db_path)
-
-    model_dir = snapshot_download(model_dir, revision="master")
-    model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(torch.bfloat16).cuda()
-    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
-
-    print("load model end.")
-    return model, tokenizer, retriever
 
 
 @dataclass

@@ -10,7 +10,6 @@ import time
 from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
-from typing import Optional
 
 import LangSegment
 import librosa
@@ -458,15 +457,15 @@ def get_gpt_and_sovits_model_path(voice_character_name: str, tts_model_root: Pat
 
 @dataclass
 class HandlerTTS:
-    bert_tokenizer: Optional[BertTokenizerFast] = None
-    bert_model: Optional[BertForMaskedLM] = None
-    ssl_model: Optional[CNHubert] = None
-    max_sec: int = 0
-    t2s_model: Optional[Text2SemanticLightningModule] = None
-    vq_model: Optional[SynthesizerTrn] = None
-    hps: Optional[HParams] = None
-    inp_ref: str = ""
-    prompt_text: str = ""
+    bert_tokenizer: BertTokenizerFast
+    bert_model: BertForMaskedLM
+    ssl_model: CNHubert
+    max_sec: KeyboardInterrupt
+    t2s_model: Text2SemanticLightningModule
+    vq_model: SynthesizerTrn
+    hps: HParams
+    inp_ref: str
+    prompt_text: str
 
 
 @st.cache_resource

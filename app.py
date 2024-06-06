@@ -13,74 +13,6 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
-from utils.digital_human.realtime_inference import digital_human_preprocess
-from utils.infer.lmdeploy_infer import load_turbomind_model
-from utils.infer.transformers_infer import load_hf_model
-from utils.rag.feature_store import gen_vector_db
-from utils.tools import resize_image
-
-# from utils.tts.sambert_hifigan.tts_sambert_hifigan import get_tts_model
-from utils.tts.gpt_sovits.inference_gpt_sovits import get_tts_model
-
-# ==================================================================
-#                               模型配置
-# ==================================================================
-MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b"
-# MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
-
-SALES_NAME = "乐乐喵"  # 启动的角色名
-
-# ==================================================================
-#                               组件配置
-# ==================================================================
-USING_LMDEPLOY = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
-ENABLE_RAG = True  # True 启用 RAG 检索增强，False 不启用
-ENABLE_TTS = True  # True 启动 tts，False 不启用
-ENABLE_DIGITAL_HUMAN = True  # True 启动 数字人，False 不启用
-DISABLE_UPLOAD = os.getenv("DISABLE_UPLOAD") == "true"
-
-# ==================================================================
-#                               页面配置
-# ==================================================================
-PRODUCT_IMAGE_HEIGHT = 400  # 商品图片高度
-EACH_CARD_OFFSET = 100  # 每个商品卡片比图片高度多出的距离
-EACH_ROW_COL = 2  # 商品页显示多少列
-
-# ==================================================================
-#                               商品配置
-# ==================================================================
-PRODUCT_INSTRUCTION_DIR = r"./product_info/instructions"
-PRODUCT_IMAGES_DIR = r"./product_info/images"
-
-PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
-PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
-
-# ==================================================================
-#                             配置文件路径
-# ==================================================================
-CONVERSATION_CFG_YAML_PATH = r"./configs/conversation_cfg.yaml"
-
-# ==================================================================
-#                               RAG 配置
-# ==================================================================
-RAG_CONFIG_PATH = r"./configs/rag_config.yaml"
-RAG_VECTOR_DB_DIR = r"./work_dirs/instruction_db"
-PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP = r"./work_dirs/instructions_gen_db_tmp"
-
-# ==================================================================
-#                               RAG 配置
-# ==================================================================
-TTS_WAV_GEN_PATH = r"./work_dirs/tts_wavs"
-
-# ==================================================================
-#                             数字人 配置
-# ==================================================================
-DIGITAL_HUMAN_GEN_PATH = r"./work_dirs/digital_human"
-DIGITAL_HUMAN_MODEL_DIR = r"./work_dirs/digital_human_weights/"
-DIGITAL_HUMAN_BBOX_SHIFT = 0
-DIGITAL_HUMAN_VIDEO_PATH = r"/path/to/video.mp4"
-DIGITAL_HUMAN_FPS = 25
-
 # 初始化 Streamlit 页面配置
 st.set_page_config(
     page_title="Streamer-Sales 销冠",
@@ -90,9 +22,14 @@ st.set_page_config(
     menu_items={
         "Get Help": "https://github.com/PeterH0323/Streamer-Sales/tree/main",
         "Report a bug": "https://github.com/PeterH0323/Streamer-Sales/issues",
-        "About": "# This is a Streamer-Sales LLM 销冠--卖货主播大模型",
+        "About": "# Streamer-Sales LLM 销冠--卖货主播大模型",
     },
 )
+
+from utils.model_loader import RAG_RETRIEVER
+from utils.rag.feature_store import gen_vector_db
+from utils.tools import resize_image
+from utils.web_configs import WEB_CONFIGS
 
 
 @st.experimental_dialog("说明书", width="large")
@@ -260,11 +197,11 @@ def get_sales_info():
     """
 
     # 加载对话配置文件
-    with open(CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
+    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
     # 从配置中提取角色信息
-    sales_info = dataset_yaml["role_type"][SALES_NAME]
+    sales_info = dataset_yaml["role_type"][WEB_CONFIGS.SALES_NAME]
 
     # 从配置中提取对话设置相关的信息
     system = dataset_yaml["conversation_setting"]["system"]
@@ -272,7 +209,7 @@ def get_sales_info():
     product_info_struct = dataset_yaml["product_info_struct"]
 
     # 将销售角色名和角色信息插入到 system prompt
-    system_str = system.replace("{role_type}", SALES_NAME).replace("{character}", "、".join(sales_info))
+    system_str = system.replace("{role_type}", WEB_CONFIGS.SALES_NAME).replace("{character}", "、".join(sales_info))
 
     # 更新session状态，存储销售相关信息
     st.session_state.sales_info = system_str
@@ -282,7 +219,7 @@ def get_sales_info():
 
 def init_product_info():
     # 读取 yaml 文件
-    with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
 
     # 根据 ID 排序，避免乱序
@@ -291,19 +228,48 @@ def init_product_info():
     product_name_list = list(product_info_dict.keys())
 
     # 生成商品信息
-    for row_id in range(0, len(product_name_list), EACH_ROW_COL):
-        for col_id, col_handler in enumerate(st.columns(EACH_ROW_COL)):
+    for row_id in range(0, len(product_name_list), WEB_CONFIGS.EACH_ROW_COL):
+        for col_id, col_handler in enumerate(st.columns(WEB_CONFIGS.EACH_ROW_COL)):
             with col_handler:
                 if row_id + col_id >= len(product_name_list):
                     continue
 
                 product_name = product_name_list[row_id + col_id]
-                make_product_container(product_name, product_info_dict[product_name], PRODUCT_IMAGE_HEIGHT, EACH_CARD_OFFSET)
+                make_product_container(
+                    product_name, product_info_dict[product_name], WEB_CONFIGS.PRODUCT_IMAGE_HEIGHT, WEB_CONFIGS.EACH_CARD_OFFSET
+                )
 
     return len(product_name_list)
 
 
-def main(model_dir, using_lmdeploy, enable_rag):
+def init_tts():
+    # TTS 初始化
+    if "gen_tts_checkbox" not in st.session_state:
+        st.session_state.gen_tts_checkbox = True
+    if WEB_CONFIGS.ENABLE_TTS:
+        # 清除 1 小时之前的所有语音
+        Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).mkdir(parents=True, exist_ok=True)
+        delete_old_files(WEB_CONFIGS.TTS_WAV_GEN_PATH)
+    else:
+        st.session_state.gen_tts_checkbox = False
+
+
+def init_digital_human():
+    # 数字人 初始化
+    if "digital_human_video_path" not in st.session_state:
+        st.session_state.digital_human_video_path = WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_PATH
+    if "gen_digital_human_checkbox" not in st.session_state:
+        st.session_state.gen_digital_human_checkbox = True
+
+    if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
+        # 清除 1 小时之前的所有视频
+        Path(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH).mkdir(parents=True, exist_ok=True)
+        # delete_old_files(st.session_state.digital_human_root)
+    else:
+        st.session_state.gen_digital_human_checkbox = False
+
+
+def main():
     """
     初始化页面配置，加载模型，处理页面跳转，并展示商品信息。
 
@@ -317,7 +283,7 @@ def main(model_dir, using_lmdeploy, enable_rag):
     """
     print("Starting...")
 
-    if enable_rag:
+    if WEB_CONFIGS.ENABLE_RAG:
         # 生成向量数据库
         gen_rag_db()
 
@@ -338,60 +304,10 @@ def main(model_dir, using_lmdeploy, enable_rag):
         st.switch_page(st.session_state.page_switch)
 
     # TTS 初始化
-    st.session_state.tts_handler = None
-    st.session_state.tts_wav_root = TTS_WAV_GEN_PATH
-
-    if "gen_tts_checkbox" not in st.session_state:
-        st.session_state.gen_tts_checkbox = True
-    if ENABLE_TTS:
-        # samber
-        # st.session_state.tts_handler = get_tts_model()
-
-        # gpt_sovits
-        st.session_state.tts_handler = get_tts_model()
-        print(f"id tts_handler {id(st.session_state.tts_handler)}")
-
-        # 清除 1 小时之前的所有语音
-        Path(st.session_state.tts_wav_root).mkdir(parents=True, exist_ok=True)
-        delete_old_files(st.session_state.tts_wav_root)
-    else:
-        st.session_state.gen_tts_checkbox = False
+    init_tts()
 
     # 数字人 初始化
-    st.session_state.digital_human_handler = None
-    st.session_state.digital_human_root = DIGITAL_HUMAN_GEN_PATH
-
-    if "digital_human_video_path" not in st.session_state:
-        st.session_state.digital_human_video_path = DIGITAL_HUMAN_VIDEO_PATH
-    if "gen_digital_human_checkbox" not in st.session_state:
-        st.session_state.gen_digital_human_checkbox = True
-    if ENABLE_DIGITAL_HUMAN:
-        # 初始化
-        st.session_state.digital_human_handler = digital_human_preprocess(
-            model_dir=DIGITAL_HUMAN_MODEL_DIR,
-            use_float16=False,
-            video_path=st.session_state.digital_human_video_path,
-            work_dir=st.session_state.digital_human_root,
-            fps=DIGITAL_HUMAN_FPS,
-            bbox_shift=DIGITAL_HUMAN_BBOX_SHIFT,
-        )
-
-        # 清除 1 小时之前的所有视频
-        Path(st.session_state.digital_human_root).mkdir(parents=True, exist_ok=True)
-        # delete_old_files(st.session_state.digital_human_root)
-    else:
-        st.session_state.gen_digital_human_checkbox = False
-
-    # 加载 LLM 模型
-    st.session_state.using_lmdeploy = using_lmdeploy
-    if st.session_state.using_lmdeploy:
-        load_model_func = load_turbomind_model
-    else:
-        load_model_func = load_hf_model
-
-    st.session_state.model, st.session_state.tokenizer, st.session_state.rag_retriever = load_model_func(
-        model_dir, enable_rag=enable_rag, rag_config=RAG_CONFIG_PATH, db_path=RAG_VECTOR_DB_DIR
-    )
+    init_digital_human()
 
     # 获取销售信息
     if "sales_info" not in st.session_state:
@@ -431,12 +347,12 @@ def main(model_dir, using_lmdeploy, enable_rag):
         # TODO 单品成交量
         # st.markdown(f"共有品牌方：{len(product_name_list)} 个")
 
-        if ENABLE_TTS:
+        if WEB_CONFIGS.ENABLE_TTS:
             # 是否生成 TTS
             st.subheader(f"TTS 配置", divider="grey")
             st.session_state.gen_tts_checkbox = st.toggle("生成语音", value=st.session_state.gen_tts_checkbox)
 
-        if ENABLE_DIGITAL_HUMAN:
+        if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
             # 是否生成 数字人
             st.subheader(f"数字人 配置", divider="grey")
             st.session_state.gen_digital_human_checkbox = st.toggle(
@@ -449,9 +365,9 @@ def main(model_dir, using_lmdeploy, enable_rag):
         heightlight_input = st.text_input(label="添加商品特性，以'、'隔开")
         product_image = st.file_uploader(label="上传商品图片", type=["png", "jpg", "jpeg", "bmp"])
         product_instruction = st.file_uploader(label="上传商品说明书", type=["md"])
-        submit_button = st.form_submit_button(label="提交", disabled=DISABLE_UPLOAD)
+        submit_button = st.form_submit_button(label="提交", disabled=WEB_CONFIGS.DISABLE_UPLOAD)
 
-        if DISABLE_UPLOAD:
+        if WEB_CONFIGS.DISABLE_UPLOAD:
             st.info(
                 "Github 上面的代码已支持上传新商品逻辑。\n但因开放性的 Web APP 没有新增商品审核机制，暂不在此开放上传商品。\n您可以 clone 本项目到您的机器启动即可使能上传按钮",
                 icon="ℹ️",
@@ -490,8 +406,10 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
     with st.status("正在上传商品...", expanded=True) as status:
 
         save_tag = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        image_save_path = Path(PRODUCT_IMAGES_DIR).joinpath(f"{save_tag}{Path(product_image.name).suffix}")
-        instruct_save_path = Path(PRODUCT_INSTRUCTION_DIR).joinpath(f"{save_tag}{Path(product_instruction.name).suffix}")
+        image_save_path = Path(WEB_CONFIGS.PRODUCT_IMAGES_DIR).joinpath(f"{save_tag}{Path(product_image.name).suffix}")
+        instruct_save_path = Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR).joinpath(
+            f"{save_tag}{Path(product_instruction.name).suffix}"
+        )
 
         st.write("图片保存中...")
         with open(image_save_path, "wb") as file:
@@ -502,16 +420,16 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
             file.write(product_instruction.getvalue())
 
         st.write("生成数据库...")
-        if ENABLE_RAG:
+        if WEB_CONFIGS.ENABLE_RAG:
             # 重新生成 RAG 向量数据库
             gen_rag_db(force_gen=True)
 
             # 重新加载 retriever
-            st.session_state.rag_retriever.pop("default")
-            st.session_state.rag_retriever.get(fs_id="default", config_path=RAG_CONFIG_PATH, work_dir=RAG_VECTOR_DB_DIR)
+            RAG_RETRIEVER.pop("default")
+            RAG_RETRIEVER.get(fs_id="default", config_path=WEB_CONFIGS.RAG_CONFIG_PATH, work_dir=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
 
         st.write("更新商品明细表...")
-        with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+        with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
             product_info_dict = yaml.safe_load(f)
 
         # 排序防止乱序
@@ -530,12 +448,12 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         )
 
         # 备份
-        if Path(PRODUCT_INFO_YAML_BACKUP_PATH).exists():
-            Path(PRODUCT_INFO_YAML_BACKUP_PATH).unlink()
-        shutil.copy(PRODUCT_INFO_YAML_PATH, PRODUCT_INFO_YAML_BACKUP_PATH)
+        if Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).exists():
+            Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).unlink()
+        shutil.copy(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH)
 
         # 覆盖保存
-        with open(PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
+        with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
             yaml.dump(product_info_dict, f, allow_unicode=True)
 
         # 更新状态
@@ -559,33 +477,39 @@ def gen_rag_db(force_gen=False):
     """
 
     # 检查数据库目录是否存在，如果存在且force_gen为False，则不执行生成操作
-    if Path(RAG_VECTOR_DB_DIR).exists() and not force_gen:
+    if Path(WEB_CONFIGS.RAG_VECTOR_DB_DIR).exists() and not force_gen:
         return
 
-    if force_gen and Path(RAG_VECTOR_DB_DIR).exists():
-        shutil.rmtree(RAG_VECTOR_DB_DIR)
+    if force_gen and Path(WEB_CONFIGS.RAG_VECTOR_DB_DIR).exists():
+        shutil.rmtree(WEB_CONFIGS.RAG_VECTOR_DB_DIR)
 
     # 仅仅遍历 instructions 字段里面的文件
-    if Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).exists():
-        shutil.rmtree(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
-    Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).mkdir(exist_ok=True, parents=True)
+    if Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).exists():
+        shutil.rmtree(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
+    Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).mkdir(exist_ok=True, parents=True)
 
     # 读取 yaml 文件，获取所有说明书路径，并移动到 tmp 目录
-    with open(PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
     for _, info in product_info_dict.items():
-        shutil.copyfile(info["instruction"], Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name))
+        shutil.copyfile(
+            info["instruction"], Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name)
+        )
 
     print("Generating rag database, pls wait ...")
     # 调用函数生成向量数据库
-    gen_vector_db(RAG_CONFIG_PATH, str(Path(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).absolute()), RAG_VECTOR_DB_DIR)
+    gen_vector_db(
+        WEB_CONFIGS.RAG_CONFIG_PATH,
+        str(Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).absolute()),
+        WEB_CONFIGS.RAG_VECTOR_DB_DIR,
+    )
 
     # 删除过程文件
-    shutil.rmtree(PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
+    shutil.rmtree(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
 
 
 if __name__ == "__main__":
     # streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
     # print("Starting...")
-    main(MODEL_DIR, USING_LMDEPLOY, ENABLE_RAG)
+    main()
