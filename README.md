@@ -99,21 +99,21 @@ license: Apache License 2.0
 
 ## 🛠 架构图
 
-![架构图](./doc/architecture.png)
+![架构图](./doc/doc_images/architecture.png)
 
 ## 🖼 演示
 
 **Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
 
 <p align="center">
-  <img src="doc/demo_gif.gif" alt="Demo gif" >
+  <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
 </p>
 
 <p align="center">
-  <img src="doc/demo2.png" alt="Demo" width="45%">
-  <img src="doc/demo3.png" alt="Demo" width="45%">
-  <img src="doc/demo4.png" alt="Demo" width="44.5%">
-  <img src="doc/demo5.png" alt="Demo" width="46%">
+  <img src="doc/doc_images/demo2.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/demo3.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/demo4.png" alt="Demo" width="44.5%">
+  <img src="doc/doc_images/demo5.png" alt="Demo" width="46%">
 </p>
 
 ## ⚙ Model Zoo
@@ -607,7 +607,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 欢迎加入我们的微信群，一起探索更多的可能！🎉
 
 <p align="center">
-  <img src="doc/wechat_group.jpg" alt="wechat_group" width=30%>
+  <img src="doc/doc_images/wechat_group.jpg" alt="wechat_group" width=30%>
 </p>
 
 ## 💕 致谢
