@@ -15,16 +15,135 @@ import cv2
 import numpy as np
 import streamlit as st
 import torch
+import wget
 from tqdm import tqdm
 
-from utils.digital_human.inference import init_digital_model, load_face_parsing_model, load_pose_model, setup_ffmpeg_env
 from utils.digital_human.musetalk.models.unet import PositionalEncoding, UNet
 from utils.digital_human.musetalk.models.vae import VAE
-from utils.digital_human.musetalk.utils.blending import get_image_blending, get_image_prepare_material
+from utils.digital_human.musetalk.utils.blending import get_image_blending, get_image_prepare_material, init_face_parsing_model
 from utils.digital_human.musetalk.utils.face_parsing import FaceParsing
 from utils.digital_human.musetalk.utils.preprocessing import get_landmark_and_bbox, read_imgs
-from utils.digital_human.musetalk.utils.utils import datagen
+from utils.digital_human.musetalk.utils.utils import datagen, load_all_model
 from utils.digital_human.musetalk.whisper.audio2feature import Audio2Feature
+
+
+def setup_ffmpeg_env(model_dir):
+    # wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+    # xz -d ffmpeg-release-amd64-static.tar.xz
+    # tar -xvf ffmpeg-release-amd64-static.tar
+
+    ffmpeg_file_name = "ffmpeg-release-amd64-static"
+    ffmpeg_root = Path(model_dir).joinpath(f"drivers").absolute()
+    Path(ffmpeg_root).mkdir(exist_ok=True, parents=True)
+
+    ffmpeg_dir = None
+    for ffmpeg_dir_path in Path(ffmpeg_root).iterdir():
+        if not ffmpeg_dir_path.is_dir():
+            continue
+        ffmpeg_dir = str(ffmpeg_dir_path)
+
+    if ffmpeg_dir is None:
+        os.system(
+            f"cd {str(ffmpeg_root)} && wget https://johnvansickle.com/ffmpeg/releases/{ffmpeg_file_name}.tar.xz && xz -d {ffmpeg_file_name}.tar.xz && tar -xvf {ffmpeg_file_name}.tar"
+        )
+
+    for ffmpeg_dir_path in Path(ffmpeg_root).iterdir():
+        if not ffmpeg_dir_path.is_dir():
+            continue
+        ffmpeg_dir = str(ffmpeg_dir_path)
+        break
+    print(f"setting ffmpeg dir: {ffmpeg_dir}")
+    if str(ffmpeg_dir) not in os.getenv("PATH"):
+        print(f"add ffmpeg to path : {str(ffmpeg_dir)}")
+        os.environ["PATH"] = f"{str(ffmpeg_dir)}:{os.environ['PATH']}"
+
+
+def init_digital_model(model_dir, use_float16=False):
+
+    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+    from huggingface_hub import snapshot_download
+
+    # 直接下载单个文件
+    muse_talk_model_path = snapshot_download(repo_id="TMElyralab/MuseTalk", local_dir=model_dir)
+    sd_model_path = snapshot_download(repo_id="stabilityai/sd-vae-ft-mse", local_dir=Path(model_dir).joinpath("sd-vae-ft-mse"))
+
+    whisper_pth_path = Path(model_dir).joinpath(r"whisper/tiny.pt")
+    whisper_pth_path.parent.mkdir(parents=True, exist_ok=True)
+    if not whisper_pth_path.exists():
+
+        wget.download(
+            url="https://openaipublic.azureedge.net/main/whisper/models/65147644a518d12f04e32d6f3b26facc3f8dd46e5390956a9424a650c0ce22b9/tiny.pt",
+            out=str(whisper_pth_path),
+        )
+
+    # load model weights
+    print("Loading models...")
+    audio_processor, vae, unet, pe = load_all_model(
+        audio2feature_model_path=str(whisper_pth_path),
+        vae_model_path=sd_model_path,
+        unet_model_dict={
+            "unet_config": str(Path(muse_talk_model_path).joinpath("musetalk", "musetalk.json")),
+            "model_path": str(Path(muse_talk_model_path).joinpath("musetalk", "pytorch_model.bin")),
+        },
+    )
+
+    if use_float16 is True:
+        pe = pe.half()
+        vae.vae = vae.vae.half()
+        unet.model = unet.model.half()
+    print("Loaded models done !...")
+    return audio_processor, vae, unet, pe
+
+
+def load_pose_model(model_dir):
+
+    from mmpose.apis import init_model
+
+    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+    from huggingface_hub import hf_hub_download
+
+    # 直接下载单个文件
+    dw_pose_path = hf_hub_download(
+        repo_id="yzd-v/DWPose",
+        filename="dw-ll_ucoco_384.pth",
+        local_dir=Path(model_dir).joinpath("dwpose"),
+    )
+
+    config_file = r"./utils/digital_human/musetalk/utils/dwpose/rtmpose-l_8xb32-270e_coco-ubody-wholebody-384x288.py"
+    pose_model = init_model(config_file, dw_pose_path, device="cuda")
+
+    return pose_model
+
+
+def load_face_parsing_model(model_dir):
+
+    os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+    from huggingface_hub import hf_hub_download
+
+    model_dir = Path(model_dir).joinpath("face-parse-bisent")
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    resnet_path = Path(model_dir).joinpath("resnet18-5c106cde.pth")
+    if not resnet_path.exists():
+
+        wget.download(
+            url="https://download.pytorch.org/models/resnet18-5c106cde.pth",
+            out=str(resnet_path),
+        )
+
+    # 79999_iter.pth 地址: https://drive.google.com/open?id=154JgKpzCPW82qINcVieuPH3fZ2e0P812
+    # 非官方
+    _ = hf_hub_download(
+        repo_id="ManyOtherFunctions/face-parse-bisent",
+        filename="79999_iter.pth",
+        local_dir=str(model_dir),
+    )
+
+    face_parsing_model = init_face_parsing_model(
+        resnet_path=str(resnet_path),
+        face_model_pth=Path(model_dir).joinpath("79999_iter.pth"),
+    )
+    return face_parsing_model
 
 
 def video2imgs(vid_path, save_path, ext=".png", cut_frame=10000000):
@@ -296,7 +415,7 @@ def digital_human_preprocess(model_dir, use_float16, video_path, work_dir, fps, 
         fps=fps,
         preparation_force=False,
     )
-    
+
     setup_ffmpeg_env(model_dir)
 
     return avatar
