@@ -130,7 +130,7 @@ license: Apache License 2.0
 已开源数字人生成 ComfyUI workflow，更多教程详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
 
 <p align="center">
-  <img src="./doc/digital_human/streamer-sales-lelemiao-workflow-v1.0.png" alt="Digital_Human" width="45%">
+  <img src="./doc/digital_human/streamer-sales-lelemiao-workflow-v1.0.png" alt="Digital_Human" width="60%">
 </p>
 
 
