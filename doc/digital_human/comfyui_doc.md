@@ -1,5 +1,25 @@
 # ComfyUI 使用文档
 
+## 工作流
+
+如果您已经有 ComfyUI 的环境，可以直接使用我的工作流：
+
+<p align="center">
+  <img src="./streamer-sales-lelemiao-workflow-v1.0.png" alt="Demo gif" >
+</p>
+
+
+## 功能点
+
+我的 Workflow 具有以下功能点：
+
+- 生成人像
+- dwpose 生成骨骼图
+- AnimateDiff生成视频
+- 提升分辨率
+- 插帧提升帧率
+
+
 ## 环境搭建
 
 ```bash
@@ -14,32 +34,22 @@ cd ComfyUI
 python main.py
 ```
 
-
-## 功能点
-
-- 生成人像
-- dwpose 生成骨骼图
-- AnimateDiff生成视频
-- 提升分辨率
-- 插帧提升帧率
-
-
 ## 模型下载
 
 执行脚本 `python download_models.py` 即可下载本项目需要用到的全部权重
 
 ## 插件安装
 
-### 插件管理器
+1. 首先需要手动拉取下【插件管理器】
 
 ```bash
 cd ComfyUI/custom_nodes
 git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 ```
 
-重启 ComfyUI
+2. 重启 ComfyUI
 
-然后点击 【管理器】->【安装节点】搜索即可。
+3. 刷新页面，点击右下角 【管理器】->【安装缺失节点】即可。
 
 以下是我用到的插件：
 
@@ -62,7 +72,7 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 |   comfyui_segment_anything    |         SAM 工具包         |
 |      sdxl_prompt_styler       |        SDXL 工具包         |
 
-## 参考网站
+## 开发参考网站
 
 - 模型下载网站：C站：https://civitai.com
 - 提示词网站：https://promlib.com/
