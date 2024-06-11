@@ -44,7 +44,7 @@ license: Apache License 2.0
 
 ## 🎉 NEWS
 
-- [2024.06.09] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见文档
+- [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
 - [2024.05.28] **项目介绍视频发布**：[B站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 - [2024.05.25] 发布 **TTS 2.0** 版本，**生成的语音在语气和情感方面有大大增强！**
 - [2024.05.23] 发布 TTS 1.0 版本，并支持开放用户自由选择该项功能，但有机器人的感觉
@@ -78,6 +78,7 @@ license: Apache License 2.0
   - [🛠 架构图](#-架构图)
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
+  - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
   - [🧱 开发计划](#-开发计划)
   - [🎨 快速体验](#-快速体验)
   - [🧭 详细指南](#-详细指南)
@@ -120,8 +121,17 @@ license: Apache License 2.0
 
 | 模型                            | 基座             | 数据量           | ModelScope(HF)                                                                          | OpenXLab(HF)                                                                                                                                                            |
 | ------------------------------- | ---------------- | ---------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7bit/)      |
+| streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7bit/)   |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
+
+
+## 🦸 数字人生成 Workflow
+
+已开源数字人生成 ComfyUI workflow，更多教程详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
+
+<p align="center">
+  <img src="./doc/digital_human/streamer-sales-lelemiao-workflow-v1.0.png" alt="Digital_Human" width="45%">
+</p>
 
 
 ## 🧱 开发计划
