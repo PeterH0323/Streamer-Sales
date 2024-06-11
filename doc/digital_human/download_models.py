@@ -37,7 +37,6 @@ for animatediff_model in ["temporaldiff-v1-animatediff.safetensors"]:
         local_dir=rf"{COMFYUI_PATH}/models/animatediff_models",
     )
 
-
 for lora_model in [
     "v2_lora_PanLeft.ckpt",
     "v2_lora_PanRight.ckpt",
