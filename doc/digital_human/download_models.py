@@ -1,10 +1,13 @@
 import os
+
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
 from huggingface_hub import hf_hub_download
 
 COMFYUI_PATH = r"/path/to/ComfyUI"
 
-# 官方 SD 权重
+# ==============================================
+#                官方 SD 权重
+# ==============================================
 hf_hub_download(
     repo_id="stabilityai/stable-diffusion-xl-base-1.0",
     filename="sd_xl_base_1.0.safetensors",
@@ -17,18 +20,20 @@ hf_hub_download(
     local_dir=rf"{COMFYUI_PATH}/models/checkpoints",
 )
 
-for animated_model in ["mm_sd_v15_v2.ckpt", "mm_sdxl_v10_beta.ckpt", "v3_sd15_mm.ckpt"]:
+# ==============================================
+#                AnimateDiff 权重
+# ==============================================
+for animatediff_model in ["mm_sd_v15_v2.ckpt", "mm_sdxl_v10_beta.ckpt", "v3_sd15_mm.ckpt"]:
     hf_hub_download(
         repo_id="guoyww/animatediff",
-        filename=animated_model,
+        filename=animatediff_model,
         local_dir=rf"{COMFYUI_PATH}/models/animatediff_models",
     )
 
-
-for animated_model in ["temporaldiff-v1-animatediff.safetensors"]:
+for animatediff_model in ["temporaldiff-v1-animatediff.safetensors"]:
     hf_hub_download(
         repo_id="CiaraRowles/TemporalDiff",
-        filename=animated_model,
+        filename=animatediff_model,
         local_dir=rf"{COMFYUI_PATH}/models/animatediff_models",
     )
 
@@ -49,6 +54,9 @@ for lora_model in [
         local_dir=rf"{COMFYUI_PATH}/models/animatediff_motion_lora",
     )
 
+# ==============================================
+#                ControlNet 权重
+# ==============================================
 for controlnet_model in ["control_v11p_sd15_openpose.pth", "control_v11f1p_sd15_depth.pth", "control_v11p_sd15_seg.pth"]:
     hf_hub_download(
         repo_id="lllyasviel/ControlNet-v1-1",
@@ -56,7 +64,9 @@ for controlnet_model in ["control_v11p_sd15_openpose.pth", "control_v11f1p_sd15_
         local_dir=rf"{COMFYUI_PATH}/models/controlnet",
     )
 
-
+# ==============================================
+#                   SAM 权重
+# ==============================================
 for sam_model in ["groundingdino_swinb_cogcoor.pth", "GroundingDINO_SwinB.cfg.py"]:
     hf_hub_download(
         repo_id="ShilongLiu/GroundingDINO",
@@ -64,6 +74,9 @@ for sam_model in ["groundingdino_swinb_cogcoor.pth", "GroundingDINO_SwinB.cfg.py
         local_dir=rf"{COMFYUI_PATH}/models/grounding-dino/",
     )
 
+# ==============================================
+#                   IP-Adapter 权重
+# ==============================================
 for ip_adapter_model in ["models/ip-adapter-plus_sd15.safetensors"]:
     hf_hub_download(
         repo_id="h94/IP-Adapter",
