@@ -178,6 +178,11 @@ def delete_old_files(directory, limit_time_s=60 * 60 * 1):
         # 检查文件是否超过 n 秒
         if file_age_seconds > limit_time_s:
             try:
+                
+                if file_path.is_dir():
+                    shutil.rmtree(file_path)
+                    continue
+                
                 # 删除文件
                 file_path.unlink()
                 print(f"Deleted: {file_path}")
@@ -266,7 +271,7 @@ def init_digital_human():
         Path(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH).mkdir(parents=True, exist_ok=True)
         # delete_old_files(st.session_state.digital_human_root)
     else:
-        st.session_state.gen_digital_human_checkbox = False
+        st.session_state.gen_digital_human_checkbox = True
 
 
 def main():

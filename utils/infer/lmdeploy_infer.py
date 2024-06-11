@@ -72,8 +72,7 @@ def get_turbomind_response(
             message_placeholder.markdown(cur_response + "▌")
         message_placeholder.markdown(cur_response)
 
-        # 生成 TTS 文字转语音
-        tts_save_path = gen_tts_in_spinner(cur_response)
+        tts_save_path = gen_tts_in_spinner(cur_response)  # 一整句生成
         gen_digital_human_video_in_spinner(tts_save_path)
 
         # Add robot response to chat history

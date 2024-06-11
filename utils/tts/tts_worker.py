@@ -9,8 +9,12 @@ from utils.tts.gpt_sovits.inference_gpt_sovits import gen_tts_wav
 from utils.web_configs import WEB_CONFIGS
 
 
-def show_audio(tts_save_path):
-    with open(tts_save_path, "rb") as f_wav:
+def show_audio(tts_path):
+
+    if tts_path is None:
+        return
+
+    with open(tts_path, "rb") as f_wav:
         audio_bytes = f_wav.read()
     st.audio(audio_bytes, format="audio/wav")
 
@@ -37,6 +41,11 @@ def gen_tts_in_spinner(cur_response):
                 TTS_HANDLER.t2s_model,
                 TTS_HANDLER.inp_ref,
                 TTS_HANDLER.prompt_text,
+                TTS_HANDLER.prompt,
+                TTS_HANDLER.refer,
+                TTS_HANDLER.bert1,
+                TTS_HANDLER.phones1,
+                TTS_HANDLER.zero_wav,
                 tts_save_path,
             )
 

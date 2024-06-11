@@ -326,7 +326,6 @@ class Avatar:
             if self.idx >= video_len - 1:
                 break
             try:
-                start = time.time()
                 res_frame = res_frame_queue.get(block=True, timeout=1)
             except queue.Empty:
                 continue
@@ -444,14 +443,14 @@ def gen_digital_human_video(
 if __name__ == "__main__":
 
     data_preparation = False
-    video_path = "/path/to/video.mp4"
+    video_path = "/root/hingwen_camp/work_dirs/tts_wavs/2024-06-05-20-48-53.wav"
     bbox_shift = 5
     avatar = Avatar(
         avatar_id="lelemiao", video_path=video_path, bbox_shift=bbox_shift, batch_size=4, preparation=data_preparation
     )
 
     avatar.inference(
-        audio_path="/path/to/video.wav",
+        audio_path=r"/root/hingwen_camp/work_dirs/tts_wavs/2024-06-05-20-48-53.wav",
         out_vid_name="avatar_1",
         fps=25,
         skip_save_images=False,

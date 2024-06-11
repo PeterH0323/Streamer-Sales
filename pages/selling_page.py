@@ -183,7 +183,7 @@ def main(meta_instruction):
         st.session_state.messages = []
 
     message_col = None
-    if st.session_state.gen_digital_human_checkbox:
+    if st.session_state.gen_digital_human_checkbox and WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
 
         with st.container():
             message_col, video_col = st.columns([0.6, 0.4])

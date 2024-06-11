@@ -1,7 +1,7 @@
-from utils.digital_human.realtime_inference import digital_human_preprocess
-from utils.infer.load_infer_model import load_hf_model, load_turbomind_model
-from utils.tts.gpt_sovits.inference_gpt_sovits import get_tts_model
-from utils.web_configs import WEB_CONFIGS
+from .digital_human.realtime_inference import digital_human_preprocess
+from .infer.load_infer_model import load_hf_model, load_turbomind_model
+from .tts.gpt_sovits.inference_gpt_sovits import get_tts_model
+from .web_configs import WEB_CONFIGS
 
 # ==================================================================
 #                               TTS 模型

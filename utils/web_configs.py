@@ -70,7 +70,7 @@ class WebConfigs:
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./work_dirs/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
-    DIGITAL_HUMAN_VIDEO_PATH: str = r"/root/hingwen_camp/demos/ComfyUI/output/AnimateDiff_00015.mp4"
+    DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
     DIGITAL_HUMAN_FPS: str = 25
 
 

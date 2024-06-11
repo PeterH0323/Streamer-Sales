@@ -1,5 +1,6 @@
 # modified from https://github.com/yangdongchao/SoundStorm/blob/master/soundstorm/s1/AR/models/t2s_model.py
 # reference: https://github.com/lifeiteng/vall-e
+import time
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -361,7 +362,7 @@ class Text2SemanticDecoder(nn.Module):
         xy_attn_mask = torch.concat([x_attn_mask_pad, y_attn_mask], dim=0).to(x.device)
 
         for idx in tqdm(range(1500)):
-
+            
             xy_dec, _ = self.h((xy_pos, None), mask=xy_attn_mask, cache=cache)
             logits = self.ar_predict_layer(xy_dec[:, -1])  ##不用改，如果用了cache的默认就是只有一帧，取最后一帧一样的
             # samples = topk_sampling(logits, top_k=top_k, top_p=1.0, temperature=temperature)
