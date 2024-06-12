@@ -129,7 +129,7 @@ class FeatureStore:
     the reject pipeline and response pipeline."""
 
     def __init__(
-        self, embeddings: HuggingFaceEmbeddings, reranker: BCERerank, config_path: str = "config.ini", language: str = "zh"
+        self, embeddings: HuggingFaceEmbeddings, reranker: BCERerank, config_path: str = "rag_config.yaml", language: str = "zh"
     ) -> None:
         """Init with model device type and config."""
         self.config_path = config_path
@@ -415,61 +415,61 @@ def parse_args():
     parser.add_argument("--work_dir", type=str, default="work_dir", help="Working directory.")
     parser.add_argument("--repo_dir", type=str, default="repodir", help="Root directory where the repositories are located.")
     parser.add_argument(
-        "--config_path", default="config.ini", help="Feature store configuration path. Default value is config.ini"
+        "--config_path", default="rag_config.yaml", help="Feature store configuration path. Default value is rag_config.yaml"
     )
-    parser.add_argument(
-        "--good_questions",
-        default="resource/good_questions.json",
-        help="Positive examples in the dataset. Default value is resource/good_questions.json",  # noqa E251  # noqa E501
-    )
-    parser.add_argument(
-        "--bad_questions",
-        default="resource/bad_questions.json",
-        help="Negative examples json path. Default value is resource/bad_questions.json",  # noqa E251  # noqa E501
-    )
-    parser.add_argument("--sample", help="Input an json file, save reject and search output.")
+    # parser.add_argument(
+    #     "--good_questions",
+    #     default="resource/good_questions.json",
+    #     help="Positive examples in the dataset. Default value is resource/good_questions.json",  # noqa E251  # noqa E501
+    # )
+    # parser.add_argument(
+    #     "--bad_questions",
+    #     default="resource/bad_questions.json",
+    #     help="Negative examples json path. Default value is resource/bad_questions.json",  # noqa E251  # noqa E501
+    # )
+    # parser.add_argument("--sample", help="Input an json file, save reject and search output.")
     args = parser.parse_args()
     return args
 
 
-def test_reject(retriever: Retriever, sample: str = None):
-    """Simple test reject pipeline."""
-    if sample is None:
-        real_questions = [
-            "SAM 10个T 的训练集，怎么比比较公平呢~？速度上还有缺陷吧？",
-            "想问下，如果只是推理的话，amp的fp16是不会省显存么，我看parameter仍然是float32，开和不开推理的显存占用都是一样的。能不能直接用把数据和model都 .half() 代替呢，相比之下amp好在哪里",  # noqa E501
-            "mmdeploy支持ncnn vulkan部署么，我只找到了ncnn cpu 版本",
-            "大佬们，如果我想在高空检测安全帽，我应该用 mmdetection 还是 mmrotate",
-            "请问 ncnn 全称是什么",
-            "有啥中文的 text to speech 模型吗?",
-            "今天中午吃什么？",
-            "huixiangdou 是什么？",
-            "mmpose 如何安装？",
-            "使用科研仪器需要注意什么？",
-        ]
-    else:
-        with open(sample) as f:
-            real_questions = json.load(f)
+# def test_reject(retriever: Retriever, sample: str = None):
+#     """Simple test reject pipeline."""
+#     if sample is None:
+#         real_questions = [
+#             "SAM 10个T 的训练集，怎么比比较公平呢~？速度上还有缺陷吧？",
+#             "想问下，如果只是推理的话，amp的fp16是不会省显存么，我看parameter仍然是float32，开和不开推理的显存占用都是一样的。能不能直接用把数据和model都 .half() 代替呢，相比之下amp好在哪里",  # noqa E501
+#             "mmdeploy支持ncnn vulkan部署么，我只找到了ncnn cpu 版本",
+#             "大佬们，如果我想在高空检测安全帽，我应该用 mmdetection 还是 mmrotate",
+#             "请问 ncnn 全称是什么",
+#             "有啥中文的 text to speech 模型吗?",
+#             "今天中午吃什么？",
+#             "huixiangdou 是什么？",
+#             "mmpose 如何安装？",
+#             "使用科研仪器需要注意什么？",
+#         ]
+#     else:
+#         with open(sample) as f:
+#             real_questions = json.load(f)
 
-    for example in real_questions:
-        reject, _ = retriever.is_reject(example)
+#     for example in real_questions:
+#         reject, _ = retriever.is_reject(example)
 
-        if reject:
-            logger.error(f"reject query: {example}")
-        else:
-            logger.warning(f"process query: {example}")
+#         if reject:
+#             logger.error(f"reject query: {example}")
+#         else:
+#             logger.warning(f"process query: {example}")
 
-        if sample is not None:
-            if reject:
-                with open("workdir/negative.txt", "a+") as f:
-                    f.write(example)
-                    f.write("\n")
-            else:
-                with open("workdir/positive.txt", "a+") as f:
-                    f.write(example)
-                    f.write("\n")
+#         if sample is not None:
+#             if reject:
+#                 with open("workdir/negative.txt", "a+") as f:
+#                     f.write(example)
+#                     f.write("\n")
+#             else:
+#                 with open("workdir/positive.txt", "a+") as f:
+#                     f.write(example)
+#                     f.write("\n")
 
-    empty_cache()
+#     empty_cache()
 
 
 def test_query(retriever: Retriever, sample: str = None):
