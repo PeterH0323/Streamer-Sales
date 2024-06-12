@@ -11,8 +11,10 @@ class WebConfigs:
     # ==================================================================
     #                               模型配置
     # ==================================================================
-    LLM_MODEL_DIR: str = "HinGwenWoong/streamer-sales-lelemiao-7b"
-    # LLM_MODEL_DIR = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
+    if os.getenv("USING_4BIT") == "true":
+        LLM_MODEL_DIR: str = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
+    else:
+        LLM_MODEL_DIR: str = "HinGwenWoong/streamer-sales-lelemiao-7b"
 
     SALES_NAME: str = "乐乐喵"  # 启动的角色名
 
