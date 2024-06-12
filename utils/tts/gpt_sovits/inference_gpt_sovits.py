@@ -596,8 +596,7 @@ def gen_tts_wav(
     how_to_cut="凑四句一切",  # ["不切", "凑四句一切", "凑50字一切", "按中文句号。切", "按英文句号.切", "按标点符号切"]
 ):
 
-    process_bar = None
-    # process_bar = st.progress(0, text="正在生成语音...")
+    process_bar = st.progress(0, text="正在生成语音...")
 
     # 推理
     sampling_rate, audio_data = get_tts_wav(
@@ -627,8 +626,8 @@ def gen_tts_wav(
         process_bar=process_bar,
     )
 
-    # process_bar.progress(1, text=f"正在生成语音 100.00 % ...")
-    # process_bar.empty()
+    process_bar.progress(1, text=f"正在生成语音 100.00 % ...")
+    process_bar.empty()
 
     # 保存
     wav = BytesIO()
