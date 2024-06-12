@@ -27,7 +27,7 @@ class WebConfigs:
     ENABLE_DIGITAL_HUMAN: bool = True  # True 启动 数字人，False 不启用
     DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 
-    CACHE_MAX_ENTRY_COUNT: float = 0.2  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
+    CACHE_MAX_ENTRY_COUNT: float = 0.1  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
 
     # ==================================================================
     #                               页面配置
