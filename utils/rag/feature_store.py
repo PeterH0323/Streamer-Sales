@@ -527,6 +527,7 @@ def gen_vector_db(config_path, source_dir, work_dir, test_mode=False, update_rej
 
     # update reject throttle
     if update_reject:
+        # 目前没有用到这块，可忽略
         retriever = cache.get(config_path=config_path, work_dir=work_dir)
         with open(os.path.join("resource", "good_questions.json")) as f:
             good_questions = json.load(f)
