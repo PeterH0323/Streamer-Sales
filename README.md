@@ -642,7 +642,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 如果您觉得我的项目不错，或者本项目对您的项目有帮助，欢迎打赏，开源不易，有您的鼓励，我会更加努力！感谢！
 
 <p align="center">
-  <img src="doc/community/sponsor.jpg" alt="wechat_group" width=30%>
+  <img src="doc/community/sponsor.jpg" alt="sponsor" width=30%>
 </p>
 
 ## 🥳 加群讨论
