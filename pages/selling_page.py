@@ -50,7 +50,7 @@ def init_sidebar():
         st.markdown("[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)")
         st.subheader("功能点：", divider="grey")
         st.markdown(
-            "1. 📜 **主播文案一键生成**\n2. 🚀 KV cache + Turbomind **推理加速**\n3. 📚 RAG **检索增强生成**\n4. 🔊 TTS **文字转语音**\n5. 🦸 **数字人生成**"
+            "1. 📜 **主播文案一键生成**\n2. 🚀 KV cache + Turbomind **推理加速**\n3. 📚 RAG **检索增强生成**\n4. 🔊 TTS **文字转语音**\n5. 🦸 **数字人生成**\n6. 🌐 **Agent 网络查询**"
         )
 
         st.subheader("目前讲解")
@@ -93,6 +93,14 @@ def init_sidebar():
                 "生成数字人视频", value=st.session_state.gen_digital_human_checkbox
             )
 
+        if WEB_CONFIGS.ENABLE_AGENT:
+            # 是否使用 agent
+            st.subheader(f"Agent 配置", divider="grey")
+            with st.container(border=True):
+                st.markdown("**插件列表**")
+                st.button("结合天气查询到货时间", type="primary")
+            st.session_state.enable_agent_checkbox = st.toggle("使用 Agent 能力", value=st.session_state.enable_agent_checkbox)
+
         st.subheader("页面切换", divider="grey")
         st.button("返回商品页", on_click=on_btn_click, kwargs={"info": "返回商品页"})
 
@@ -133,6 +141,7 @@ def init_message_block(meta_instruction, get_response_func, user_avator, robot_a
             session_messages=st.session_state.messages,
             add_session_msg=False,
             first_input_str="",
+            enable_agent=False,
         )
 
     # 初始化按钮消息状态
@@ -157,6 +166,9 @@ def process_message(get_response_func, user_avator, prompt, meta_instruction, ro
         first_input_str=st.session_state.first_input,
         rag_retriever=RAG_RETRIEVER,
         product_name=st.session_state.product_name,
+        enable_agent=st.session_state.enable_agent_checkbox,
+        departure_place=st.session_state.departure_place,
+        delivery_company_name=st.session_state.delivery_company_name,
     )
 
 
@@ -174,6 +186,7 @@ def main(meta_instruction):
         "本项目是基于人工智能的文字、语音、视频生成领域搭建的卖货主播大模型。用户被授予使用此工具创建文字、语音、视频的自由，但用户在使用过程中应该遵守当地法律，并负责任地使用。开发人员不对用户可能的不当使用承担任何责任。",
         icon="❗",
     )
+
     # 初始化侧边栏
     init_sidebar()
 

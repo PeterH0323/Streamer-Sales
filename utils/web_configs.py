@@ -25,9 +25,11 @@ class WebConfigs:
     ENABLE_RAG: bool = True  # True 启用 RAG 检索增强，False 不启用
     ENABLE_TTS: bool = True  # True 启动 tts，False 不启用
     ENABLE_DIGITAL_HUMAN: bool = True  # True 启动 数字人，False 不启用
+    ENABLE_AGENT: bool = True  # True 启动 Agent，False 不启用
+
     DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 
-    CACHE_MAX_ENTRY_COUNT: float = 0.1  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
+    CACHE_MAX_ENTRY_COUNT: float = 0.2  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
 
     # ==================================================================
     #                               页面配置
@@ -37,8 +39,8 @@ class WebConfigs:
     EACH_ROW_COL: int = 2  # 商品页显示多少列
 
     # 定义用户和机器人头像路径
-    USER_AVATOR = "./assets/user.png"
-    ROBOT_AVATOR = "./assets/logo.png"
+    USER_AVATOR: str = "./assets/user.png"
+    ROBOT_AVATOR: str = "./assets/logo.png"
 
     # ==================================================================
     #                               商品配置
@@ -46,8 +48,8 @@ class WebConfigs:
     PRODUCT_INSTRUCTION_DIR: str = r"./product_info/instructions"
     PRODUCT_IMAGES_DIR: str = r"./product_info/images"
 
-    PRODUCT_INFO_YAML_PATH = r"./product_info/product_info.yaml"
-    PRODUCT_INFO_YAML_BACKUP_PATH = PRODUCT_INFO_YAML_PATH + ".bk"
+    PRODUCT_INFO_YAML_PATH: str = r"./product_info/product_info.yaml"
+    PRODUCT_INFO_YAML_BACKUP_PATH: str = PRODUCT_INFO_YAML_PATH + ".bk"
 
     # ==================================================================
     #                             配置文件路径
@@ -72,9 +74,13 @@ class WebConfigs:
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./work_dirs/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
-    DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
+    DIGITAL_HUMAN_VIDEO_PATH: str = r"/root/hingwen_camp/work_dirs/lelemiao_digital_human_video.mp4"
     DIGITAL_HUMAN_FPS: str = 25
 
-
+    # ==================================================================
+    #                             Agent 配置
+    # ==================================================================
+    # pass
+    
 # 实例化
 WEB_CONFIGS = WebConfigs()

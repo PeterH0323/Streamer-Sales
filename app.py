@@ -82,6 +82,10 @@ def on_btton_click(*args, **kwargs):
         st.session_state.image_path = kwargs["image_path"]
         st.session_state.product_name = kwargs["product_name"]
 
+        # 更新发货地、快递公司名称
+        st.session_state.departure_place = kwargs["departure_place"]
+        st.session_state.delivery_company_name = kwargs["delivery_company_name"]
+
         # # 清空语音
         # if ENABLE_TTS:
         #     for message in st.session_state.messages:
@@ -153,6 +157,8 @@ def make_product_container(product_name, product_info, image_height, each_card_o
                     "product_name": product_name,
                     "heighlights": heighlights_str,
                     "image_path": product_info["images"],
+                    "departure_place": product_info["departure_place"],
+                    "delivery_company_name": product_info["delivery_company_name"],
                 },
             )
 
@@ -178,11 +184,11 @@ def delete_old_files(directory, limit_time_s=60 * 60 * 1):
         # 检查文件是否超过 n 秒
         if file_age_seconds > limit_time_s:
             try:
-                
+
                 if file_path.is_dir():
                     shutil.rmtree(file_path)
                     continue
-                
+
                 # 删除文件
                 file_path.unlink()
                 print(f"Deleted: {file_path}")
@@ -250,13 +256,11 @@ def init_product_info():
 def init_tts():
     # TTS 初始化
     if "gen_tts_checkbox" not in st.session_state:
-        st.session_state.gen_tts_checkbox = True
+        st.session_state.gen_tts_checkbox = WEB_CONFIGS.ENABLE_TTS
     if WEB_CONFIGS.ENABLE_TTS:
         # 清除 1 小时之前的所有语音
         Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).mkdir(parents=True, exist_ok=True)
         delete_old_files(WEB_CONFIGS.TTS_WAV_GEN_PATH)
-    else:
-        st.session_state.gen_tts_checkbox = False
 
 
 def init_digital_human():
@@ -264,14 +268,12 @@ def init_digital_human():
     if "digital_human_video_path" not in st.session_state:
         st.session_state.digital_human_video_path = WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_PATH
     if "gen_digital_human_checkbox" not in st.session_state:
-        st.session_state.gen_digital_human_checkbox = True
+        st.session_state.gen_digital_human_checkbox = WEB_CONFIGS.ENABLE_DIGITAL_HUMAN
 
     if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
         # 清除 1 小时之前的所有视频
         Path(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH).mkdir(parents=True, exist_ok=True)
         # delete_old_files(st.session_state.digital_human_root)
-    else:
-        st.session_state.gen_digital_human_checkbox = True
 
 
 def main():
@@ -314,6 +316,9 @@ def main():
     # 数字人 初始化
     init_digital_human()
 
+    if "enable_agent_checkbox" not in st.session_state:
+        st.session_state.enable_agent_checkbox = WEB_CONFIGS.ENABLE_AGENT
+
     # 获取销售信息
     if "sales_info" not in st.session_state:
         get_sales_info()
@@ -342,7 +347,7 @@ def main():
         st.markdown("[销冠 —— 卖货主播大模型 Github repo](https://github.com/PeterH0323/Streamer-Sales)")
         st.subheader("功能点：", divider="grey")
         st.markdown(
-            "1. 📜 **主播文案一键生成**\n2. 🚀 KV cache + Turbomind **推理加速**\n3. 📚 RAG **检索增强生成**\n4. 🔊 TTS **文字转语音**\n5. 🦸 **数字人生成**"
+            "1. 📜 **主播文案一键生成**\n2. 🚀 KV cache + Turbomind **推理加速**\n3. 📚 RAG **检索增强生成**\n4. 🔊 TTS **文字转语音**\n5. 🦸 **数字人生成**\n6. 🌐 **Agent 网络查询**"
         )
 
         st.subheader(f"主播后台信息", divider="grey")
@@ -363,6 +368,14 @@ def main():
             st.session_state.gen_digital_human_checkbox = st.toggle(
                 "生成数字人视频", value=st.session_state.gen_digital_human_checkbox
             )
+
+        if WEB_CONFIGS.ENABLE_AGENT:
+            # 是否使用 agent
+            st.subheader(f"Agent 配置", divider="grey")
+            with st.container(border=True):
+                st.markdown("**插件列表**")
+                st.button("结合天气查询到货时间", type="primary")
+            st.session_state.enable_agent_checkbox = st.toggle("使用 Agent 能力", value=st.session_state.enable_agent_checkbox)
 
     # 添加新商品上传表单
     with st.form(key="add_product_form"):

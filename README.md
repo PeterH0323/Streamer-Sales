@@ -35,7 +35,7 @@ license: Apache License 2.0
 
 **Streamer-Sales 销冠 —— 卖货主播大模型** 是一个能够根据给定的商品特点对商品进行解说并激发用户的购买意愿的卖货主播模型，以其独特的智能魅力，将彻底改变您的购物体验。该模型能深度理解商品特点，以生动、精准的语言为商品量身打造解说词，让每一件商品都焕发出诱人的光彩。无论是细节之处，还是整体效果，都能通过其细腻、独到的解说，激发用户的购买欲望。
 
-模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
+模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
 
 功能点总结：
 
@@ -44,6 +44,7 @@ license: Apache License 2.0
 - 📚 RAG 检索增强生成
 - 🔊 TTS 文字转语音
 - 🦸 数字人生成
+- 🌐 Agent 使用网络查询实时快递等信息
 
 无论是线上直播销售，还是线下门店推广，这款卖货主播大模型都能成为您不可或缺的得力助手。它不仅能够提升销售效率，还能增强用户体验，为您的品牌形象加分。
 
@@ -57,6 +58,7 @@ license: Apache License 2.0
 
 ## 🎉 NEWS
 
+- [2024.06.16] **接入 Agent**，可以询问主播关于快递的信息，会调用 Agent 能力进行**网上查询**
 - [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
 - [2024.05.28] **项目介绍视频发布**：[B站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 - [2024.05.25] 发布 **TTS 2.0** 版本，**生成的语音在语气和情感方面有大大增强！**
@@ -79,6 +81,7 @@ license: Apache License 2.0
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
+  - [🌐 Agent](#-agent)
   - [🧱 开发计划](#-开发计划)
   - [🎨 快速体验](#-快速体验)
   - [🧭 详细指南](#-详细指南)
@@ -90,12 +93,13 @@ license: Apache License 2.0
     - [六、部署](#六部署)
     - [七、如何添加商品](#七如何添加商品)
   - [📧 后记](#-后记)
-  - [加群讨论](#加群讨论)
+  - [💳 打赏](#-打赏)
+  - [🥳 加群讨论](#-加群讨论)
   - [💕 致谢](#-致谢)
   - [🎫 开源许可证](#-开源许可证)
   - [🔗 引用](#-引用)
-  - [✨Star History](#star-history)
-  - [免责声明/许可](#免责声明许可)
+  - [🌟 Star History](#-star-history)
+  - [🧾 免责声明/许可](#-免责声明许可)
 
 
 ## 🛠 架构图
@@ -133,6 +137,23 @@ license: Apache License 2.0
   <img src="./doc/digital_human/streamer-sales-lelemiao-workflow-v1.0.png" alt="Digital_Human">
 </p>
 
+## 🌐 Agent
+
+目前已支持可以询问主播关于快递单号的信息，可以试试问主播【到杭州需要多久】来触发网络查询，会根据实时网络的信息来反馈给用户。
+
+目前调用的 API 主要有两个：
+
+- [快递鸟-预计到达时间](https://www.kdniao.com/product-yjddsj)
+- [和风天气](https://dev.qweather.com/docs/api/weather/weather-now/)
+
+使用环境变量设置 Key:
+
+```bash
+export DELIVERY_TIME_API_KEY="${快递鸟 EBusinessID},${快递鸟 api_key}"
+export WEATHER_API_KEY="${和风天气 API key}"
+```
+
+
 
 ## 🧱 开发计划
 
@@ -146,7 +167,7 @@ license: Apache License 2.0
 - [x] 支持上传新商品并生成新 RAG 数据库
 - [x] TTS 生成语音
 - [x] 数字人
-- [ ] 接入 Agent，支持订单情况、收货时间等实时信息
+- [x] 接入 Agent，支持订单情况、收货时间等实时信息
 - [ ] ASR
 - [ ] 多模态
 
@@ -581,6 +602,8 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     heighlights: [亮点1, 亮点2, 亮点3]
     images: 商品图片路径，必须位于 product_info/images/ 中
     instruction: 商品说明书路径，必须位于 product_info/instructions/ 中，说明书需要时 markdown 格式
+    departure_place: 发货地点（城市名）
+    delivery_company_name: 快递公司名称
     id: int 数字，用于排序，越小越靠前
 
 # 例子：
@@ -589,6 +612,8 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
     images: "./product_info/images/lip_stick.png"
     instruction: "./product_info/instructions/lip_stick.md"
+    departure_place: "杭州"
+    delivery_company_name: "圆通"
     id: 1
 ...
 ```
@@ -612,12 +637,20 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 **如果本项目帮到大家，可以在 GitHub 上右上角帮我点个 star~ ⭐⭐ , 您的 star ⭐是我们最大的鼓励，谢谢各位！**
 
-## 加群讨论
+## 💳 打赏
+
+如果您觉得我的项目不错，或者本项目对您的项目有帮助，欢迎打赏，开源不易，有您的鼓励，我会更加努力！感谢！
+
+<p align="center">
+  <img src="doc/community/sponsor.jpg" alt="wechat_group" width=30%>
+</p>
+
+## 🥳 加群讨论
 
 欢迎加入我们的微信群，一起探索更多的可能！🎉
 
 <p align="center">
-  <img src="doc/doc_images/wechat_group.jpg" alt="wechat_group" width=30%>
+  <img src="doc/community/wechat_group.jpg" alt="wechat_group" width=30%>
 </p>
 
 ## 💕 致谢
@@ -648,11 +681,11 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 }
 ```
 
-## ✨Star History
+## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PeterH0323/Streamer-Sales&type=Date)](https://star-history.com/#PeterH0323/Streamer-Sales&Date)
 
-## 免责声明/许可
+## 🧾 免责声明/许可
 
 1. `代码`：`Streamer-Sales` 的代码采用 `Apache` 许可证发布，学术用途和商业用途都可以。
 2. `其他开源模型`：使用的其他开源模型必须遵守他们的许可证，如 `InternLM2`、`GPT-SoVITS`、`ft-mse-vae` 等。
