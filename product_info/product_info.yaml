@@ -2,6 +2,8 @@
     heighlights: [高效清洁, 减少手动压力, 定时提醒, 智能模式调节, 无线充电, 噪音低]
     images: "./product_info/images/elec_toothblush.png"
     instruction: "./product_info/instructions/elec_toothblush.md"
+    departure_place: "汕头"
+    delivery_company_name: "顺丰"
     id: 1
 
 
@@ -9,6 +11,8 @@
     heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
     images: "./product_info/images/lip_stick.png"
     instruction: "./product_info/instructions/lip_stick.md"
+    departure_place: "宁波"
+    delivery_company_name: "圆通"
     id: 2
 
 
@@ -16,6 +20,8 @@
     heighlights: [温和配方, 深层清洁, 滋养头皮, 丰富泡沫, 易冲洗, 适合各种发质]
     images: "./product_info/images/shampoo.png"
     instruction: "./product_info/instructions/shampoo.md"
+    departure_place: "广州"
+    delivery_company_name: "申通"
     id: 3
 
 
@@ -23,6 +29,8 @@
     heighlights: [密集滋养, 深层补水, 急救修复, 快速见效, 定期护理, 多种类型选择]
     images: "./product_info/images/mask.png"
     instruction: "./product_info/instructions/mask.md"
+    departure_place: "广州"
+    delivery_company_name: "韵达"
     id: 4
 
 
@@ -30,6 +38,8 @@
     heighlights: [浪漫优雅, 花香调为主, 情感表达, 适合各种年龄, 瓶身设计精致, 提升女性魅力]
     images: "./product_info/images/perfume.png"
     instruction: "./product_info/instructions/perfume.md"
+    departure_place: "广州"
+    delivery_company_name: "韵达"
     id: 5
 
 
@@ -37,6 +47,8 @@
     heighlights: [耐用性, 可书写性, 不同颜色和类型, 轻便设计, 环保材料, 易于携带]
     images: "./product_info/images/pen.png"
     instruction: "./product_info/instructions/pen.md"
+    departure_place: "宁波"
+    delivery_company_name: "圆通"
     id: 6
 
 
@@ -44,6 +56,8 @@
     heighlights: [防滑材质, 吸湿排汗, 厚度适中, 耐用易清洁, 各种瑜伽动作适用, 轻巧便携]
     images: "./product_info/images/yoga_mat.png"
     instruction: "./product_info/instructions/yoga_mat.md"
+    departure_place: "汕头"
+    delivery_company_name: "圆通"
     id: 7
 
 
@@ -51,6 +65,8 @@
     heighlights: [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
     images: "./product_info/images/pants.png"
     instruction: "./product_info/instructions/pants.md"
+    departure_place: "广州"
+    delivery_company_name: "圆通"
     id: 8
 
 
@@ -58,6 +74,8 @@
     heighlights: [不粘涂层, 耐磨耐用, 导热快, 易清洗, 多种烹饪方式, 设计人性化]
     images: "./product_info/images/wok.png"
     instruction: "./product_info/instructions/wok.md"
+    departure_place: "武汉"
+    delivery_company_name: "京东"
     id: 9
 
 
@@ -65,6 +83,8 @@
     heighlights: [轻薄, 触控操作, 电池续航好, 移动办公便利, 娱乐性强, 适合儿童学习]
     images: "./product_info/images/pad.png"
     instruction: "./product_info/instructions/pad.md"
+    departure_place: "广州"
+    delivery_company_name: "京东"
     id: 10
 
 
@@ -72,6 +92,8 @@
     heighlights: [色彩鲜艳, 对比度极高, 响应速度快, 无背光眩光, 厚度较薄, 自发光无需额外照明]
     images: "./product_info/images/oled_tv.png"
     instruction: "./product_info/instructions/oled_tv.md"
+    departure_place: "广州"
+    delivery_company_name: "京东"
     id: 11
 
 
@@ -79,4 +101,6 @@
     heighlights: [富含铁质, 营养价值高, 肌肉纤维好, 红白相间纹理, 适合烧烤炖煮, 草食动物来源]
     images: "./product_info/images/beef.png"
     instruction: "./product_info/instructions/beef.md"
+    departure_place: "广州"
+    delivery_company_name: "顺丰"
     id: 12
