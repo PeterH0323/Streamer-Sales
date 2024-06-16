@@ -661,6 +661,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 - [HuixiangDou](https://github.com/InternLM/HuixiangDou)
 - [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
 - [MuseTalk](https://github.com/TMElyralab/MuseTalk)
+- [lagent](https://github.com/InternLM/lagent)
 
 感谢上海人工智能实验室推出的书生·浦语大模型实战营，为我们的项目提供宝贵的技术指导和强大的算力支持。
 
