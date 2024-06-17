@@ -187,6 +187,10 @@ conda env create -f environment.yml
 conda activate streamer-sales
 pip install -r requirements.txt
 
+# Agent Key (如果没有请忽略)
+export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
+export WEATHER_API_KEY="${天气 API key}"
+
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
@@ -583,6 +587,11 @@ python ./benchmark/get_benchmark_report.py
 > 反之，使用原生 HF 进行推理，则将 app.py 里面的 `USING_LMDEPLOY` 设置为 `False`
 
 ```bash
+
+# Agent Key (如果没有请忽略)
+export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
+export WEATHER_API_KEY="${天气 API key}"
+
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 

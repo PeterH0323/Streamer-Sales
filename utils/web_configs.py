@@ -75,18 +75,19 @@ class WebConfigs:
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./work_dirs/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
-    DIGITAL_HUMAN_VIDEO_PATH: str = r"/root/hingwen_camp/work_dirs/lelemiao_digital_human_video.mp4"
+    DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
     DIGITAL_HUMAN_FPS: str = 25
 
     # ==================================================================
     #                             Agent 配置
     # ==================================================================
-    # pass
-    
+    AGENT_WEATHER_API_KEY: str | None = os.environ.get("WEATHER_API_KEY", None)  # 天气 API Key
+    AGENT_DELIVERY_TIME_API_KEY: str | None = os.environ.get("DELIVERY_TIME_API_KEY", None)  # 快递查询 API Key
     # ==================================================================
     #                              ASR 配置
     # ==================================================================
     ASR_WAV_SAVE_PATH: str = r"./work_dirs/asr_wavs"
-    
+
+
 # 实例化
 WEB_CONFIGS = WebConfigs()

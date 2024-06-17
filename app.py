@@ -316,8 +316,16 @@ def main():
     # 数字人 初始化
     init_digital_human()
 
+    # 清理 ASR 旧文件
+    if WEB_CONFIGS.ENABLE_ASR:
+        delete_old_files(WEB_CONFIGS.ASR_WAV_SAVE_PATH)
+
     if "enable_agent_checkbox" not in st.session_state:
         st.session_state.enable_agent_checkbox = WEB_CONFIGS.ENABLE_AGENT
+
+        if WEB_CONFIGS.AGENT_DELIVERY_TIME_API_KEY is None or WEB_CONFIGS.AGENT_WEATHER_API_KEY is None:
+            WEB_CONFIGS.ENABLE_AGENT = False
+            st.session_state.enable_agent_checkbox = False
 
     # 获取销售信息
     if "sales_info" not in st.session_state:

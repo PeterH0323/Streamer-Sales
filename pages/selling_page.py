@@ -3,12 +3,11 @@
 # @Time    : 2024.4.16
 # @Author  : HinGwenWong
 
+import random
 from datetime import datetime
 from pathlib import Path
-import random
 
 import streamlit as st
-
 
 # 设置页面配置，包括标题、图标、布局和菜单项
 st.set_page_config(
@@ -29,7 +28,8 @@ from utils.asr.asr_worker import process_asr
 from utils.digital_human.digital_human_worker import show_video
 from utils.infer.lmdeploy_infer import get_turbomind_response
 from utils.infer.transformers_infer import get_hf_response
-from utils.model_loader import ASR_HANDLER, LLM_MODEL, LLM_TOKENIZER, RAG_RETRIEVER
+from utils.model_loader import (ASR_HANDLER, LLM_MODEL, LLM_TOKENIZER,
+                                RAG_RETRIEVER)
 from utils.tools import resize_image
 from utils.web_configs import WEB_CONFIGS
 
@@ -89,32 +89,30 @@ def init_sidebar():
         # 成交额
 
         if WEB_CONFIGS.ENABLE_ASR:
+            Path(WEB_CONFIGS.ASR_WAV_SAVE_PATH).mkdir(parents=True, exist_ok=True)
+
             st.subheader(f"语音输入", divider="grey")
-            # audio = audiorecorder("Click to record", "Click to stop recording")
             audio = audiorecorder(
                 start_prompt="开始录音", stop_prompt="停止录音", pause_prompt="", show_visualizer=True, key=None
             )
+
             if len(audio) > 0:
-                Path(WEB_CONFIGS.ASR_WAV_SAVE_PATH).mkdir(parents=True, exist_ok=True)
 
                 # 将录音保存 wav 文件
                 save_tag = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".wav"
                 wav_path = str(Path(WEB_CONFIGS.ASR_WAV_SAVE_PATH).joinpath(save_tag).absolute())
 
-                # To play audio in frontend:
-                # st.audio(audio.export().read())
-
-                # To save audio to a file, use pydub export method:
-                audio.export(wav_path, format="wav")
+                # st.audio(audio.export().read()) # 前端显示
+                audio.export(wav_path, format="wav")  # 使用 pydub 保存到 wav 文件
 
                 # To get audio properties, use pydub AudioSegment properties:
                 # st.write(
                 #     f"Frame rate: {audio.frame_rate}, Frame width: {audio.frame_width}, Duration: {audio.duration_seconds} seconds"
                 # )
+
                 # 语音识别
                 asr_text = process_asr(ASR_HANDLER, wav_path)
-                # 显示录音
-                # st.audio(audio_bytes, format="audio/wav")
+
                 # 删除过程文件
                 # Path(wav_path).unlink()
 

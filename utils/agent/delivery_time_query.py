@@ -11,6 +11,8 @@ from lagent.actions.base_action import BaseAction, tool_api
 from lagent.actions.parser import BaseParser, JsonParser
 from lagent.schema import ActionReturn, ActionStatusCode
 
+from utils.web_configs import WEB_CONFIGS
+
 
 class DeliveryTimeQueryAction(BaseAction):
     """快递时效查询插件，用于根据用户提出的收货地址查询到达期限"""
@@ -19,7 +21,6 @@ class DeliveryTimeQueryAction(BaseAction):
         self,
         departure_place: str,
         delivery_company_name: str,
-        key: Optional[str] = None,
         description: Optional[dict] = None,
         parser: Type[BaseParser] = JsonParser,
         enable: bool = True,
@@ -28,8 +29,8 @@ class DeliveryTimeQueryAction(BaseAction):
         self.departure_place = departure_place  # 发货地
 
         # 天气查询
-        self.weather_query_handler = WeatherQuery(departure_place, key)
-        self.delivery_time_handler = DeliveryTimeQuery(delivery_company_name, key)
+        self.weather_query_handler = WeatherQuery(departure_place, WEB_CONFIGS.AGENT_WEATHER_API_KEY)
+        self.delivery_time_handler = DeliveryTimeQuery(delivery_company_name, WEB_CONFIGS.AGENT_DELIVERY_TIME_API_KEY)
 
     @tool_api
     def run(self, query: str) -> ActionReturn:
@@ -72,12 +73,12 @@ class WeatherQuery:
     def __init__(
         self,
         departure_place: str,
-        key: Optional[str] = None,
+        api_key: Optional[str] = None,
     ) -> None:
         self.departure_place = departure_place  # 发货地
 
         # 天气查询
-        api_key = os.environ.get("WEATHER_API_KEY", key)
+        # api_key = os.environ.get("WEATHER_API_KEY", key)
         if api_key is None:
             raise ValueError("Please set Weather API key either in the environment as WEATHER_API_KEY")
         self.api_key = api_key
@@ -160,11 +161,11 @@ class DeliveryTimeQuery:
     def __init__(
         self,
         delivery_company_name: Optional[str] = "中通",
-        key: Optional[str] = None,
+        api_key: Optional[str] = None,
     ) -> None:
 
         # 快递时效查询
-        api_key = os.environ.get("DELIVERY_TIME_API_KEY", key)
+        # api_key = os.environ.get("DELIVERY_TIME_API_KEY", key)
         if api_key is None or "," not in api_key:
             raise ValueError(
                 'Please set Delivery time API key either in the environment as DELIVERY_TIME_API_KEY="${e_business_id},${api_key}"'
