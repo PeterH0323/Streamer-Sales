@@ -35,7 +35,7 @@ license: Apache License 2.0
 
 **Streamer-Sales 销冠 —— 卖货主播大模型** 是一个能够根据给定的商品特点对商品进行解说并激发用户的购买意愿的卖货主播模型，以其独特的智能魅力，将彻底改变您的购物体验。该模型能深度理解商品特点，以生动、精准的语言为商品量身打造解说词，让每一件商品都焕发出诱人的光彩。无论是细节之处，还是整体效果，都能通过其细腻、独到的解说，激发用户的购买欲望。
 
-模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
+模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **ASR 语音生成文字** 🎙️，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
 
 功能点总结：
 
@@ -45,6 +45,7 @@ license: Apache License 2.0
 - 🔊 TTS 文字转语音
 - 🦸 数字人生成
 - 🌐 Agent 使用网络查询实时快递等信息
+- 🎙️ ASR 语音转文字
 
 无论是线上直播销售，还是线下门店推广，这款卖货主播大模型都能成为您不可或缺的得力助手。它不仅能够提升销售效率，还能增强用户体验，为您的品牌形象加分。
 
@@ -58,6 +59,7 @@ license: Apache License 2.0
 
 ## 🎉 NEWS
 
+- [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
 - [2024.06.16] **接入 Agent**，可以询问主播关于快递的信息，会调用 Agent 能力进行**网上查询**
 - [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
 - [2024.05.28] **项目介绍视频发布**：[B站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
@@ -168,7 +170,7 @@ export WEATHER_API_KEY="${和风天气 API key}"
 - [x] TTS 生成语音
 - [x] 数字人
 - [x] 接入 Agent，支持订单情况、收货时间等实时信息
-- [ ] ASR
+- [x] ASR
 - [ ] 多模态
 
 ## 🎨 快速体验
@@ -662,6 +664,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 - [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS)
 - [MuseTalk](https://github.com/TMElyralab/MuseTalk)
 - [lagent](https://github.com/InternLM/lagent)
+- [FunASR](https://github.com/modelscope/FunASR)
 
 感谢上海人工智能实验室推出的书生·浦语大模型实战营，为我们的项目提供宝贵的技术指导和强大的算力支持。
 

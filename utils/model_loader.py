@@ -1,3 +1,4 @@
+from .asr.asr_worker import load_asr_model
 from .digital_human.realtime_inference import digital_human_preprocess
 from .infer.load_infer_model import load_hf_model, load_turbomind_model
 from .tts.gpt_sovits.inference_gpt_sovits import get_tts_model
@@ -17,6 +18,7 @@ if WEB_CONFIGS.ENABLE_TTS:
 else:
     TTS_HANDLER = None
 
+
 # ==================================================================
 #                             数字人 模型
 # ==================================================================
@@ -32,6 +34,16 @@ if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
     )
 else:
     DIGITAL_HUMAN_HANDLER = None
+
+
+# ==================================================================
+#                               ASR 模型
+# ==================================================================
+
+if WEB_CONFIGS.ENABLE_ASR:
+    ASR_HANDLER = load_asr_model()
+else:
+    ASR_HANDLER = None
 
 
 # ==================================================================

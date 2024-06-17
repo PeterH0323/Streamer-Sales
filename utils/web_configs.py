@@ -26,6 +26,7 @@ class WebConfigs:
     ENABLE_TTS: bool = True  # True 启动 tts，False 不启用
     ENABLE_DIGITAL_HUMAN: bool = True  # True 启动 数字人，False 不启用
     ENABLE_AGENT: bool = True  # True 启动 Agent，False 不启用
+    ENABLE_ASR: bool = True  # True 启动 语音转文字，False 不启用
 
     DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 
@@ -81,6 +82,11 @@ class WebConfigs:
     #                             Agent 配置
     # ==================================================================
     # pass
+    
+    # ==================================================================
+    #                              ASR 配置
+    # ==================================================================
+    ASR_WAV_SAVE_PATH: str = r"./work_dirs/asr_wavs"
     
 # 实例化
 WEB_CONFIGS = WebConfigs()

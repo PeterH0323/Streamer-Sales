@@ -48,3 +48,7 @@ wget==3.2
 # Agent
 lagent==0.2.2
 jionlp==1.5.14
+
+# ASR
+funasr==1.0.27
+streamlit-audiorecorder==0.0.5
