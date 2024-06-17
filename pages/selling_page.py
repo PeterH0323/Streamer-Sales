@@ -28,8 +28,7 @@ from utils.asr.asr_worker import process_asr
 from utils.digital_human.digital_human_worker import show_video
 from utils.infer.lmdeploy_infer import get_turbomind_response
 from utils.infer.transformers_infer import get_hf_response
-from utils.model_loader import (ASR_HANDLER, LLM_MODEL, LLM_TOKENIZER,
-                                RAG_RETRIEVER)
+from utils.model_loader import ASR_HANDLER, LLM_MODEL, LLM_TOKENIZER, RAG_RETRIEVER
 from utils.tools import resize_image
 from utils.web_configs import WEB_CONFIGS
 
@@ -260,9 +259,10 @@ def main(meta_instruction):
         prompt = st.session_state.button_msg
         st.session_state.button_msg = "x-x"
         st.chat_input(hint_msg)
-    elif asr_text != "":
+    elif asr_text != "" and st.session_state.asr_text_cache != asr_text:
         prompt = asr_text
         st.chat_input(hint_msg)
+        st.session_state.asr_text_cache = asr_text
     else:
         prompt = st.chat_input(hint_msg)
 

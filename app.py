@@ -276,6 +276,14 @@ def init_digital_human():
         # delete_old_files(st.session_state.digital_human_root)
 
 
+def init_asr():
+    # 清理 ASR 旧文件
+    if WEB_CONFIGS.ENABLE_ASR:
+        delete_old_files(WEB_CONFIGS.ASR_WAV_SAVE_PATH)
+
+    st.session_state.asr_text_cache = ""
+
+
 def main():
     """
     初始化页面配置，加载模型，处理页面跳转，并展示商品信息。
@@ -316,9 +324,8 @@ def main():
     # 数字人 初始化
     init_digital_human()
 
-    # 清理 ASR 旧文件
-    if WEB_CONFIGS.ENABLE_ASR:
-        delete_old_files(WEB_CONFIGS.ASR_WAV_SAVE_PATH)
+    # ASR 初始化
+    init_asr()
 
     if "enable_agent_checkbox" not in st.session_state:
         st.session_state.enable_agent_checkbox = WEB_CONFIGS.ENABLE_AGENT
