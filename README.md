@@ -61,7 +61,7 @@ license: Apache License 2.0
 
 - [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
 - [2024.06.16] **接入 Agent**，可以询问主播关于快递的信息，会调用 Agent 能力进行**网上查询**
-- [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
+- [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/README.md) 文档
 - [2024.05.28] **项目介绍视频发布**：[B站](https://www.bilibili.com/video/BV1ZJ4m1w75P)
 - [2024.05.25] 发布 **TTS 2.0** 版本，**生成的语音在语气和情感方面有大大增强！**
 - [2024.05.23] 发布 TTS 1.0 版本，并支持开放用户自由选择该项功能，但有机器人的感觉
@@ -133,7 +133,7 @@ license: Apache License 2.0
 
 ## 🦸 数字人生成 Workflow
 
-已开源数字人生成 ComfyUI workflow，更多教程详见 [ComfyUI 数字人生成](./doc/digital_human/comfyui_doc.md) 文档
+已开源数字人生成 ComfyUI workflow，更多教程详见 [ComfyUI 数字人生成](./doc/digital_human/README.md) 文档
 
 <p align="center">
   <img src="./doc/digital_human/streamer-sales-lelemiao-workflow-v1.0.png" alt="Digital_Human">
