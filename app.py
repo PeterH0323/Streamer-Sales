@@ -278,7 +278,7 @@ def init_digital_human():
 
 def init_asr():
     # 清理 ASR 旧文件
-    if WEB_CONFIGS.ENABLE_ASR:
+    if WEB_CONFIGS.ENABLE_ASR and Path(WEB_CONFIGS.ASR_WAV_SAVE_PATH).exists():
         delete_old_files(WEB_CONFIGS.ASR_WAV_SAVE_PATH)
 
     st.session_state.asr_text_cache = ""
