@@ -80,6 +80,7 @@ license: Apache License 2.0
   - [🎉 NEWS](#-news)
   - [📌 目录](#-目录)
   - [🛠 架构图](#-架构图)
+  - [📺️ 讲解视频](#️-讲解视频)
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
@@ -108,9 +109,17 @@ license: Apache License 2.0
 
 ![架构图](./doc/doc_images/architecture.png)
 
+## 📺️ 讲解视频
+
+干货满满，欢迎一键三连（疯狂暗示🍺）
+
+|       | 标题  |   视频 |
+| :---: | :-----------------------------------------------------------------------------: | :--------------------------------------------------------------: |
+|   🌟   | 爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！ | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P)  [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
+
 ## 🖼 演示
 
-**Demo 地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+**在线体验地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
 
 <p align="center">
   <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
