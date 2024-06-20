@@ -115,7 +115,7 @@ license: Apache License 2.0
 
 |       | 标题  | 视频 |
 | :---: | :-----------------------------------------------------------------------------: | :--------------------------------------------------------------: |
-|   🌟   | 爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！ | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P)  [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
+|   🌟   | [爆肝1个月，我做了个【AI卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P) | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P)  [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
 
 ## 🖼 演示
 
