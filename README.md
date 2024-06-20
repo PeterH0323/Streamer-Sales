@@ -494,9 +494,7 @@ xtuner train finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_d
 
 1. 搭建环境
 
-这里用到 ppocr 工具来进行 ocr 识别，（本人也是 ppocr 的贡献者，目前 commit 数排在 10 / 181 :smile:）
-
-另外生成一个虚拟环境，避免有版本冲突
+这里用到 ppocr 工具来进行 ocr 识别，在这里我另外生成了一个虚拟环境，避免有版本冲突
 ```bash
 conda create -n ppocr python=3.8
 conda activate ppocr
@@ -505,9 +503,11 @@ pip install paddlepaddle-gpu -i https://mirror.baidu.com/pypi/simple
 pip install paddleocr==2.7.3
 ```
 
-2. 网上下载图片 or 自己的图片，如果有自己的说明书，则下一步改为直接运行 `gen_instructions.py` 中的 `gen_instructions_according_ocr_res` 这个方法即可
+2. 将网上下载图片 or 自己的图片命名成商品名称（要英文 or 拼音）整理到一个文件夹中，如果有自己的说明书，则下一步改为直接运行 `gen_instructions.py` 中的 `gen_instructions_according_ocr_res` 这个方法即可
 
-3. 识别文字 & 使用 LLM 总结生成 markdown 文件
+3. 获取 kimi 的 api key，并填入 [./configs/api_cfg.yaml](https://github.com/PeterH0323/Streamer-Sales/blob/main/configs/api_cfg.yaml) 对应的位置
+
+4. 识别文字 & 使用 LLM 总结生成 markdown 文件
 
 ```bash
 cd ./dataset/gen_instructions
