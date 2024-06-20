@@ -90,7 +90,7 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
   <img src="./images/comfyui-2.png" alt="workflow" >
 </p>
 
-人物生成好了，下一步要生成特定的动作的话，有时候语言很难描述，我们需要借助 controlnet 来结合  pose 的姿态图来让 sd 生成特定动作的任务，这就是左下角的作用（在这里说下， pose 的用的是 mmpose ，OpennMMLab 牛逼！）
+人物生成好了，下一步要生成特定的动作的话，有时候语言很难描述，我们需要借助 controlnet 来结合  pose 的姿态图来让 sd 生成特定动作的任务，这就是左下角的作用
 
 3. AnimateDiff 生成视频
 
@@ -98,7 +98,7 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
   <img src="./images/comfyui-3.png" alt="workflow" >
 </p>
 
-这两块搞好之后，可以看到任务以特定的动作生成了，下面，我们加入动作，用到的算法是 Animatediff （上海人工智能实验室出的，来说一句 上海人工智能实验室牛逼！）简单的串起来，就可以了
+这两块搞好之后，可以看到任务以特定的动作生成了，下面，我们加入动作，用到的算法是 Animatediff 简单的串起来，就可以了
 
 4. 插帧提升帧率
 
