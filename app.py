@@ -396,6 +396,8 @@ def main():
     with st.form(key="add_product_form"):
         product_name_input = st.text_input(label="添加商品名称")
         heightlight_input = st.text_input(label="添加商品特性，以'、'隔开")
+        departure_place_input = st.text_input(label="发货地")
+        delivery_company_input = st.text_input(label="快递公司名称")
         product_image = st.file_uploader(label="上传商品图片", type=["png", "jpg", "jpeg", "bmp"])
         product_instruction = st.file_uploader(label="上传商品说明书", type=["md"])
         submit_button = st.form_submit_button(label="提交", disabled=WEB_CONFIGS.DISABLE_UPLOAD)
@@ -407,10 +409,19 @@ def main():
             )
 
         if submit_button:
-            update_product_info(product_name_input, heightlight_input, product_image, product_instruction)
+            update_product_info(
+                product_name_input,
+                heightlight_input,
+                product_image,
+                product_instruction,
+                departure_place_input,
+                delivery_company_input,
+            )
 
 
-def update_product_info(product_name_input, heightlight_input, product_image, product_instruction):
+def update_product_info(
+    product_name_input, heightlight_input, product_image, product_instruction, departure_place, delivery_company
+):
     """
     更新产品信息的函数。
 
@@ -419,6 +430,8 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
     - heightlight_input: 商品特性输入，字符串类型。
     - product_image: 商品图片，图像类型。
     - product_instruction: 商品说明书，文本类型。
+    - departure_place: 发货地。
+    - delivery_company: 快递公司。
 
     返回值:
     无。该函数直接操作UI状态，不返回任何值。
@@ -433,6 +446,10 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
 
     if product_image is None or product_instruction is None:
         st.error("图片和说明书不能为空")
+        return
+
+    if departure_place == "" or delivery_company == "":
+        st.error("发货地和快递公司名称不能为空")
         return
 
     # 显示上传状态，并执行上传操作
@@ -452,15 +469,6 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         with open(instruct_save_path, "wb") as file:
             file.write(product_instruction.getvalue())
 
-        st.write("生成数据库...")
-        if WEB_CONFIGS.ENABLE_RAG:
-            # 重新生成 RAG 向量数据库
-            gen_rag_db(force_gen=True)
-
-            # 重新加载 retriever
-            RAG_RETRIEVER.pop("default")
-            RAG_RETRIEVER.get(fs_id="default", config_path=WEB_CONFIGS.RAG_CONFIG_PATH, work_dir=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
-
         st.write("更新商品明细表...")
         with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
             product_info_dict = yaml.safe_load(f)
@@ -476,6 +484,8 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
                     "images": str(image_save_path),
                     "instruction": str(instruct_save_path),
                     "id": product_info_dict[max_id_key]["id"] + 1,
+                    "departure_place": departure_place,
+                    "delivery_company_name": delivery_company,
                 }
             }
         )
@@ -488,6 +498,15 @@ def update_product_info(product_name_input, heightlight_input, product_image, pr
         # 覆盖保存
         with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
             yaml.dump(product_info_dict, f, allow_unicode=True)
+
+        st.write("生成数据库...")
+        if WEB_CONFIGS.ENABLE_RAG:
+            # 重新生成 RAG 向量数据库
+            gen_rag_db(force_gen=True)
+
+            # 重新加载 retriever
+            RAG_RETRIEVER.pop("default")
+            RAG_RETRIEVER.get(fs_id="default", config_path=WEB_CONFIGS.RAG_CONFIG_PATH, work_dir=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
 
         # 更新状态
         status.update(label="添加商品成功!", state="complete", expanded=False)
