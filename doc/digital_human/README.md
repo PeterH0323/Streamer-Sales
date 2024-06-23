@@ -17,8 +17,8 @@
 - DW Pose 生成骨骼图
 - ControlNet 控制人物姿态
 - AnimateDiff 生成视频
-- 提升分辨率
 - 插帧提升帧率
+- 提升分辨率
 
 ## 环境搭建
 
