@@ -86,6 +86,9 @@ def on_btton_click(*args, **kwargs):
         st.session_state.departure_place = kwargs["departure_place"]
         st.session_state.delivery_company_name = kwargs["delivery_company_name"]
 
+        # 设置为默认数字人视频路径
+        st.session_state.digital_human_video_path = WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_PATH
+
         # # 清空语音
         # if ENABLE_TTS:
         #     for message in st.session_state.messages:
