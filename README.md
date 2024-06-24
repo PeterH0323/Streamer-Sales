@@ -128,8 +128,8 @@ license: Apache License 2.0
 <p align="center">
   <img src="doc/doc_images/demo2.png" alt="Demo" width="45%">
   <img src="doc/doc_images/demo3.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo4.png" alt="Demo" width="44.5%">
-  <img src="doc/doc_images/demo5.png" alt="Demo" width="46%">
+  <img src="doc/doc_images/demo4.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/demo5.png" alt="Demo" width="45%">
 </p>
 
 ## ⚙ Model Zoo
