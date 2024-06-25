@@ -328,7 +328,6 @@ dependencies:
       - tenacity==8.3.0
       - termcolor==2.4.0
       - terminado==0.18.1
-      - textract==1.6.5
       - threadpoolctl==3.5.0
       - tifffile==2024.5.22
       - tiktoken==0.7.0

@@ -9,7 +9,7 @@ BCEmbedding==0.1.5
 langchain==0.2.0
 langchain-community==0.2.0
 loguru==0.7.2
-textract==1.6.5
+# textract==1.6.5
 faiss-gpu==1.7.2
 
 # Train
