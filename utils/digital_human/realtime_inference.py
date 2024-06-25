@@ -243,6 +243,24 @@ class Avatar:
                 need_to_prepare = True
                 shutil.rmtree(self.avatar_path)
 
+        if need_to_prepare is False:
+            # 对文件再进行一个判断，避免中途出错导致文件没生成全
+            for prepare_file in [
+                self.full_imgs_path,
+                self.coords_path,
+                self.latents_out_path,
+                self.video_out_path,
+                self.mask_out_path,
+                self.mask_coords_path,
+                self.avatar_info_path,
+            ]:
+                if not os.path.exists(prepare_file):
+                    # 如有文件不存在，则需要重新生成
+                    print(f"Missing file {prepare_file}, will process prerpare...")
+                    need_to_prepare = True
+                    shutil.rmtree(self.avatar_path)
+                    break
+
         if need_to_prepare:
             print("*********************************")
             print(f"  creating avator: {self.avatar_id}")
@@ -443,14 +461,14 @@ def gen_digital_human_video(
 if __name__ == "__main__":
 
     data_preparation = False
-    video_path = "/root/hingwen_camp/work_dirs/tts_wavs/2024-06-05-20-48-53.wav"
+    video_path = "./work_dirs/tts_wavs/2024-06-05-20-48-53.wav"
     bbox_shift = 5
     avatar = Avatar(
         avatar_id="lelemiao", video_path=video_path, bbox_shift=bbox_shift, batch_size=4, preparation=data_preparation
     )
 
     avatar.inference(
-        audio_path=r"/root/hingwen_camp/work_dirs/tts_wavs/2024-06-05-20-48-53.wav",
+        audio_path=r"./work_dirs/tts_wavs/2024-06-05-20-48-53.wav",
         out_vid_name="avatar_1",
         fps=25,
         skip_save_images=False,
