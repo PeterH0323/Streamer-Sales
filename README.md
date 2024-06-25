@@ -37,7 +37,7 @@ license: Apache License 2.0
 
 模型用 [xtuner](https://github.com/InternLM/xtuner) 在 [InternLM2](https://github.com/InternLM/InternLM) 的基础上指令微调而来，部署集成了 LMDeploy **加速推理**🚀，支持 **ASR 语音生成文字** 🎙️，支持 **RAG 检索增强生成**📚做到可以随时更新说明书指导主播生成文案，支持 **Agent 通过网络查询快递信息** 🌐，还加入带有感情的 **TTS 文字转语音**🔊生成，最后还会**生成主播数字人视频**🦸，让主播不止于文字介绍。
 
-功能点总结：
+**功能点总结：**
 
 - 📜 主播文案一键生成
 - 🚀 KV cache + Turbomind 推理加速
