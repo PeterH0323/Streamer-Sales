@@ -10,7 +10,7 @@ from utils.web_configs import WEB_CONFIGS
 
 
 @st.cache_resource
-def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=None):  # hf awq
+def load_turbomind_model(model_dir):  # hf awq
 
     print("load model begin.")
 
@@ -29,7 +29,7 @@ def load_turbomind_model(model_dir, enable_rag=True, rag_config=None, db_path=No
 
 
 @st.cache_resource
-def load_hf_model(model_dir, enable_rag=True, rag_config=None, db_path=None):
+def load_hf_model(model_dir):
     print("load model begin.")
 
     model_dir = snapshot_download(model_dir, revision="master")
