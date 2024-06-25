@@ -9,7 +9,7 @@ from lagent.schema import ActionReturn, AgentReturn
 from lmdeploy import GenerationConfig
 
 from utils.digital_human.digital_human_worker import gen_digital_human_video_in_spinner
-from utils.tools import build_rag_prompt
+from utils.rag.rag_worker import build_rag_prompt
 from utils.tts.tts_worker import gen_tts_in_spinner
 
 from utils.agent.delivery_time_query import DeliveryTimeQueryAction  # isort:skip

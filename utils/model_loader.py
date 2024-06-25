@@ -1,3 +1,4 @@
+from .rag.rag_worker import load_rag_model
 from .asr.asr_worker import load_asr_model
 from .digital_human.realtime_inference import digital_human_preprocess
 from .infer.load_infer_model import load_hf_model, load_turbomind_model
@@ -47,6 +48,16 @@ else:
 
 
 # ==================================================================
+#                               RAG 模型
+# ==================================================================
+
+if WEB_CONFIGS.ENABLE_RAG:
+    RAG_RETRIEVER = load_rag_model()
+else:
+    RAG_RETRIEVER = None
+
+
+# ==================================================================
 #                               LLM 模型
 # ==================================================================
 
@@ -56,9 +67,4 @@ if WEB_CONFIGS.USING_LMDEPLOY:
 else:
     load_model_func = load_hf_model
 
-LLM_MODEL, LLM_TOKENIZER, RAG_RETRIEVER = load_model_func(
-    WEB_CONFIGS.LLM_MODEL_DIR,
-    enable_rag=WEB_CONFIGS.ENABLE_RAG,
-    rag_config=WEB_CONFIGS.RAG_CONFIG_PATH,
-    db_path=WEB_CONFIGS.RAG_VECTOR_DB_DIR,
-)
+LLM_MODEL, LLM_TOKENIZER = load_model_func(WEB_CONFIGS.LLM_MODEL_DIR)

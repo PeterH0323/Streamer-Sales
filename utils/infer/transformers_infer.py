@@ -9,7 +9,7 @@ from torch import nn
 from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList
 from transformers.utils import logging
 
-from utils.tools import build_rag_prompt
+from utils.rag.rag_worker import build_rag_prompt
 from utils.tts.tts_worker import gen_tts_in_spinner
 
 logger = logging.get_logger(__name__)

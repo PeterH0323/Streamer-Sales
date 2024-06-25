@@ -27,7 +27,8 @@ st.set_page_config(
 )
 
 from utils.model_loader import RAG_RETRIEVER
-from utils.tools import gen_rag_db, resize_image
+from utils.tools import resize_image
+from utils.rag.rag_worker import gen_rag_db
 from utils.web_configs import WEB_CONFIGS
 
 
