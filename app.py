@@ -27,8 +27,7 @@ st.set_page_config(
 )
 
 from utils.model_loader import RAG_RETRIEVER
-from utils.rag.feature_store import gen_vector_db
-from utils.tools import resize_image
+from utils.tools import gen_rag_db, resize_image
 from utils.web_configs import WEB_CONFIGS
 
 
@@ -301,10 +300,6 @@ def main():
     """
     print("Starting...")
 
-    if WEB_CONFIGS.ENABLE_RAG:
-        # 生成向量数据库
-        gen_rag_db()
-
     # 初始化页面跳转
     if "page_switch" not in st.session_state:
         st.session_state.page_switch = "app.py"
@@ -521,46 +516,6 @@ def update_product_info(
 
         # 刷新页面
         st.rerun()
-
-
-def gen_rag_db(force_gen=False):
-    """
-    生成向量数据库。
-
-    参数:
-    force_gen - 布尔值，当设置为 True 时，即使数据库已存在也会重新生成数据库。
-    """
-
-    # 检查数据库目录是否存在，如果存在且force_gen为False，则不执行生成操作
-    if Path(WEB_CONFIGS.RAG_VECTOR_DB_DIR).exists() and not force_gen:
-        return
-
-    if force_gen and Path(WEB_CONFIGS.RAG_VECTOR_DB_DIR).exists():
-        shutil.rmtree(WEB_CONFIGS.RAG_VECTOR_DB_DIR)
-
-    # 仅仅遍历 instructions 字段里面的文件
-    if Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).exists():
-        shutil.rmtree(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
-    Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).mkdir(exist_ok=True, parents=True)
-
-    # 读取 yaml 文件，获取所有说明书路径，并移动到 tmp 目录
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-    for _, info in product_info_dict.items():
-        shutil.copyfile(
-            info["instruction"], Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name)
-        )
-
-    print("Generating rag database, pls wait ...")
-    # 调用函数生成向量数据库
-    gen_vector_db(
-        WEB_CONFIGS.RAG_CONFIG_PATH,
-        str(Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).absolute()),
-        WEB_CONFIGS.RAG_VECTOR_DB_DIR,
-    )
-
-    # 删除过程文件
-    shutil.rmtree(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
 
 
 if __name__ == "__main__":
