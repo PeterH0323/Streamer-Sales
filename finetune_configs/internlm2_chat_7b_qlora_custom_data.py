@@ -24,7 +24,7 @@ from xtuner.utils import PROMPT_TEMPLATE
 #                          PART 1  Settings                           #
 #######################################################################
 # Model
-pretrained_model_name_or_path = '/path/to/internlm2-chat-7b'
+pretrained_model_name_or_path = 'internlm/internlm2-chat-7b' # 如果本地有可以直接使用 聚堆路径 '/path/to/internlm/internlm2-chat-7b'
 use_varlen_attn = False
 
 # Data

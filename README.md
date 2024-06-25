@@ -500,8 +500,8 @@ python merge_dataset.py dataset/gen_dataset/trainval_dataset/response dataset/ge
 
 ```diff
 # Model
-- pretrained_model_name_or_path = 'internlm/internlm2-7b'
-+ pretrained_model_name_or_path = '/path/to/internlm/internlm2-7b' # 这步可选，如果事先下载好了模型可以直接使用绝对路径
+- pretrained_model_name_or_path = 'internlm/internlm2-chat-7b'
++ pretrained_model_name_or_path = '/path/to/internlm/internlm2-chat-7b' # 这步可选，如果事先下载好了模型可以直接使用绝对路径
 
 # Data
 - data_path = 'timdettmers/openassistant-guanaco'
