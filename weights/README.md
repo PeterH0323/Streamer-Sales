@@ -16,7 +16,7 @@
 | TTS | pretrain | [hf](https://huggingface.co/lj1995/GPT-SoVITS/tree/main) | gpt_sovits_weights/pretrain |
 | TTS | star | [hf](https://huggingface.co/baicai1145/GPT-SoVITS-STAR/blob/main/%E8%89%BE%E4%B8%9D%E5%A6%B2.zip) | gpt_sovits_weights/star |
 | LLM | streamer-sales-lelemiao-7b | [modelscope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | llm_weights/HinGwenWoong/streamer-sales-lelemiao-7b |
-| RAG | BCE | [modelscope](https://modelscope.cn/models/maidalun/bce-embedding-base_v1/files) <br/> [modelscope](https://modelscope.cn/models/maidalun/bce-reranker-base_v1/files)| rag_weights/maidalun/bce-embedding-base_v1 <br/> rag_weights/maidalun/bce-reranker-base_v1 |
+| RAG | BCE | [modelscope](https://modelscope.cn/models/maidalun/bce-embedding-base_v1/files) <br/><br/> [modelscope](https://modelscope.cn/models/maidalun/bce-reranker-base_v1/files)| rag_weights/maidalun/bce-embedding-base_v1 <br/><br/> rag_weights/maidalun/bce-reranker-base_v1 |
 
 
 最终文件结构如下：
