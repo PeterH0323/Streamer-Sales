@@ -8,7 +8,7 @@
 | ASR | fsmn-vad | [modelscope](https://modelscope.cn/models/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch/files) | asr_weights/iic/speech_fsmn_vad_zh-cn-16k-common-pytorch |
 | ASR | ct-punc | [modelscope](https://modelscope.cn/models/iic/punc_ct-transformer_cn-en-common-vocab471067-large/files) | asr_weights/iic/punc_ct-transformer_cn-en-common-vocab471067-large |
 | 数字人 | dwpose | [hf](https://hf-mirror.com/yzd-v/DWPose/blob/main/dw-ll_ucoco_384.pth) | digital_human_weights/dwpose/dw-ll_ucoco_384.pth |
-| 数字人 | face-alignment | [adrianbulat](https://www.adrianbulat.com/downloads/python-fan/s3fd-619a316812.pth) </br></br> [openmmlab](https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_l_8xb32-300e_coco/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth) | digital_human_weights/face-alignment/s3fd-619a316812.pth </br></br> digital_human_weights/face-alignment/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth |
+| 数字人 | face-alignment | [adrianbulat](https://www.adrianbulat.com/downloads/python-fan/s3fd-619a316812.pth) | digital_human_weights/face-alignment/s3fd-619a316812.pth |
 | 数字人 | face-parse-bisent | [hf](https://hf-mirror.com/ManyOtherFunctions/face-parse-bisent/blob/main/79999_iter.pth) </br></br> [hf](https://hf-mirror.com/ManyOtherFunctions/face-parse-bisent/blob/main/resnet18-5c106cde.pth) | digital_human_weights/face-parse-bisent/79999_iter.pth </br></br> digital_human_weights/face-parse-bisent/resnet18-5c106cde.pth|
 | 数字人 | musetalk | [hf](https://hf-mirror.com/TMElyralab/MuseTalk/tree/main) | digital_human_weights/musetalk/ |
 | 数字人 | sd-vae-ft-mse | [hf](https://hf-mirror.com/stabilityai/sd-vae-ft-mse/tree/main) | digital_human_weights/sd-vae-ft-mse/ |
