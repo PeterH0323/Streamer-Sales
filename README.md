@@ -163,6 +163,8 @@ export WEATHER_API_KEY="${天气 API key}"
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
+**注意**：如果您发现下载权重经常 timeout ，参考 [权重文件结构](./weights/README.md) 文档，文档内已有超链接可访问源模型路径，可进行自行下载
+
 ## 🖥️ 配置需求
 
 1. 微调
