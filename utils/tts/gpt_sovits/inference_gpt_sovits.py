@@ -30,6 +30,7 @@ from utils.tts.gpt_sovits.module.models import SynthesizerTrn
 from utils.tts.gpt_sovits.text import cleaned_text_to_sequence
 from utils.tts.gpt_sovits.text.cleaner import clean_text
 from utils.tts.gpt_sovits.utils import load_audio
+from utils.web_configs import WEB_CONFIGS
 
 symbol_splits = {
     "，",
@@ -444,13 +445,13 @@ class HandlerTTS:
 
 
 @st.cache_resource
-def get_tts_model(voice_character_name="艾丝妲", save_dir="./work_dirs/gpt_sovits_weights/star", is_half=True):
+def get_tts_model(voice_character_name="艾丝妲", is_half=True):
 
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
     from huggingface_hub import hf_hub_download, snapshot_download
 
     # https://huggingface.co/baicai1145/GPT-SoVITS-STAR/tree/main
-    tts_star_model_root = Path(save_dir)
+    tts_star_model_root = Path(WEB_CONFIGS.TTS_MODEL_DIR).joinpath("star")
 
     gpt_path, sovits_path = get_gpt_and_sovits_model_path(voice_character_name, tts_star_model_root)
 
@@ -478,7 +479,7 @@ def get_tts_model(voice_character_name="艾丝妲", save_dir="./work_dirs/gpt_so
     ref_wav_path = Path(tts_star_model_root).joinpath("参考音频", inf_name)
 
     # https://huggingface.co/lj1995/GPT-SoVITS/tree/main
-    tts_model_dir = snapshot_download(repo_id="lj1995/GPT-SoVITS", local_dir="./work_dirs/gpt_sovits_weights/pretrain")
+    tts_model_dir = snapshot_download(repo_id="lj1995/GPT-SoVITS", local_dir=Path(WEB_CONFIGS.TTS_MODEL_DIR).joinpath("pretrain"))
     cnhubert_base_path = os.path.join(tts_model_dir, "chinese-hubert-base")
     bert_path = os.path.join(tts_model_dir, "chinese-roberta-wwm-ext-large")
 

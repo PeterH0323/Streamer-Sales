@@ -1,9 +1,20 @@
 from .rag.rag_worker import load_rag_model
 from .asr.asr_worker import load_asr_model
 from .digital_human.realtime_inference import digital_human_preprocess
-from .infer.load_infer_model import load_hf_model, load_turbomind_model
+from .infer.load_infer_model import load_turbomind_model
 from .tts.gpt_sovits.inference_gpt_sovits import get_tts_model
 from .web_configs import WEB_CONFIGS
+
+
+# ==================================================================
+#                               RAG 模型
+# ==================================================================
+
+if WEB_CONFIGS.ENABLE_RAG:
+    RAG_RETRIEVER = load_rag_model()
+else:
+    RAG_RETRIEVER = None
+
 
 # ==================================================================
 #                               TTS 模型
@@ -48,23 +59,8 @@ else:
 
 
 # ==================================================================
-#                               RAG 模型
-# ==================================================================
-
-if WEB_CONFIGS.ENABLE_RAG:
-    RAG_RETRIEVER = load_rag_model()
-else:
-    RAG_RETRIEVER = None
-
-
-# ==================================================================
 #                               LLM 模型
 # ==================================================================
 
 # 加载 LLM 模型
-if WEB_CONFIGS.USING_LMDEPLOY:
-    load_model_func = load_turbomind_model
-else:
-    load_model_func = load_hf_model
-
-LLM_MODEL, LLM_TOKENIZER = load_model_func(WEB_CONFIGS.LLM_MODEL_DIR)
+LLM_MODEL = load_turbomind_model(WEB_CONFIGS.LLM_MODEL_NAME)

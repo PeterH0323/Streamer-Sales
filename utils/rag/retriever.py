@@ -14,6 +14,8 @@ from loguru import logger
 from modelscope import snapshot_download
 from sklearn.metrics import precision_recall_curve
 
+from utils.web_configs import WEB_CONFIGS
+
 try:
     from utils.rag.file_operation import FileOperation
 except:
@@ -192,8 +194,8 @@ class CacheRetriever:
             embedding_model_path = config["embedding_model_path"]
             reranker_model_path = config["reranker_model_path"]
 
-        embedding_model_path = snapshot_download(embedding_model_path)
-        reranker_model_path = snapshot_download(reranker_model_path)
+        embedding_model_path = snapshot_download(embedding_model_path, cache_dir=WEB_CONFIGS.RAG_MODEL_DIR)
+        reranker_model_path = snapshot_download(reranker_model_path, cache_dir=WEB_CONFIGS.RAG_MODEL_DIR)
 
         # load text2vec and rerank model
         logger.info("loading test2vec and rerank models")

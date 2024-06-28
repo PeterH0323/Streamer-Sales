@@ -1,10 +1,29 @@
 import datetime
 from funasr import AutoModel
 import streamlit as st
+from utils.web_configs import WEB_CONFIGS
+from modelscope import snapshot_download
+from modelscope.utils.constant import Invoke, ThirdParty
+from funasr.download.name_maps_from_hub import name_maps_ms as NAME_MAPS_MS
 
 
 @st.cache_resource
 def load_asr_model():
+
+    # 模型下载
+    model_path_info = dict()
+    for model_name in ["paraformer-zh", "fsmn-vad", "ct-punc"]:
+        print(f"downloading asr model : {NAME_MAPS_MS[model_name]}")
+        mode_dir = snapshot_download(
+            NAME_MAPS_MS[model_name],
+            revision="master",
+            user_agent={Invoke.KEY: Invoke.PIPELINE, ThirdParty.KEY: "funasr"},
+            cache_dir=WEB_CONFIGS.ASR_MODEL_DIR,
+        )
+        model_path_info[model_name] = mode_dir
+        NAME_MAPS_MS[model_name] = mode_dir # 更新
+
+    print(f"ASR model path info = {model_path_info}")
     # paraformer-zh is a multi-functional asr model
     # use vad, punc, spk or not as you need
     model = AutoModel(
@@ -12,6 +31,9 @@ def load_asr_model():
         vad_model="fsmn-vad",  # 语音端点检测，实时
         punc_model="ct-punc",  # 标点恢复
         # spk_model="cam++" # 说话人确认/分割
+        model_path=model_path_info["paraformer-zh"],
+        vad_kwargs={"model_path": model_path_info["fsmn-vad"]},
+        punc_kwargs={"model_path": model_path_info["ct-punc"]},
     )
     return model
 

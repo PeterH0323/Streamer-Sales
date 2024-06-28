@@ -9,19 +9,20 @@ class WebConfigs:
     """
 
     # ==================================================================
-    #                               模型配置
+    #                             LLM 模型配置
     # ==================================================================
     if os.getenv("USING_4BIT") == "true":
-        LLM_MODEL_DIR: str = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
+        LLM_MODEL_NAME: str = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
     else:
-        LLM_MODEL_DIR: str = "HinGwenWoong/streamer-sales-lelemiao-7b"
+        LLM_MODEL_NAME: str = "HinGwenWoong/streamer-sales-lelemiao-7b"
 
     SALES_NAME: str = "乐乐喵"  # 启动的角色名
+    
+    LLM_MODEL_DIR: str = r"./weigths/llm_weights/"
 
     # ==================================================================
     #                               组件配置
     # ==================================================================
-    USING_LMDEPLOY: bool = True  # True 使用 LMDeploy 作为推理后端加速推理，False 使用原生 HF 进行推理用于初步验证模型
     ENABLE_RAG: bool = True  # True 启用 RAG 检索增强，False 不启用
     ENABLE_TTS: bool = True  # True 启动 tts，False 不启用
     ENABLE_DIGITAL_HUMAN: bool = True  # True 启动 数字人，False 不启用
@@ -63,17 +64,19 @@ class WebConfigs:
     RAG_CONFIG_PATH: str = r"./configs/rag_config.yaml"
     RAG_VECTOR_DB_DIR: str = r"./work_dirs/instruction_db"
     PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP: str = r"./work_dirs/instructions_gen_db_tmp"
+    RAG_MODEL_DIR: str = r"./weigths/rag_weights/"
 
     # ==================================================================
     #                               TTS 配置
     # ==================================================================
     TTS_WAV_GEN_PATH: str = r"./work_dirs/tts_wavs"
+    TTS_MODEL_DIR: str = r"./weigths/gpt_sovits_weights/"
 
     # ==================================================================
     #                             数字人 配置
     # ==================================================================
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
-    DIGITAL_HUMAN_MODEL_DIR: str = r"./work_dirs/digital_human_weights/"
+    DIGITAL_HUMAN_MODEL_DIR: str = r"./weigths/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
     DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
     DIGITAL_HUMAN_FPS: str = 25
@@ -88,7 +91,7 @@ class WebConfigs:
     #                              ASR 配置
     # ==================================================================
     ASR_WAV_SAVE_PATH: str = r"./work_dirs/asr_wavs"
-
+    ASR_MODEL_DIR: str = r"./weigths/asr_weights/"
 
 # 实例化
 WEB_CONFIGS = WebConfigs()
