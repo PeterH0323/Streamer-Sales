@@ -26,11 +26,11 @@ st.set_page_config(
     },
 )
 
-from utils.model_loader import RAG_RETRIEVER
 from utils.tools import resize_image
 from utils.rag.rag_worker import gen_rag_db
 from utils.web_configs import WEB_CONFIGS
 
+from utils.model_loader import RAG_RETRIEVER  # isort:skip
 
 @st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
@@ -290,14 +290,6 @@ def init_asr():
 def main():
     """
     初始化页面配置，加载模型，处理页面跳转，并展示商品信息。
-
-    参数:
-    - model_dir: 模型目录路径，用于加载指定的模型。
-    - using_lmdeploy: 布尔值，指示是否使用lmdeploy加载模型。
-    - enable_rag: 布尔值，指示是否启用RAG（Retrieve And Generate）模型。
-
-    返回值:
-    无
     """
     print("Starting...")
 

@@ -27,8 +27,7 @@ from audiorecorder import audiorecorder
 from utils.asr.asr_worker import process_asr
 from utils.digital_human.digital_human_worker import show_video
 from utils.infer.lmdeploy_infer import get_turbomind_response
-from utils.infer.transformers_infer import get_hf_response
-from utils.model_loader import ASR_HANDLER, LLM_MODEL, LLM_TOKENIZER, RAG_RETRIEVER
+from utils.model_loader import ASR_HANDLER, LLM_MODEL, RAG_RETRIEVER
 from utils.tools import resize_image
 from utils.web_configs import WEB_CONFIGS
 
@@ -150,7 +149,7 @@ def init_sidebar():
     return asr_text
 
 
-def init_message_block(meta_instruction, get_response_func, user_avator, robot_avator):
+def init_message_block(meta_instruction, user_avator, robot_avator):
 
     # 在应用重新运行时显示聊天历史消息
     for message in st.session_state.messages:
@@ -167,13 +166,12 @@ def init_message_block(meta_instruction, get_response_func, user_avator, robot_a
     # 如果聊天历史为空，则显示产品介绍
     if len(st.session_state.messages) == 0:
         # 直接产品介绍
-        get_response_func(
+        get_turbomind_response(
             st.session_state.first_input,
             meta_instruction,
             user_avator,
             robot_avator,
             LLM_MODEL,
-            LLM_TOKENIZER,
             session_messages=st.session_state.messages,
             add_session_msg=False,
             first_input_str="",
@@ -185,18 +183,17 @@ def init_message_block(meta_instruction, get_response_func, user_avator, robot_a
         st.session_state.button_msg = "x-x"
 
 
-def process_message(get_response_func, user_avator, prompt, meta_instruction, robot_avator):
+def process_message(user_avator, prompt, meta_instruction, robot_avator):
     # Display user message in chat message container
     with st.chat_message("user", avatar=user_avator):
         st.markdown(prompt)
 
-    get_response_func(
+    get_turbomind_response(
         prompt,
         meta_instruction,
         user_avator,
         robot_avator,
         LLM_MODEL,
-        LLM_TOKENIZER,
         session_messages=st.session_state.messages,
         add_session_msg=True,
         first_input_str=st.session_state.first_input,
@@ -226,12 +223,6 @@ def main(meta_instruction):
     # 初始化侧边栏
     asr_text = init_sidebar()
 
-    # 根据是否使用lmdeploy选择响应函数
-    if WEB_CONFIGS.USING_LMDEPLOY:
-        get_response_func = get_turbomind_response
-    else:
-        get_response_func = get_hf_response
-
     # 初始化聊天历史记录
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -249,9 +240,9 @@ def main(meta_instruction):
                     show_video(st.session_state.digital_human_video_path, autoplay=True, loop=True, muted=True)
 
             with message_col:
-                init_message_block(meta_instruction, get_response_func, WEB_CONFIGS.USER_AVATOR, WEB_CONFIGS.ROBOT_AVATOR)
+                init_message_block(meta_instruction, WEB_CONFIGS.USER_AVATOR, WEB_CONFIGS.ROBOT_AVATOR)
     else:
-        init_message_block(meta_instruction, get_response_func, WEB_CONFIGS.USER_AVATOR, WEB_CONFIGS.ROBOT_AVATOR)
+        init_message_block(meta_instruction, WEB_CONFIGS.USER_AVATOR, WEB_CONFIGS.ROBOT_AVATOR)
 
     # 输入框显示提示信息
     hint_msg = "你好，可以问我任何关于产品的问题"
@@ -270,11 +261,11 @@ def main(meta_instruction):
     if prompt:
 
         if message_col is None:
-            process_message(get_response_func, WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction, WEB_CONFIGS.ROBOT_AVATOR)
+            process_message(WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction, WEB_CONFIGS.ROBOT_AVATOR)
         else:
             # 数字人启动，页面会分块，放入信息块中
             with message_col:
-                process_message(get_response_func, WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction, WEB_CONFIGS.ROBOT_AVATOR)
+                process_message(WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction, WEB_CONFIGS.ROBOT_AVATOR)
 
 
 # st.sidebar.page_link("app.py", label="商品页")
