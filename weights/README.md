@@ -22,7 +22,7 @@
 最终文件结构如下：
 
 ```bash
-./weigths
+./weights
 |-- asr_weights
 |   |-- iic
 |   |   |-- punc_ct-transformer_cn-en-common-vocab471067-large

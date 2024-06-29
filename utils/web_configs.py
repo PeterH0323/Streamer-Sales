@@ -18,7 +18,7 @@ class WebConfigs:
 
     SALES_NAME: str = "乐乐喵"  # 启动的角色名
     
-    LLM_MODEL_DIR: str = r"./weigths/llm_weights/"
+    LLM_MODEL_DIR: str = r"./weights/llm_weights/"
 
     # ==================================================================
     #                               组件配置
@@ -64,19 +64,19 @@ class WebConfigs:
     RAG_CONFIG_PATH: str = r"./configs/rag_config.yaml"
     RAG_VECTOR_DB_DIR: str = r"./work_dirs/instruction_db"
     PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP: str = r"./work_dirs/instructions_gen_db_tmp"
-    RAG_MODEL_DIR: str = r"./weigths/rag_weights/"
+    RAG_MODEL_DIR: str = r"./weights/rag_weights/"
 
     # ==================================================================
     #                               TTS 配置
     # ==================================================================
     TTS_WAV_GEN_PATH: str = r"./work_dirs/tts_wavs"
-    TTS_MODEL_DIR: str = r"./weigths/gpt_sovits_weights/"
+    TTS_MODEL_DIR: str = r"./weights/gpt_sovits_weights/"
 
     # ==================================================================
     #                             数字人 配置
     # ==================================================================
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
-    DIGITAL_HUMAN_MODEL_DIR: str = r"./weigths/digital_human_weights/"
+    DIGITAL_HUMAN_MODEL_DIR: str = r"./weights/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
     DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
     DIGITAL_HUMAN_FPS: str = 25
@@ -91,7 +91,7 @@ class WebConfigs:
     #                              ASR 配置
     # ==================================================================
     ASR_WAV_SAVE_PATH: str = r"./work_dirs/asr_wavs"
-    ASR_MODEL_DIR: str = r"./weigths/asr_weights/"
+    ASR_MODEL_DIR: str = r"./weights/asr_weights/"
 
 # 实例化
 WEB_CONFIGS = WebConfigs()
