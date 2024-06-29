@@ -160,7 +160,6 @@ def get_turbomind_response(
     user_avator,
     robot_avator,
     model_pipe,
-    tokenizer,
     session_messages,
     add_session_msg=True,
     first_input_str="",
