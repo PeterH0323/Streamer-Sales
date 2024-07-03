@@ -167,7 +167,7 @@ def make_product_container(product_name, product_info, image_height, each_card_o
             )
 
 
-def delete_old_files(directory, limit_time_s=60 * 60 * 1):
+def delete_old_files(directory, limit_time_s=60 * 60 * 5):
     """
     删除指定目录下超过一定时间的文件。
 

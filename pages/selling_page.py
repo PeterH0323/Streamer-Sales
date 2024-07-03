@@ -9,6 +9,8 @@ from pathlib import Path
 
 import streamlit as st
 
+from utils.web_configs import WEB_CONFIGS
+
 # 设置页面配置，包括标题、图标、布局和菜单项
 st.set_page_config(
     page_title="Streamer-Sales 销冠",
@@ -29,7 +31,6 @@ from utils.digital_human.digital_human_worker import show_video
 from utils.infer.lmdeploy_infer import get_turbomind_response
 from utils.model_loader import ASR_HANDLER, LLM_MODEL, RAG_RETRIEVER
 from utils.tools import resize_image
-from utils.web_configs import WEB_CONFIGS
 
 
 def on_btn_click(*args, **kwargs):
