@@ -17,21 +17,6 @@ else:
 
 
 # ==================================================================
-#                               TTS 模型
-# ==================================================================
-
-if WEB_CONFIGS.ENABLE_TTS:
-    # samber
-    # from utils.tts.sambert_hifigan.tts_sambert_hifigan import get_tts_model
-    # TTS_HANDLER = get_tts_model()
-
-    # gpt_sovits
-    TTS_HANDLER = get_tts_model()
-else:
-    TTS_HANDLER = None
-
-
-# ==================================================================
 #                             数字人 模型
 # ==================================================================
 
@@ -46,6 +31,21 @@ if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
     )
 else:
     DIGITAL_HUMAN_HANDLER = None
+
+
+# ==================================================================
+#                               TTS 模型
+# ==================================================================
+
+if WEB_CONFIGS.ENABLE_TTS:
+    # samber
+    # from utils.tts.sambert_hifigan.tts_sambert_hifigan import get_tts_model
+    # TTS_HANDLER = get_tts_model()
+
+    # gpt_sovits
+    TTS_HANDLER = get_tts_model()
+else:
+    TTS_HANDLER = None
 
 
 # ==================================================================
