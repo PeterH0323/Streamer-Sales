@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 import glob
 import json
 import os
@@ -338,7 +339,7 @@ class Avatar:
 
         torch.save(self.input_latent_list_cycle, os.path.join(self.latents_out_path))
 
-    def process_frames(self, res_frame_queue, video_len, skip_save_images):
+    def process_frames(self, res_frame_queue, video_len, skip_save_images, save_dir_name):
         print(video_len)
         while True:
             if self.idx >= video_len - 1:
@@ -361,11 +362,14 @@ class Avatar:
             combine_frame = get_image_blending(ori_frame, res_frame, bbox, mask, mask_crop_box)
 
             if skip_save_images is False:
-                cv2.imwrite(f"{self.avatar_path}/tmp/{str(self.idx).zfill(8)}.png", combine_frame)
+                cv2.imwrite(f"{self.avatar_path}/{save_dir_name}/{str(self.idx).zfill(8)}.png", combine_frame)
             self.idx = self.idx + 1
 
     def inference(self, audio_path, output_vid, fps, skip_save_images=False):
-        os.makedirs(self.avatar_path + "/tmp", exist_ok=True)
+
+        tmp_tag = "tmp_" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+
+        os.makedirs(self.avatar_path + f"/{tmp_tag}", exist_ok=True)
         print("start inference")
         ############################################## extract audio feature ##############################################
         start_time = time.time()
@@ -377,7 +381,9 @@ class Avatar:
         res_frame_queue = queue.Queue()
         self.idx = 0
         # # Create a sub-thread and start it
-        process_thread = threading.Thread(target=self.process_frames, args=(res_frame_queue, video_num, skip_save_images))
+        process_thread = threading.Thread(
+            target=self.process_frames, args=(res_frame_queue, video_num, skip_save_images, tmp_tag)
+        )
         process_thread.start()
 
         gen = datagen(whisper_chunks, self.input_latent_list_cycle, self.batch_size)
@@ -403,17 +409,17 @@ class Avatar:
 
         print("Total process time of {} frames including saving images = {}s".format(video_num, time.time() - start_time))
 
-        cmd_img2video = f"ffmpeg -y -v warning -r {fps} -f image2 -i {self.avatar_path}/tmp/%08d.png -vcodec libx264 -vf format=rgb24,scale=out_color_matrix=bt709,format=yuv420p -crf 18 {self.avatar_path}/temp.mp4"
+        cmd_img2video = f"ffmpeg -y -v warning -r {fps} -f image2 -i {self.avatar_path}/{tmp_tag}/%08d.png -vcodec libx264 -vf format=rgb24,scale=out_color_matrix=bt709,format=yuv420p -crf 18 {self.avatar_path}/{tmp_tag}.mp4"
         print(cmd_img2video)
         os.system(cmd_img2video)
 
         # output_vid = os.path.join(self.video_out_path, out_vid_name + ".mp4")  # on
-        cmd_combine_audio = f"ffmpeg -y -v warning -i {audio_path} -i {self.avatar_path}/temp.mp4 {output_vid}"
+        cmd_combine_audio = f"ffmpeg -y -v warning -i {audio_path} -i {self.avatar_path}/{tmp_tag}.mp4 {output_vid}"
         print(cmd_combine_audio)
         os.system(cmd_combine_audio)
 
-        os.remove(f"{self.avatar_path}/temp.mp4")
-        shutil.rmtree(f"{self.avatar_path}/tmp")
+        os.remove(f"{self.avatar_path}/{tmp_tag}.mp4")
+        shutil.rmtree(f"{self.avatar_path}/{tmp_tag}")
         print(f"result is save to {output_vid}")
 
         return str(output_vid)
