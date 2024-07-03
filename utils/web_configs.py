@@ -26,8 +26,8 @@ class WebConfigs:
     ENABLE_RAG: bool = True  # True 启用 RAG 检索增强，False 不启用
     ENABLE_TTS: bool = True  # True 启动 tts，False 不启用
     ENABLE_DIGITAL_HUMAN: bool = True  # True 启动 数字人，False 不启用
-    ENABLE_AGENT: bool = True  # True 启动 Agent，False 不启用
-    ENABLE_ASR: bool = True  # True 启动 语音转文字，False 不启用
+    ENABLE_AGENT: bool = os.environ.get("ENABLE_AGENT", 'true') == 'true'  # True 启动 Agent，False 不启用
+    ENABLE_ASR: bool = os.environ.get("ENABLE_ASR", 'true') == 'true'  # True 启动 语音转文字，False 不启用
 
     DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 

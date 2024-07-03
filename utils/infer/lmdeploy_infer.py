@@ -12,7 +12,6 @@ from utils.digital_human.digital_human_worker import gen_digital_human_video_in_
 from utils.rag.rag_worker import build_rag_prompt
 from utils.tts.tts_worker import gen_tts_in_spinner
 
-from utils.agent.delivery_time_query import DeliveryTimeQueryAction  # isort:skip
 
 
 def prepare_generation_config(skip_special_tokens=True):
@@ -42,6 +41,9 @@ def combine_history(prompt, meta_instruction, history_msg=None, first_input_str=
 
 @st.cache_resource
 def init_handlers(departure_place, delivery_company_name):
+    
+    from utils.agent.delivery_time_query import DeliveryTimeQueryAction  # isort:skip
+
     META_CN = "当开启工具以及代码时，根据需求选择合适的工具进行调用"
 
     INTERPRETER_CN = (
