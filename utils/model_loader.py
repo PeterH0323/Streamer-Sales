@@ -1,19 +1,10 @@
+from .web_configs import WEB_CONFIGS
+
 from .rag.rag_worker import load_rag_model
 from .asr.asr_worker import load_asr_model
 from .digital_human.realtime_inference import digital_human_preprocess
 from .infer.load_infer_model import load_turbomind_model
 from .tts.gpt_sovits.inference_gpt_sovits import get_tts_model
-from .web_configs import WEB_CONFIGS
-
-
-# ==================================================================
-#                               RAG 模型
-# ==================================================================
-
-if WEB_CONFIGS.ENABLE_RAG:
-    RAG_RETRIEVER = load_rag_model()
-else:
-    RAG_RETRIEVER = None
 
 
 # ==================================================================
@@ -31,6 +22,16 @@ if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
     )
 else:
     DIGITAL_HUMAN_HANDLER = None
+
+
+# ==================================================================
+#                               RAG 模型
+# ==================================================================
+
+if WEB_CONFIGS.ENABLE_RAG:
+    RAG_RETRIEVER = load_rag_model()
+else:
+    RAG_RETRIEVER = None
 
 
 # ==================================================================

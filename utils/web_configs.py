@@ -17,7 +17,7 @@ class WebConfigs:
         LLM_MODEL_NAME: str = "HinGwenWoong/streamer-sales-lelemiao-7b"
 
     SALES_NAME: str = "乐乐喵"  # 启动的角色名
-    
+
     LLM_MODEL_DIR: str = r"./weights/llm_weights/"
 
     # ==================================================================
@@ -26,12 +26,14 @@ class WebConfigs:
     ENABLE_RAG: bool = True  # True 启用 RAG 检索增强，False 不启用
     ENABLE_TTS: bool = True  # True 启动 tts，False 不启用
     ENABLE_DIGITAL_HUMAN: bool = True  # True 启动 数字人，False 不启用
-    ENABLE_AGENT: bool = os.environ.get("ENABLE_AGENT", 'true') == 'true'  # True 启动 Agent，False 不启用
-    ENABLE_ASR: bool = os.environ.get("ENABLE_ASR", 'true') == 'true'  # True 启动 语音转文字，False 不启用
+    ENABLE_AGENT: bool = os.environ.get("ENABLE_AGENT", "true") == "true"  # True 启动 Agent，False 不启用
+    ENABLE_ASR: bool = os.environ.get("ENABLE_ASR", "true") == "true"  # True 启动 语音转文字，False 不启用
 
     DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 
-    CACHE_MAX_ENTRY_COUNT: float = float(os.environ.get("KV_CACHE", 0.1))  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
+    CACHE_MAX_ENTRY_COUNT: float = float(
+        os.environ.get("KV_CACHE", 0.1)
+    )  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
 
     # ==================================================================
     #                               页面配置
@@ -92,6 +94,7 @@ class WebConfigs:
     # ==================================================================
     ASR_WAV_SAVE_PATH: str = r"./work_dirs/asr_wavs"
     ASR_MODEL_DIR: str = r"./weights/asr_weights/"
+
 
 # 实例化
 WEB_CONFIGS = WebConfigs()
