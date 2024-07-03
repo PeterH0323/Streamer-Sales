@@ -13,6 +13,8 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
+from utils.web_configs import WEB_CONFIGS
+
 # 初始化 Streamlit 页面配置
 st.set_page_config(
     page_title="Streamer-Sales 销冠",
@@ -25,12 +27,11 @@ st.set_page_config(
         "About": "# Streamer-Sales LLM 销冠--卖货主播大模型",
     },
 )
-
-from utils.tools import resize_image
 from utils.rag.rag_worker import gen_rag_db
-from utils.web_configs import WEB_CONFIGS
+from utils.tools import resize_image
 
 from utils.model_loader import RAG_RETRIEVER  # isort:skip
+
 
 @st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
