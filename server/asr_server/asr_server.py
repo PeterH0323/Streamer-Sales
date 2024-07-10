@@ -25,7 +25,7 @@ class ASRItem(BaseModel):
     wav_path: str  # wav 文件路径
 
 
-@app.get("/")
+@app.get("/asr")
 async def get_asr(asr_item: ASRItem):
     # 语音转文字
     result = ""
