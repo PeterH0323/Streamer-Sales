@@ -1,27 +1,26 @@
 import asyncio
 import json
 import multiprocessing
-from pathlib import Path
 import shutil
-from typing import Dict, List
 import wave
+from pathlib import Path
+from typing import Dict, List
 
 import requests
-from tqdm import tqdm
 import uvicorn
+import yaml
 from fastapi import FastAPI, HTTPException, Response
+from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
 from pydantic import BaseModel
 from sse_starlette import EventSourceResponse
-import yaml
+from tqdm import tqdm
 
-from utils.agent.agent_worker import get_agent_result
-from utils.rag.rag_worker import build_rag_prompt, RAG_RETRIEVER, rebuild_rag_db
-from utils.tools import SYMBOL_SPLITS, make_text_chunk
-from utils.web_configs import API_CONFIG, WEB_CONFIGS
-from lmdeploy.serve.openai.api_client import APIClient
+from ..tts_server.tools import SYMBOL_SPLITS, make_text_chunk
+from ..web_configs import API_CONFIG, WEB_CONFIGS
 
-# from moviepy.editor import VideoFileClip, concatenate_videoclips
+from .modules.agent.agent_worker import get_agent_result
+from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt, rebuild_rag_db
 
 
 class ChatGenConfig(BaseModel):
@@ -267,7 +266,12 @@ async def streamer_sales_process(chat_item: ChatItem):
         logger.info(f"Generating digital human...")
         DIGITAL_HUMAN_QUENE.put(tts_request_dict)
         while True:
-            if Path(WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_OUTPUT_PATH).joinpath(Path(tts_save_path).stem + ".mp4").with_suffix(".txt").exists():
+            if (
+                Path(WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_OUTPUT_PATH)
+                .joinpath(Path(tts_save_path).stem + ".mp4")
+                .with_suffix(".txt")
+                .exists()
+            ):
                 break
             yield json.dumps(
                 {

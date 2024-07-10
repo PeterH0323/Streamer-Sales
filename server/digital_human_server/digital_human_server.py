@@ -3,7 +3,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 
-from utils.digital_human.digital_human_worker import gen_digital_human_video_in_spinner
+from .modules.digital_human_worker import gen_digital_human_video_in_spinner
 
 
 app = FastAPI()

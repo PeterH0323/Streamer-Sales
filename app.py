@@ -14,7 +14,7 @@ import streamlit as st
 import yaml
 
 from utils.api import upload_product_api
-from utils.web_configs import WEB_CONFIGS
+from server.web_configs import WEB_CONFIGS
 
 # 初始化 Streamlit 页面配置
 st.set_page_config(
@@ -465,7 +465,7 @@ def update_product_info(
 
         st.write("更新商品数据库...")
         upload_product_api(
-            product_name_input, heightlight_input, image_save_path, instruct_save_path, departure_place, delivery_company
+            product_name_input, heightlight_input, str(image_save_path), str(instruct_save_path), departure_place, delivery_company
         )
 
         # 更新状态

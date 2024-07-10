@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
 
-from utils.web_configs import WEB_CONFIGS
-from utils.asr.asr_worker import load_asr_model, process_asr
+from ..web_configs import WEB_CONFIGS
+from .asr_worker import load_asr_model, process_asr
 
 # router = APIRouter(
 #     prefix="/asr",

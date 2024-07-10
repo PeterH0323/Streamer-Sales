@@ -1,3 +1,4 @@
+
 class HParams:  # Fix gpt-sovits torch.load 报缺少模块的问题
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
@@ -28,3 +29,4 @@ class HParams:  # Fix gpt-sovits torch.load 报缺少模块的问题
 
     def __repr__(self):
         return self.__dict__.__repr__()
+

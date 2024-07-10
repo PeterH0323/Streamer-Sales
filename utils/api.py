@@ -6,7 +6,7 @@ import uuid
 import requests
 import streamlit as st
 from utils.tools import combine_history, show_audio, show_video
-from utils.web_configs import WEB_CONFIGS, API_CONFIG
+from server.web_configs import WEB_CONFIGS, API_CONFIG
 
 
 def get_asr_api(wav_path, user_id="123"):
@@ -19,7 +19,7 @@ def get_asr_api(wav_path, user_id="123"):
 
     print(req_data)
 
-    res = requests.get(API_CONFIG.ASR_URL, json=req_data)
+    res = requests.get(API_CONFIG.ASR_URL, json=req_data).json()
     return res["result"]
 
 
@@ -89,6 +89,8 @@ def get_chat_api(
             try:
                 item_json = json.loads(item)
                 cur_response = item_json["data"]
+                # step_name = item_json["step"]
+                # end_flag = item_json["end_flag"]
 
             except Exception as e:
                 print(f"Got error msg = {item}")
@@ -104,7 +106,6 @@ def get_chat_api(
             st.toast("生成语音成功!")
 
         if enable_digital_human:
-
             # 生成 数字人视频
             dg_vid_path = str(Path(WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_OUTPUT_PATH).joinpath(request_id + ".mp4"))
             st.session_state.digital_human_video_path = dg_vid_path
@@ -122,7 +123,6 @@ def get_chat_api(
                 "wav": wav_path,
             }
         )
-        # st.rerun()
 
 
 def upload_product_api(product_name, heightlight, image_path, instruction_path, departure_place, delivery_company, user_id="123"):
@@ -140,5 +140,5 @@ def upload_product_api(product_name, heightlight, image_path, instruction_path, 
 
     print(req_data)
 
-    res = requests.get(API_CONFIG.UPLOAD_PRODUCT_URL, json=req_data)
-    return res["result"]
+    res = requests.get(API_CONFIG.UPLOAD_PRODUCT_URL, json=req_data).json()
+    return res["status"]

@@ -3,7 +3,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 
-from utils.tts.tts_worker import gen_tts_in_spinner
+from .modules.tts_worker import gen_tts_in_spinner
 
 
 app = FastAPI()
