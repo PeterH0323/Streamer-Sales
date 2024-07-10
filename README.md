@@ -59,6 +59,7 @@ license: Apache License 2.0
 
 ## 🎉 NEWS
 
+- [2024.07.10] **前后端分离**，可以自由编排模块服务数量做到负载均衡啦！
 - [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
 - [2024.06.16] **接入 Agent**，可以询问主播关于快递的信息，会调用 Agent 能力进行**网上查询**
 - [2024.06.10] **重磅发布 数字人 1.0** 🦸🦸🦸 ，同时开源 **ComfyUI Workflow** ！详见 [ComfyUI 数字人生成](./doc/digital_human/README.md) 文档
@@ -83,6 +84,7 @@ license: Apache License 2.0
   - [📺️ 讲解视频](#️-讲解视频)
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
+  - [🏆 获奖信息](#-获奖信息)
   - [🎨 快速体验](#-快速体验)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
@@ -140,6 +142,9 @@ license: Apache License 2.0
 | streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao--7b/)    |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
 
+## 🏆 获奖信息
+
+- [2024浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
 
 ## 🎨 快速体验
 

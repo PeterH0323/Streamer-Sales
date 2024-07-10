@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 
 
 @dataclass
@@ -47,6 +47,12 @@ class WebConfigs:
     ROBOT_AVATOR: str = "./assets/logo.png"
 
     # ==================================================================
+    #                               服务配置
+    # ==================================================================
+    USING_LLM_API: bool = True
+    SERVER_API_URL: str = "http://0.0.0.0:23333"
+
+    # ==================================================================
     #                               商品配置
     # ==================================================================
     PRODUCT_INSTRUCTION_DIR: str = r"./product_info/instructions"
@@ -78,6 +84,7 @@ class WebConfigs:
     #                             数字人 配置
     # ==================================================================
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
+    DIGITAL_HUMAN_VIDEO_OUTPUT_PATH: str = r"./work_dirs/digital_human/vid_output"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./weights/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
     DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
@@ -96,5 +103,16 @@ class WebConfigs:
     ASR_MODEL_DIR: str = r"./weights/asr_weights/"
 
 
+@dataclass
+class ApiConfig:
+    CHAT_URL: str = "http://0.0.0.0:8000/streamer-sales/chat"
+    TTS_URL: str = "http://0.0.0.0:8001/tts"
+    DIGITAL_HUMAN_URL: str = "http://0.0.0.0:8002/digital_human"
+    ASR_URL: str = "http://0.0.0.0:8003/asr"
+    LLM_URL: str = "http://0.0.0.0:23333"
+    UPLOAD_PRODUCT_URL: str = "http://0.0.0.0:8000/streamer-sales/upload_product"
+
+
 # 实例化
 WEB_CONFIGS = WebConfigs()
+API_CONFIG = ApiConfig()

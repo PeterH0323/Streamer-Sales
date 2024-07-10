@@ -26,11 +26,8 @@ st.set_page_config(
 
 from audiorecorder import audiorecorder
 
-from utils.asr.asr_worker import process_asr
-from utils.digital_human.digital_human_worker import show_video
-from utils.infer.lmdeploy_infer import get_turbomind_response
-from utils.model_loader import ASR_HANDLER, LLM_MODEL, RAG_RETRIEVER
-from utils.tools import resize_image
+from utils.api import get_asr_api, get_chat_api
+from utils.tools import resize_image, show_video
 
 
 def on_btn_click(*args, **kwargs):
@@ -110,10 +107,10 @@ def init_sidebar():
                 # )
 
                 # 语音识别
-                asr_text = process_asr(ASR_HANDLER, wav_path)
+                asr_text = get_asr_api(wav_path)
 
                 # 删除过程文件
-                # Path(wav_path).unlink()
+                Path(wav_path).unlink()
 
         # 是否生成 TTS
         if WEB_CONFIGS.ENABLE_TTS:
@@ -150,8 +147,8 @@ def init_sidebar():
     return asr_text
 
 
-def init_message_block(meta_instruction, user_avator, robot_avator):
-
+def init_message_block(meta_instruction):
+    first_flag = False
     # 在应用重新运行时显示聊天历史消息
     for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=message.get("avatar")):
@@ -167,42 +164,42 @@ def init_message_block(meta_instruction, user_avator, robot_avator):
     # 如果聊天历史为空，则显示产品介绍
     if len(st.session_state.messages) == 0:
         # 直接产品介绍
-        get_turbomind_response(
+        get_chat_api(
             st.session_state.first_input,
             meta_instruction,
-            user_avator,
-            robot_avator,
-            LLM_MODEL,
             session_messages=st.session_state.messages,
             add_session_msg=False,
-            first_input_str="",
+            enable_rag=False,
             enable_agent=False,
+            enable_tts=st.session_state.gen_tts_checkbox,
+            enable_digital_human=st.session_state.gen_digital_human_checkbox,
         )
+        first_flag = True
 
     # 初始化按钮消息状态
     if "button_msg" not in st.session_state:
         st.session_state.button_msg = "x-x"
 
+    return first_flag
 
-def process_message(user_avator, prompt, meta_instruction, robot_avator):
+def process_message(user_avator, prompt, meta_instruction):
     # Display user message in chat message container
     with st.chat_message("user", avatar=user_avator):
         st.markdown(prompt)
 
-    get_turbomind_response(
+    get_chat_api(
         prompt,
         meta_instruction,
-        user_avator,
-        robot_avator,
-        LLM_MODEL,
         session_messages=st.session_state.messages,
         add_session_msg=True,
         first_input_str=st.session_state.first_input,
-        rag_retriever=RAG_RETRIEVER,
         product_name=st.session_state.product_name,
-        enable_agent=st.session_state.enable_agent_checkbox,
         departure_place=st.session_state.departure_place,
         delivery_company_name=st.session_state.delivery_company_name,
+        enable_rag=WEB_CONFIGS.ENABLE_RAG,
+        enable_agent=st.session_state.enable_agent_checkbox,
+        enable_tts=st.session_state.gen_tts_checkbox,
+        enable_digital_human=st.session_state.gen_digital_human_checkbox,
     )
 
 
@@ -241,9 +238,9 @@ def main(meta_instruction):
                     show_video(st.session_state.digital_human_video_path, autoplay=True, loop=True, muted=True)
 
             with message_col:
-                init_message_block(meta_instruction, WEB_CONFIGS.USER_AVATOR, WEB_CONFIGS.ROBOT_AVATOR)
+                init_message_block(meta_instruction)
     else:
-        init_message_block(meta_instruction, WEB_CONFIGS.USER_AVATOR, WEB_CONFIGS.ROBOT_AVATOR)
+        init_message_block(meta_instruction)
 
     # 输入框显示提示信息
     hint_msg = "你好，可以问我任何关于产品的问题"
@@ -262,12 +259,11 @@ def main(meta_instruction):
     if prompt:
 
         if message_col is None:
-            process_message(WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction, WEB_CONFIGS.ROBOT_AVATOR)
+            process_message(WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction)
         else:
             # 数字人启动，页面会分块，放入信息块中
             with message_col:
-                process_message(WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction, WEB_CONFIGS.ROBOT_AVATOR)
-
+                process_message(WEB_CONFIGS.USER_AVATOR, prompt, meta_instruction)
 
 # st.sidebar.page_link("app.py", label="商品页")
 # st.sidebar.page_link("./pages/selling_page.py", label="主播卖货", disabled=True)
@@ -281,4 +277,4 @@ if "sales_info" not in st.session_state or st.session_state.sales_info == "":
     st.session_state.page_switch = "app.py"
     st.switch_page("app.py")
 
-main((st.session_state.sales_info))
+main(st.session_state.sales_info)

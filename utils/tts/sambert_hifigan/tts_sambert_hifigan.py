@@ -1,4 +1,3 @@
-import streamlit as st
 from modelscope.outputs import OutputKeys
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
@@ -7,7 +6,6 @@ from modelscope.utils.constant import Tasks
 # pip install pytorch_wavelets tensorboardX scipy==1.12.0
 
 
-@st.cache_resource
 def get_tts_model():
     model_id = "damo/speech_sambert-hifigan_tts_zhisha_zh-cn_16k"
     sambert_hifigan_tts = pipeline(task=Tasks.text_to_speech, model=model_id)

@@ -1,13 +1,13 @@
 import datetime
 from funasr import AutoModel
-import streamlit as st
-from utils.web_configs import WEB_CONFIGS
+from funasr.download.name_maps_from_hub import name_maps_ms as NAME_MAPS_MS
 from modelscope import snapshot_download
 from modelscope.utils.constant import Invoke, ThirdParty
-from funasr.download.name_maps_from_hub import name_maps_ms as NAME_MAPS_MS
+
+from utils.web_configs import WEB_CONFIGS
 
 
-@st.cache_resource
+# @st.cache_resource
 def load_asr_model():
 
     # 模型下载
@@ -21,7 +21,7 @@ def load_asr_model():
             cache_dir=WEB_CONFIGS.ASR_MODEL_DIR,
         )
         model_path_info[model_name] = mode_dir
-        NAME_MAPS_MS[model_name] = mode_dir # 更新
+        NAME_MAPS_MS[model_name] = mode_dir  # 更新权重路径环境变量
 
     print(f"ASR model path info = {model_path_info}")
     # paraformer-zh is a multi-functional asr model

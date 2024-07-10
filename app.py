@@ -13,6 +13,7 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
+from utils.api import upload_product_api
 from utils.web_configs import WEB_CONFIGS
 
 # 初始化 Streamlit 页面配置
@@ -27,10 +28,7 @@ st.set_page_config(
         "About": "# Streamer-Sales LLM 销冠--卖货主播大模型",
     },
 )
-from utils.rag.rag_worker import gen_rag_db
 from utils.tools import resize_image
-
-from utils.model_loader import RAG_RETRIEVER  # isort:skip
 
 
 @st.experimental_dialog("说明书", width="large")
@@ -167,12 +165,16 @@ def make_product_container(product_name, product_info, image_height, each_card_o
             )
 
 
-def delete_old_files(directory, limit_time_s=60 * 60 * 5):
+def delete_old_files(directory, limit_time_s=60 * 60 * 2):
     """
     删除指定目录下超过一定时间的文件。
 
     :param directory: 要检查和删除文件的目录路径
     """
+
+    if not Path(directory).exists():
+        return
+
     # 获取当前时间戳
     current_time = time.time()
 
@@ -277,7 +279,7 @@ def init_digital_human():
     if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
         # 清除 1 小时之前的所有视频
         Path(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH).mkdir(parents=True, exist_ok=True)
-        # delete_old_files(st.session_state.digital_human_root)
+        delete_old_files(WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_OUTPUT_PATH)
 
 
 def init_asr():
@@ -461,44 +463,10 @@ def update_product_info(
         with open(instruct_save_path, "wb") as file:
             file.write(product_instruction.getvalue())
 
-        st.write("更新商品明细表...")
-        with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-            product_info_dict = yaml.safe_load(f)
-
-        # 排序防止乱序
-        product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
-        max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["id"])
-
-        product_info_dict.update(
-            {
-                product_name_input: {
-                    "heighlights": heightlight_input.split("、"),
-                    "images": str(image_save_path),
-                    "instruction": str(instruct_save_path),
-                    "id": product_info_dict[max_id_key]["id"] + 1,
-                    "departure_place": departure_place,
-                    "delivery_company_name": delivery_company,
-                }
-            }
+        st.write("更新商品数据库...")
+        upload_product_api(
+            product_name_input, heightlight_input, image_save_path, instruct_save_path, departure_place, delivery_company
         )
-
-        # 备份
-        if Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).exists():
-            Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).unlink()
-        shutil.copy(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH)
-
-        # 覆盖保存
-        with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
-            yaml.dump(product_info_dict, f, allow_unicode=True)
-
-        st.write("生成数据库...")
-        if WEB_CONFIGS.ENABLE_RAG:
-            # 重新生成 RAG 向量数据库
-            gen_rag_db(force_gen=True)
-
-            # 重新加载 retriever
-            RAG_RETRIEVER.pop("default")
-            RAG_RETRIEVER.get(fs_id="default", config_path=WEB_CONFIGS.RAG_CONFIG_PATH, work_dir=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
 
         # 更新状态
         status.update(label="添加商品成功!", state="complete", expanded=False)
@@ -506,7 +474,7 @@ def update_product_info(
         st.toast("添加商品成功!", icon="🎉")
 
         with st.spinner("准备刷新页面..."):
-            time.sleep(3)
+            time.sleep(2)
 
         # 刷新页面
         st.rerun()

@@ -13,8 +13,9 @@ from pathlib import Path
 from typing import List, Optional
 
 import cv2
+from loguru import logger
 import numpy as np
-import streamlit as st
+
 import torch
 import wget
 from tqdm import tqdm
@@ -26,6 +27,7 @@ from utils.digital_human.musetalk.utils.face_parsing import FaceParsing
 from utils.digital_human.musetalk.utils.preprocessing import get_landmark_and_bbox, read_imgs
 from utils.digital_human.musetalk.utils.utils import datagen, load_all_model
 from utils.digital_human.musetalk.whisper.audio2feature import Audio2Feature
+from utils.web_configs import WEB_CONFIGS
 
 
 def setup_ffmpeg_env(model_dir):
@@ -194,7 +196,7 @@ class Avatar:
         self.full_imgs_path = f"{self.avatar_path}/full_imgs"
         self.coords_path = f"{self.avatar_path}/coords.pkl"
         self.latents_out_path = f"{self.avatar_path}/latents.pt"
-        self.video_out_path = f"{self.avatar_path}/vid_output/"
+        # self.video_out_path = f"{self.avatar_path}/vid_output/"
         self.mask_out_path = f"{self.avatar_path}/mask"
         self.mask_coords_path = f"{self.avatar_path}/mask_coords.pkl"
         self.avatar_info_path = f"{self.avatar_path}/avator_info.json"
@@ -250,7 +252,6 @@ class Avatar:
                 self.full_imgs_path,
                 self.coords_path,
                 self.latents_out_path,
-                self.video_out_path,
                 self.mask_out_path,
                 self.mask_coords_path,
                 self.avatar_info_path,
@@ -266,7 +267,7 @@ class Avatar:
             print("*********************************")
             print(f"  creating avator: {self.avatar_id}")
             print("*********************************")
-            osmakedirs([self.avatar_path, self.full_imgs_path, self.video_out_path, self.mask_out_path])
+            osmakedirs([self.avatar_path, self.full_imgs_path, self.mask_out_path])
             self.prepare_material(vae_model=vae_model, face_parsing_model=face_parsing_model)
 
         self.input_latent_list_cycle = torch.load(self.latents_out_path)
@@ -405,27 +406,34 @@ class Avatar:
             for res_frame in recon:
                 res_frame_queue.put(res_frame)
         # Close the queue and sub-thread after all tasks are completed
+        logger.info("waitting for all queue...")
         process_thread.join()
 
-        print("Total process time of {} frames including saving images = {}s".format(video_num, time.time() - start_time))
+        logger.info("Total process time of {} frames including saving images = {}s".format(video_num, time.time() - start_time))
 
         cmd_img2video = f"ffmpeg -y -v warning -r {fps} -f image2 -i {self.avatar_path}/{tmp_tag}/%08d.png -vcodec libx264 -vf format=rgb24,scale=out_color_matrix=bt709,format=yuv420p -crf 18 {self.avatar_path}/{tmp_tag}.mp4"
-        print(cmd_img2video)
+        logger.info(cmd_img2video)
         os.system(cmd_img2video)
 
         # output_vid = os.path.join(self.video_out_path, out_vid_name + ".mp4")  # on
         cmd_combine_audio = f"ffmpeg -y -v warning -i {audio_path} -i {self.avatar_path}/{tmp_tag}.mp4 {output_vid}"
-        print(cmd_combine_audio)
+        logger.info(cmd_combine_audio)
         os.system(cmd_combine_audio)
 
+        logger.info("Remove tmp files...")
         os.remove(f"{self.avatar_path}/{tmp_tag}.mp4")
         shutil.rmtree(f"{self.avatar_path}/{tmp_tag}")
-        print(f"result is save to {output_vid}")
+
+        # 保存好之后写一个文件，防止在没保存好的时候直接 push 到前端了
+        with open(Path(output_vid).with_suffix(".txt"), "w") as f:
+            f.write("")
+
+        logger.info(f"result is save to {output_vid}")
 
         return str(output_vid)
 
 
-@st.cache_resource
+# @st.cache_resource
 def digital_human_preprocess(model_dir, use_float16, video_path, work_dir, fps, bbox_shift):
 
     avatar = Avatar(
@@ -434,7 +442,7 @@ def digital_human_preprocess(model_dir, use_float16, video_path, work_dir, fps, 
         model_dir=model_dir,
         video_path=video_path,
         bbox_shift=bbox_shift,
-        batch_size=8,
+        batch_size=32,
         fps=fps,
         preparation_force=False,
     )
@@ -452,8 +460,13 @@ def gen_digital_human_video(
     video_path,
     fps,
 ):
-    output_vid_image_dir = Path(avatar_handler.video_out_path).joinpath(f"{Path(video_path).stem}+{Path(audio_path).stem}")
-    output_vid_file_path = output_vid_image_dir.with_suffix(".mp4")
+    if not Path(work_dir).exists():
+        Path(work_dir).mkdir(exist_ok=True, parents=True)
+
+    # output_vid_image_dir = Path(work_dir).joinpath(f"{Path(video_path).stem}+{Path(audio_path).stem}")
+    # output_vid_file_path = output_vid_image_dir.with_suffix(".mp4")
+
+    output_vid_file_path = Path(work_dir).joinpath(video_path)
     output_vid = avatar_handler.inference(
         audio_path=audio_path,  # wav file
         output_vid=str(output_vid_file_path),
@@ -462,6 +475,19 @@ def gen_digital_human_video(
     )
 
     return output_vid
+
+
+if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
+    DIGITAL_HUMAN_HANDLER = digital_human_preprocess(
+        model_dir=WEB_CONFIGS.DIGITAL_HUMAN_MODEL_DIR,
+        use_float16=False,
+        video_path=WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_PATH,
+        work_dir=WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH,
+        fps=WEB_CONFIGS.DIGITAL_HUMAN_FPS,
+        bbox_shift=WEB_CONFIGS.DIGITAL_HUMAN_BBOX_SHIFT,
+    )
+else:
+    DIGITAL_HUMAN_HANDLER = None
 
 
 if __name__ == "__main__":
