@@ -201,6 +201,11 @@ lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --model-format hf
 ```
 
+如果需要换成 4bit 模型，修改两处地方就行：
+
+- `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
+- `--model-format hf` -> `--model-format awq`
+
 5. 中台服务
 
 ```bash
