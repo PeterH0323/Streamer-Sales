@@ -8,6 +8,7 @@
   <img src="./streamer-sales-lelemiao-workflow-v1.0.png" alt="Demo gif" >
 </p>
 
+**用法**：直接将上面的图片拖进去 ComfyUI 工作区就可以啦，但记得提前保存您的工作区哈。
 
 ## 功能点
 
