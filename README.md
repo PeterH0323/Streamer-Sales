@@ -839,11 +839,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ## 🥳 加群讨论
 
-欢迎加入我们的微信群，一起探索更多的可能！🎉
-
-<p align="center">
-  <img src="doc/community/wechat_group.jpg" alt="wechat_group" width=30%>
-</p>
+目前群已满员了，可以在我的主页找到我的微信号，请备注 `Streamer-Sales` 或者 `销冠大模型`，欢迎您的加入。
 
 ## 💕 致谢
 
