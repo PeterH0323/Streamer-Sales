@@ -1,6 +1,5 @@
 import datetime
 
-# import streamlit as st
 from funasr import AutoModel
 from funasr.download.name_maps_from_hub import name_maps_ms as NAME_MAPS_MS
 from modelscope import snapshot_download
@@ -9,7 +8,6 @@ from modelscope.utils.constant import Invoke, ThirdParty
 from ..web_configs import WEB_CONFIGS
 
 
-# @st.cache_resource
 def load_asr_model():
 
     # 模型下载

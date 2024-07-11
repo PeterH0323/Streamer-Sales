@@ -15,7 +15,6 @@ import LangSegment
 import librosa
 import numpy as np
 import soundfile as sf
-# import streamlit as st
 import torch
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 from transformers.models.bert.modeling_bert import BertForMaskedLM
@@ -445,7 +444,6 @@ class HandlerTTS:
     zero_wav: np.ndarray
 
 
-# @st.cache_resource
 def get_tts_model(voice_character_name="艾丝妲", is_half=True):
 
     os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"

@@ -1,7 +1,6 @@
 import shutil
 from pathlib import Path
 
-# import streamlit as st
 import torch
 import yaml
 
@@ -90,7 +89,6 @@ def gen_rag_db(force_gen=False):
     shutil.rmtree(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
 
 
-# @st.cache_resource
 def load_rag_model():
     # 生成 rag 数据库
     gen_rag_db()

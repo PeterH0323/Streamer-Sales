@@ -16,7 +16,6 @@ import cv2
 from loguru import logger
 import numpy as np
 
-# import streamlit as st
 import torch
 import wget
 from tqdm import tqdm
@@ -434,7 +433,6 @@ class Avatar:
         return str(output_vid)
 
 
-# @st.cache_resource
 def digital_human_preprocess(model_dir, use_float16, video_path, work_dir, fps, bbox_shift):
 
     avatar = Avatar(
