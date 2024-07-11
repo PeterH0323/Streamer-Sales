@@ -11,14 +11,8 @@ class WebConfigs:
     # ==================================================================
     #                             LLM 模型配置
     # ==================================================================
-    if os.getenv("USING_4BIT") == "true":
-        LLM_MODEL_NAME: str = "HinGwenWoong/streamer-sales-lelemiao-7b-4bit"
-    else:
-        LLM_MODEL_NAME: str = "HinGwenWoong/streamer-sales-lelemiao-7b"
-
     SALES_NAME: str = "乐乐喵"  # 启动的角色名
-
-    LLM_MODEL_DIR: str = r"./weights/llm_weights/"
+    # LLM_MODEL_DIR: str = r"./weights/llm_weights/"
 
     # ==================================================================
     #                               组件配置
@@ -31,10 +25,6 @@ class WebConfigs:
 
     DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 
-    CACHE_MAX_ENTRY_COUNT: float = float(
-        os.environ.get("KV_CACHE", 0.1)
-    )  # KV cache 占比，如果部署出现 OOM 降低这个配置，反之可以加大
-
     # ==================================================================
     #                               页面配置
     # ==================================================================
@@ -45,12 +35,6 @@ class WebConfigs:
     # 定义用户和机器人头像路径
     USER_AVATOR: str = "./assets/user.png"
     ROBOT_AVATOR: str = "./assets/logo.png"
-
-    # ==================================================================
-    #                               服务配置
-    # ==================================================================
-    USING_LLM_API: bool = True
-    SERVER_API_URL: str = "http://0.0.0.0:23333"
 
     # ==================================================================
     #                               商品配置
@@ -87,7 +71,7 @@ class WebConfigs:
     DIGITAL_HUMAN_VIDEO_OUTPUT_PATH: str = r"./work_dirs/digital_human/vid_output"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./weights/digital_human_weights/"
     DIGITAL_HUMAN_BBOX_SHIFT: int = 0
-    DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
+    DIGITAL_HUMAN_VIDEO_PATH: str = r"./assets/lelemiao_digital_human_video.mp4"
     DIGITAL_HUMAN_FPS: str = 25
 
     # ==================================================================
@@ -105,12 +89,17 @@ class WebConfigs:
 
 @dataclass
 class ApiConfig:
-    CHAT_URL: str = "http://0.0.0.0:8000/streamer-sales/chat"
+    # ==================================================================
+    #                               URL 配置
+    # ==================================================================
     TTS_URL: str = "http://0.0.0.0:8001/tts"
     DIGITAL_HUMAN_URL: str = "http://0.0.0.0:8002/digital_human"
     ASR_URL: str = "http://0.0.0.0:8003/asr"
     LLM_URL: str = "http://0.0.0.0:23333"
+    
+    CHAT_URL: str = "http://0.0.0.0:8000/streamer-sales/chat"
     UPLOAD_PRODUCT_URL: str = "http://0.0.0.0:8000/streamer-sales/upload_product"
+    PLUGINS_INFO_URL: str = "http://0.0.0.0:8000/streamer-sales/plugins_info"
 
 
 # 实例化

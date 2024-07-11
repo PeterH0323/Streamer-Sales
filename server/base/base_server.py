@@ -1,124 +1,29 @@
 import asyncio
 import json
-import multiprocessing
 import shutil
 import wave
 from pathlib import Path
 from typing import Dict, List
 
-import requests
 import uvicorn
 import yaml
 from fastapi import FastAPI, HTTPException, Response
 from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
-from pydantic import BaseModel
 from sse_starlette import EventSourceResponse
 from tqdm import tqdm
 
-from ..tts_server.tools import SYMBOL_SPLITS, make_text_chunk
+from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
-
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt, rebuild_rag_db
-
-
-class ChatGenConfig(BaseModel):
-    # LLM 推理配置
-    top_p: float = 0.8
-    temperature: float = 0.7
-    repetition_penalty: float = 1.005
-
-
-class ProductInfo(BaseModel):
-    name: str
-    heighlights: str
-    introduce: str  # 生成商品文案 prompt
-
-    image_path: str
-    departure_place: str
-    delivery_company_name: str
-
-
-class PluginsInfo(BaseModel):
-    rag: bool = True
-    agent: bool = True
-    tts: bool = True
-    digital_human: bool = True
-
-
-class ChatItem(BaseModel):
-    user_id: str  # User 识别号，用于区分不用的用户调用
-    request_id: str  # 请求 ID，用于生成 TTS & 数字人
-    prompt: List[Dict[str, str]]  # 本次的 prompt
-    product_info: ProductInfo  # 商品信息
-    plugins: PluginsInfo = PluginsInfo()  # 插件信息
-    chat_config: ChatGenConfig = ChatGenConfig()
-
-
-class UploadProductItem(BaseModel):
-    user_id: str  # User 识别号，用于区分不用的用户调用
-    request_id: str  # 请求 ID，用于生成 TTS & 数字人
-    name: str
-    heightlight: str
-    image_path: str
-    instruction_path: str
-    departure_place: str
-    delivery_company: str
-
+from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
+from .utils import ChatItem, UploadProductItem, SERVER_PLUGINS_INFO
 
 app = FastAPI()
 
 # 加载 LLM 模型
-LLM_MODEL = APIClient(API_CONFIG.LLM_URL)
-
-TTS_TEXT_QUENE = multiprocessing.Queue(maxsize=100)
-DIGITAL_HUMAN_QUENE = multiprocessing.Queue(maxsize=100)
-
-
-def process_tts():
-
-    while True:
-        try:
-            text_chunk = TTS_TEXT_QUENE.get(block=True, timeout=1)
-        except Exception as e:
-            # logger.info(f"### {e}")
-            continue
-        logger.info(f"Get tts quene: {type(text_chunk)} , {text_chunk}")
-        res = requests.get(API_CONFIG.TTS_URL, json=text_chunk)
-
-        # # tts 推理成功，放入数字人队列进行推理
-        # res_json = res.json()
-        # tts_request_dict = {
-        #     "user_id": "123",
-        #     "request_id": text_chunk["request_id"],
-        #     "chunk_id": text_chunk["chunk_id"],
-        #     "tts_path": res_json["wav_path"],
-        # }
-
-        # DIGITAL_HUMAN_QUENE.put(tts_request_dict)
-
-        logger.info(f"tts res = {res}")
-
-
-def process_digital_human():
-
-    while True:
-        try:
-            text_chunk = DIGITAL_HUMAN_QUENE.get(block=True, timeout=1)
-        except Exception as e:
-            # logger.info(f"### {e}")
-            continue
-        logger.info(f"Get digital human quene: {type(text_chunk)} , {text_chunk}")
-        res = requests.get(API_CONFIG.DIGITAL_HUMAN_URL, json=text_chunk)
-        logger.info(f"digital human res = {res}")
-
-
-TTS_PROCESS_THREAD = multiprocessing.Process(target=process_tts)
-TTS_PROCESS_THREAD.start()
-
-DIGITAL_HUMAN_PROCESS_THREAD = multiprocessing.Process(target=process_digital_human)
-DIGITAL_HUMAN_PROCESS_THREAD.start()
+LLM_MODEL_HANDLER = APIClient(API_CONFIG.LLM_URL)
 
 
 async def streamer_sales_process(chat_item: ChatItem):
@@ -126,13 +31,13 @@ async def streamer_sales_process(chat_item: ChatItem):
     # ====================== Agent ======================
     # 调取 Agent
     agent_response = ""
-    if chat_item.plugins.agent:
+    if chat_item.plugins.agent and SERVER_PLUGINS_INFO.agent_enabled:
         GENERATE_AGENT_TEMPLATE = (
             "这是网上获取到的信息：“{}”\n 客户的问题：“{}” \n 请认真阅读信息并运用你的性格进行解答。"  # Agent prompt 模板
         )
         input_prompt = chat_item.prompt[-1]["content"]
         agent_response = get_agent_result(
-            LLM_MODEL, input_prompt, chat_item.product_info.departure_place, chat_item.product_info.delivery_company_name
+            LLM_MODEL_HANDLER, input_prompt, chat_item.product_info.departure_place, chat_item.product_info.delivery_company_name
         )
         if agent_response != "":
             agent_response = GENERATE_AGENT_TEMPLATE.format(agent_response, input_prompt)
@@ -156,8 +61,8 @@ async def streamer_sales_process(chat_item: ChatItem):
     idx = 0
     last_text_index = 0
     sentence_id = 0
-    model_name = LLM_MODEL.available_models[0]
-    for item in LLM_MODEL.chat_completions_v1(model=model_name, messages=chat_item.prompt, stream=True):
+    model_name = LLM_MODEL_HANDLER.available_models[0]
+    for item in LLM_MODEL_HANDLER.chat_completions_v1(model=model_name, messages=chat_item.prompt, stream=True):
         logger.debug(f"LLM predict: {item}")
         if "content" not in item["choices"][0]["delta"]:
             continue
@@ -169,7 +74,7 @@ async def streamer_sales_process(chat_item: ChatItem):
         current_predict += current_res
         idx += 1
 
-        if chat_item.plugins.tts:
+        if chat_item.plugins.tts and SERVER_PLUGINS_INFO.tts_server_enabled:
             # 切句子
             sentence = ""
             for symbol in SYMBOL_SPLITS:
@@ -207,7 +112,7 @@ async def streamer_sales_process(chat_item: ChatItem):
         )
         await asyncio.sleep(0.01)  # 加个延时避免无法发出 event stream
 
-    if chat_item.plugins.digital_human:
+    if chat_item.plugins.digital_human and SERVER_PLUGINS_INFO.digital_human_server_enabled:
 
         wav_list = [
             Path(WEB_CONFIGS.TTS_WAV_GEN_PATH, chat_item.request_id + f"-{str(i).zfill(8)}.wav")
@@ -304,11 +209,22 @@ async def streamer_sales_process(chat_item: ChatItem):
 
 
 @app.get("/")
-async def root():
+async def hello():
     return {"message": "Hello Streamer-Sales"}
 
 
-@app.get("/streamer-sales/chat")
+@app.get("/streamer-sales/plugins_info")
+async def get_plugins_info():
+    return {
+        "rag": True,
+        "asr": SERVER_PLUGINS_INFO.asr_server_enabled,
+        "tts": SERVER_PLUGINS_INFO.tts_server_enabled,
+        "digital_human": SERVER_PLUGINS_INFO.digital_human_server_enabled,
+        "agent": SERVER_PLUGINS_INFO.agent_enabled,
+    }
+
+
+@app.post("/streamer-sales/chat")
 async def streamer_sales_chat(chat_item: ChatItem, response: Response):
     # 对话总接口
     response.headers["Content-Type"] = "text/event-stream"
@@ -316,7 +232,7 @@ async def streamer_sales_chat(chat_item: ChatItem, response: Response):
     return EventSourceResponse(streamer_sales_process(chat_item))
 
 
-@app.get("/streamer-sales/upload_product")
+@app.post("/streamer-sales/upload_product")
 async def streamer_sales_chat(upload_product_item: UploadProductItem):
     # 上传商品
 

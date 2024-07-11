@@ -19,7 +19,7 @@ def get_asr_api(wav_path, user_id="123"):
 
     print(req_data)
 
-    res = requests.get(API_CONFIG.ASR_URL, json=req_data).json()
+    res = requests.post(API_CONFIG.ASR_URL, json=req_data).json()
     return res["result"]
 
 
@@ -79,7 +79,7 @@ def get_chat_api(
 
         print(req_data)
 
-        res = requests.get(API_CONFIG.CHAT_URL, json=req_data, stream=True)
+        res = requests.post(API_CONFIG.CHAT_URL, json=req_data, stream=True)
         for item in res.iter_lines(decode_unicode=True):
             print(item)
 
@@ -140,5 +140,11 @@ def upload_product_api(product_name, heightlight, image_path, instruction_path, 
 
     print(req_data)
 
-    res = requests.get(API_CONFIG.UPLOAD_PRODUCT_URL, json=req_data).json()
+    res = requests.post(API_CONFIG.UPLOAD_PRODUCT_URL, json=req_data).json()
     return res["status"]
+
+
+def get_server_plugins_info_api():
+    # 获取 插件列表 结果
+    res = requests.get(API_CONFIG.PLUGINS_INFO_URL).json()
+    return res

@@ -13,7 +13,7 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
-from utils.api import upload_product_api
+from utils.api import get_server_plugins_info_api, upload_product_api
 from server.web_configs import WEB_CONFIGS
 
 # 初始化 Streamlit 页面配置
@@ -29,7 +29,6 @@ st.set_page_config(
     },
 )
 from utils.tools import resize_image
-
 
 @st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
@@ -262,7 +261,8 @@ def init_product_info():
 def init_tts():
     # TTS 初始化
     if "gen_tts_checkbox" not in st.session_state:
-        st.session_state.gen_tts_checkbox = WEB_CONFIGS.ENABLE_TTS
+        st.session_state.gen_tts_checkbox = get_server_plugins_info_api()['tts']
+        
     if WEB_CONFIGS.ENABLE_TTS:
         # 清除 1 小时之前的所有语音
         Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).mkdir(parents=True, exist_ok=True)
@@ -273,8 +273,9 @@ def init_digital_human():
     # 数字人 初始化
     if "digital_human_video_path" not in st.session_state:
         st.session_state.digital_human_video_path = WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_PATH
+        
     if "gen_digital_human_checkbox" not in st.session_state:
-        st.session_state.gen_digital_human_checkbox = WEB_CONFIGS.ENABLE_DIGITAL_HUMAN
+        st.session_state.gen_digital_human_checkbox = get_server_plugins_info_api()['digital_human']
 
     if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
         # 清除 1 小时之前的所有视频
@@ -288,6 +289,7 @@ def init_asr():
         delete_old_files(WEB_CONFIGS.ASR_WAV_SAVE_PATH)
 
     st.session_state.asr_text_cache = ""
+
 
 
 def main():
@@ -322,11 +324,10 @@ def main():
     init_asr()
 
     if "enable_agent_checkbox" not in st.session_state:
-        st.session_state.enable_agent_checkbox = WEB_CONFIGS.ENABLE_AGENT
-
-        if WEB_CONFIGS.AGENT_DELIVERY_TIME_API_KEY is None or WEB_CONFIGS.AGENT_WEATHER_API_KEY is None:
+        st.session_state.enable_agent_checkbox = get_server_plugins_info_api()['agent']
+        
+        if st.session_state.enable_agent_checkbox == False:
             WEB_CONFIGS.ENABLE_AGENT = False
-            st.session_state.enable_agent_checkbox = False
 
     # 获取销售信息
     if "sales_info" not in st.session_state:
