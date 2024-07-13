@@ -85,6 +85,7 @@ license: Apache License 2.0
   - [🖼 演示](#-演示)
   - [⚙ Model Zoo](#-model-zoo)
   - [🏆 获奖信息](#-获奖信息)
+  - [📰 媒体转载](#-媒体转载)
   - [🎨 快速体验](#-快速体验)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
@@ -145,6 +146,12 @@ license: Apache License 2.0
 ## 🏆 获奖信息
 
 - [2024浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
+
+## 📰 媒体转载
+
+<p align="center">
+  <img src="doc/doc_images/media_cited.gif" alt="media cited gif" width="80%">
+</p>
 
 ## 🎨 快速体验
 
