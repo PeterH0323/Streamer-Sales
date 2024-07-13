@@ -199,6 +199,7 @@ uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
 
 ```bash
 conda activate streamer-sales
+export MODELSCOPE_CACHE="./weights/llm_weights"
 export LMDEPLOY_USE_MODELSCOPE=True
 lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --server-port 23333 \
