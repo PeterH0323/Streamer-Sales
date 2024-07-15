@@ -112,7 +112,7 @@ def load_pose_model(model_dir):
         local_dir=Path(model_dir).joinpath("dwpose"),
     )
 
-    config_file = r"./server/digital_human_server/modules/musetalk/utils/dwpose/rtmpose-l_8xb32-270e_coco-ubody-wholebody-384x288.py"
+    config_file = r"./server/digital_human/modules/musetalk/utils/dwpose/rtmpose-l_8xb32-270e_coco-ubody-wholebody-384x288.py"
     pose_model = init_model(config_file, dw_pose_path, device="cuda")
 
     return pose_model

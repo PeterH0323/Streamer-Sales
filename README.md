@@ -724,21 +724,21 @@ python ./benchmark/get_benchmark_report.py
 
 ```bash
 conda activate streamer-sales
-uvicorn server.tts_server.tts_server:app --host 0.0.0.0 --port 8001 # tts
+uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001 # tts
 ```
 
 2. 数字人 服务
 
 ```bash
 conda activate streamer-sales
-uvicorn server.digital_human_server.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
 ```
 
 3. ASR 服务
 
 ```bash
 conda activate streamer-sales
-uvicorn server.asr_server.asr_server:app --host 0.0.0.0 --port 8003 # asr
+uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
 
 ```
 
