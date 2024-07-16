@@ -171,14 +171,12 @@ pip install -r requirements.txt
 
 ```
 
-启动分为两种方式：
-- **前后端分离版本** ( `> v0.7.1` ) ：适合分布式部署，可以配置负载均衡，更适合生产环境。
-- **前后端融合版本** ( `<= v0.7.1` )：适合初学者或者只是想部署玩玩的用户。
-
 **注意**：如果您发现下载权重经常 timeout ，参考 [权重文件结构](./weights/README.md) 文档，文档内已有超链接可访问源模型路径，可进行自行下载
 
+启动分为两种方式：
+
 <details close>
-<summary><b>前后端分离版本 ( > v0.7.1 )</b></summary>
+<summary><b>前后端分离版本 ( > v0.7.1 )</b>：适合分布式部署，可以配置负载均衡，更适合生产环境。</summary>
 
 **注意**：每个服务都要用一个 terminal 去启动，后面会使用 docker-compose 串起来
 
@@ -244,7 +242,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 </details>
 
 <details close>
-<summary><b>前后端融合版本 ( <= v0.7.1 )</b></summary>
+<summary><b>前后端融合版本 ( <= v0.7.1 )</b>：适合初学者或者只是想部署玩玩的用户</summary>
 
 ```bash
 
