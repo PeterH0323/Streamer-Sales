@@ -161,6 +161,7 @@ or
 
 **本地**：
 
+- 环境搭建：
 ```bash
 git clone https://github.com/PeterH0323/Streamer-Sales.git
 cd Streamer-Sales
@@ -170,7 +171,14 @@ pip install -r requirements.txt
 
 ```
 
-- 前后端分离版本 ( > v0.7.1 )：
+启动分为两种方式：
+- **前后端分离版本** ( `> v0.7.1` ) ：适合分布式部署，可以配置负载均衡，更适合生产环境。
+- **前后端融合版本** ( `<= v0.7.1` )：适合初学者或者只是想部署玩玩的用户。
+
+**注意**：如果您发现下载权重经常 timeout ，参考 [权重文件结构](./weights/README.md) 文档，文档内已有超链接可访问源模型路径，可进行自行下载
+
+<details close>
+<summary><b>前后端分离版本 ( > v0.7.1 )</b></summary>
 
 **注意**：每个服务都要用一个 terminal 去启动，后面会使用 docker-compose 串起来
 
@@ -233,7 +241,10 @@ conda activate streamer-sales
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860 
 ```
 
-- 前后端融合版本 ( <= v0.7.1 )：
+</details>
+
+<details close>
+<summary><b>前后端融合版本 ( <= v0.7.1 )</b></summary>
 
 ```bash
 
@@ -246,7 +257,7 @@ export WEATHER_API_KEY="${天气 API key}"
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
-**注意**：如果您发现下载权重经常 timeout ，参考 [权重文件结构](./weights/README.md) 文档，文档内已有超链接可访问源模型路径，可进行自行下载
+</details>
 
 ## 🖥️ 配置需求
 
@@ -669,7 +680,7 @@ python feature_store.py
 1. 将 pth 转为 HF 格式的模型
 
 ```bash
-xtuner convert pth_to_hf ./finetune_configs/internlm2_chat_7b_qlora_custom_data.py \
+xtuner convert pth_to_hf ./finetune_configs/internlm2_chat_7b/internlm2_chat_7b_qlora_custom_data.py \
                          ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340.pth \
                          ./work_dirs/internlm2_chat_7b_qlora_custom_data/iter_340_hf
 ```
