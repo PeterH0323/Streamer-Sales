@@ -119,7 +119,7 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
 ## 配置视频路径
 
-生成好了 mp4 我们就可以修改下配置 [web_configs](../../server/web_configs.py#L78) 中的 `DIGITAL_HUMAN_VIDEO_PATH` 参数，后续就会用这个视频来生成口型了。
+生成好了 mp4 我们就可以修改下配置 [web_configs](../../server/web_configs.py#L74) 中的 `DIGITAL_HUMAN_VIDEO_PATH` 参数，后续就会用这个视频来生成口型了。
 
 ```diff
 - DIGITAL_HUMAN_VIDEO_PATH: str = r"./doc/digital_human/lelemiao_digital_human_video.mp4"
