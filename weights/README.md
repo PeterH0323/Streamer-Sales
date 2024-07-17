@@ -69,8 +69,7 @@
 |   |   `-- dw-ll_ucoco_384.pth
 |   |-- face-alignment
 |   |   |-- checkpoints
-|   |   |   |-- s3fd-619a316812.pth
-|   |   |   `-- rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth
+|   |   |   `-- s3fd-619a316812.pth
 |   |-- face-parse-bisent
 |   |   |-- 79999_iter.pth
 |   |   `-- resnet18-5c106cde.pth
