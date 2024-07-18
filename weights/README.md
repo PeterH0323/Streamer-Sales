@@ -19,6 +19,17 @@
 | RAG | BCE | [modelscope](https://modelscope.cn/models/maidalun/bce-embedding-base_v1/files) <br/><br/> [modelscope](https://modelscope.cn/models/maidalun/bce-reranker-base_v1/files)| rag_weights/maidalun/bce-embedding-base_v1 <br/><br/> rag_weights/maidalun/bce-reranker-base_v1 |
 
 
+磁盘占用情况:
+
+| 模型文件夹 | 占用大小 |
+| :-: | :-: |
+| asr_weights | 2.1G    |
+| digital_human_weights | 4.8G    |
+| gpt_sovits_weights | 1.6G    |
+| llm_weights | 15G     |
+| rag_weights | 2.2G    |
+
+
 最终文件结构如下：
 
 ```bash
