@@ -25,7 +25,12 @@ class ServerPluginsInfo:
         )
 
     def check_server(self, url):
-        res = requests.get(url)
+
+        try:
+            res = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            return False
+
         if res.status_code == 200:
             return True
         else:
