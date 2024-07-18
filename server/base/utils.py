@@ -24,6 +24,10 @@ class ChatGenConfig(BaseModel):
     temperature: float = 0.7
     repetition_penalty: float = 1.005
 
+class SalesInfo(BaseModel):
+    # 主播信息
+    sales_name: str
+
 
 class ProductInfo(BaseModel):
     name: str

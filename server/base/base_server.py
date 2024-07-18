@@ -9,7 +9,7 @@ from sse_starlette import EventSourceResponse
 from ..web_configs import WEB_CONFIGS
 from .modules.rag.rag_worker import rebuild_rag_db
 from .server_info import SERVER_PLUGINS_INFO
-from .utils import ChatItem, UploadProductItem, streamer_sales_process
+from .utils import ChatItem, UploadProductItem, SalesInfo, streamer_sales_process
 
 app = FastAPI()
 
@@ -48,6 +48,39 @@ def get_product_info_api():
     product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
 
     return {"status": "success", "product_info": product_info_dict}
+
+
+@app.get("/streamer-sales/get_sales_info")
+def get_sales_info_api(sales_info: SalesInfo):
+    """
+    从配置文件中加载销售相关信息
+
+    - sales_info: 系统问候语，针对销售角色定制
+    - first_input_template: 对话开始时的第一个输入模板
+    - product_info_struct_template: 产品信息结构模板
+    """
+
+    # 加载对话配置文件
+    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
+        dataset_yaml = yaml.safe_load(f)
+
+    # 从配置中提取角色信息
+    sales_info = dataset_yaml["role_type"][sales_info.sales_name]  # [WEB_CONFIGS.SALES_NAME]
+
+    # 从配置中提取对话设置相关的信息
+    system = dataset_yaml["conversation_setting"]["system"]
+    first_input = dataset_yaml["conversation_setting"]["first_input"]
+    product_info_struct = dataset_yaml["product_info_struct"]
+
+    # 将销售角色名和角色信息插入到 system prompt
+    system_str = system.replace("{role_type}", WEB_CONFIGS.SALES_NAME).replace("{character}", "、".join(sales_info))
+
+    return {
+        "status": "success",
+        "sales_info": system_str,
+        "first_input_template": first_input,
+        "product_info_struct_template": product_info_struct,
+    }
 
 
 @app.post("/streamer-sales/upload_product")
