@@ -144,6 +144,12 @@ def upload_product_api(product_name, heightlight, image_path, instruction_path, 
     return res["status"]
 
 
+def get_product_info_api():
+    # 获取 商品信息 结果
+    res = requests.get(API_CONFIG.GET_PRODUCT_INFO_URL).json()
+    return res["product_info"]
+
+
 def get_server_plugins_info_api():
     # 获取 插件列表 结果
     res = requests.get(API_CONFIG.PLUGINS_INFO_URL).json()

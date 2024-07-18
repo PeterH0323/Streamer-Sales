@@ -2,8 +2,8 @@ from loguru import logger
 import requests
 import multiprocessing
 
-from .utils import SERVER_PLUGINS_INFO
 from ..web_configs import API_CONFIG
+from .server_info import SERVER_PLUGINS_INFO
 
 
 def process_tts(tts_text_queue):

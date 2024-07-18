@@ -99,6 +99,7 @@ class ApiConfig:
     
     CHAT_URL: str = "http://0.0.0.0:8000/streamer-sales/chat"
     UPLOAD_PRODUCT_URL: str = "http://0.0.0.0:8000/streamer-sales/upload_product"
+    GET_PRODUCT_INFO_URL: str = "http://0.0.0.0:8000/streamer-sales/get_product_info"
     PLUGINS_INFO_URL: str = "http://0.0.0.0:8000/streamer-sales/plugins_info"
 
 

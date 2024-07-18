@@ -13,7 +13,7 @@ from pathlib import Path
 import streamlit as st
 import yaml
 
-from utils.api import get_server_plugins_info_api, upload_product_api
+from utils.api import get_server_plugins_info_api, upload_product_api, get_product_info_api
 from server.web_configs import WEB_CONFIGS
 
 # 初始化 Streamlit 页面配置
@@ -234,12 +234,8 @@ def get_sales_info():
 
 
 def init_product_info():
-    # 读取 yaml 文件
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-
-    # 根据 ID 排序，避免乱序
-    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
+    # 获取商品信息
+    product_info_dict = get_product_info_api()
 
     product_name_list = list(product_info_dict.keys())
 
