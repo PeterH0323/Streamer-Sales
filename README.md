@@ -215,7 +215,9 @@ lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --model-format hf
 ```
 
-如果需要换成 4bit 模型，修改两处地方就行：
+使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署建议使用 40G 显存机器。
+
+如果您的机器是 24G 的显卡，需要换成 4bit 模型，修改命令中的两处地方就行：
 
 - `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
 - `--model-format hf` -> `--model-format awq`
@@ -271,12 +273,21 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 2. 部署
 
-| 模型名称                                                                                      | 显存 |
-| --------------------------------------------------------------------------------------------- | ---- |
-| [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)           | 40G  |
-| [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 24G  |
+| 服务名称 | 显存 |
+| :-: | :-: |
+| TTS | 2G （1668MB） |
+| 数字人 | 5G （4734MB） |
+| ASR | 5.5G （5562MB） |
+| RAG | 2G （1974MB） |
+| LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | 16G （16060MB）</br>  建议使用 40G 显卡|
+| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡|
 
-默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令 ( <= v0.7.1 )：
+默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令 ：
+
+使用 前后端分离版本 ( > 0.7.1 ) 使用 [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) 启动，如果还是 OOM ，不启动 ASR 服务就问题不大了。
+
+<details close>
+<summary><b>前后端融合版本 ( <= v0.7.1 )</b>：适合初学者或者只是想部署玩玩的用户</summary>
 
 ```bash
 export USING_4BIT=true # 设置使用 4bit 模型
@@ -288,8 +299,8 @@ export WEATHER_API_KEY="${天气 API key}"
 
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
+</details>
 
-使用 > 0.7.1 版本只要不启动 ASR 服务就问题不大了。
 
 ## 🦸 数字人生成 Workflow
 
