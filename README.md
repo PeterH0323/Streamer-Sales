@@ -87,6 +87,8 @@ license: Apache License 2.0
   - [🏆 获奖信息](#-获奖信息)
   - [📰 媒体转载](#-媒体转载)
   - [🎨 快速体验](#-快速体验)
+    - [在线体验](#在线体验)
+    - [本地](#本地)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
   - [🌐 Agent](#-agent)
@@ -158,11 +160,13 @@ license: Apache License 2.0
 
 ## 🎨 快速体验
 
-**在线体验地址**：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
+### 在线体验
 
-or 
+目前已将 `v0.7.1` 版本部署到 OpenXLab 平台，地址 ：https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales
 
-**本地**：
+因为 Agent API 需要计费的关系和显存大小的关系，上面失能了 Agent 和 ASR，但项目本身是支持的，可以自行购买 API 服务和本地部署来体验。
+
+### 本地
 
 - 环境搭建：
 ```bash
