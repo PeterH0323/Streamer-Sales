@@ -16,6 +16,7 @@ import librosa
 import numpy as np
 import soundfile as sf
 import torch
+from loguru import logger
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 from transformers.models.bert.modeling_bert import BertForMaskedLM
 from transformers.models.bert.tokenization_bert_fast import BertTokenizerFast
@@ -416,9 +417,9 @@ def cut_sentences(input_text, how_to_cut):
     return cut_txt
 
 
-def get_gpt_and_sovits_model_path(voice_character_name: str, tts_model_root: Path):
-    gpt_path_list = [i for i in tts_model_root.glob(f"{voice_character_name}*.ckpt")]
-    sovits_path_list = [i for i in tts_model_root.glob(f"{voice_character_name}*.pth")]
+def get_gpt_and_sovits_model_path(tts_model_root: Path):
+    gpt_path_list = [i for i in tts_model_root.glob("*.ckpt")]
+    sovits_path_list = [i for i in tts_model_root.glob("*.pth")]
 
     if len(gpt_path_list) > 0 and len(sovits_path_list) > 0:
         return str(gpt_path_list[0]), str(sovits_path_list[0])
@@ -452,7 +453,7 @@ def get_tts_model(voice_character_name="艾丝妲", is_half=True):
     # https://huggingface.co/baicai1145/GPT-SoVITS-STAR/tree/main
     tts_star_model_root = Path(WEB_CONFIGS.TTS_MODEL_DIR).joinpath("star")
 
-    gpt_path, sovits_path = get_gpt_and_sovits_model_path(voice_character_name, tts_star_model_root)
+    gpt_path, sovits_path = get_gpt_and_sovits_model_path(tts_star_model_root)
 
     if gpt_path is None:
         if tts_star_model_root.exists():
@@ -469,13 +470,18 @@ def get_tts_model(voice_character_name="艾丝妲", is_half=True):
         # 解压
         os.system(f"cd {str(tts_star_model_root)} && unzip {voice_character_name}.zip")
 
-    gpt_path, sovits_path = get_gpt_and_sovits_model_path(voice_character_name, tts_star_model_root)
-    print(f"gpt_path dir = {gpt_path}")
-    print(f"sovits_path dir = {sovits_path}")
+    logger.info(f"============ TTS 模型信息 ============")
 
-    inf_name = "激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav"
-    prompt_text = inf_name.split("-")[-1].replace(".wav", "")
-    ref_wav_path = Path(tts_star_model_root).joinpath("参考音频", inf_name)
+    gpt_path, sovits_path = get_gpt_and_sovits_model_path(tts_star_model_root)
+    logger.info(f"gpt_path dir = {gpt_path}")
+    logger.info(f"sovits_path dir = {sovits_path}")
+
+    ref_wav_path = Path(tts_star_model_root).joinpath("参考音频", WEB_CONFIGS.TTS_INF_NAME)
+    prompt_text = WEB_CONFIGS.TTS_INF_NAME.split("-")[-1].replace(".wav", "")
+    logger.info(f"ref_wav_path = {ref_wav_path}")
+    logger.info(f"prompt_text = {prompt_text}")
+
+    logger.info(f"====================================")
 
     # https://huggingface.co/lj1995/GPT-SoVITS/tree/main
     tts_model_dir = snapshot_download(repo_id="lj1995/GPT-SoVITS", local_dir=Path(WEB_CONFIGS.TTS_MODEL_DIR).joinpath("pretrain"))

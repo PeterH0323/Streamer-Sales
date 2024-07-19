@@ -99,6 +99,8 @@ license: Apache License 2.0
     - [五、RAG 向量数据库](#五rag-向量数据库)
     - [六、部署](#六部署)
     - [七、如何添加商品](#七如何添加商品)
+    - [八、如何自定义数字人](#八如何自定义数字人)
+    - [九、如何替换自己的 TTS](#九如何替换自己的-tts)
   - [📧 后记](#-后记)
   - [💳 打赏](#-打赏)
   - [🥳 加群讨论](#-加群讨论)
@@ -844,6 +846,53 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 **Enjoy ！**
+
+### 八、如何自定义数字人
+
+本项目支持如何自定义数字人，您可以根据教程自行修改 SD 正反向提示词生成新的数字人，然后修改配置即可。
+
+- 从零开始生成数字人：[ComfyUI 数字人生成](./doc/digital_human/README.md) 
+- 已有数字人视频，直接修改配置使用： [配置数字人视频路径](./doc/digital_human/README.md#配置数字人视频路径)
+
+### 九、如何替换自己的 TTS 
+
+本项目使用的事 GPT-SoVITs 来实现 TTS，支持替换自己基于 GPT-SoVITs 微调的模型替换，只需几步即可实现
+
+1. 将微调好的 `.ckpt` 和 `.pth` 放到 `./weights/gpt_sovits_weights/star` 文件夹中，**注意，每个模型类型有且只有一个，如果多余一个则取第一个**，最终路径：
+
+2. 将参考音频放到 `./weights/gpt_sovits_weights/star/参考音频` 文件夹中，
+
+文件名规范：`${心情描述}-${参考音频的文字，需要标点符号}.wav`, **一定要有 `-` 和 `.wav` 结尾！**
+
+eg. `激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav`
+
+3. 检查文件：完成上面两步，路径应该是这样的：
+
+```bash
+./weights/gpt_sovits_weights/star
+|-- 参考音频
+|   `-- ${心情描述}-${参考音频的文字，需要标点符号}.wav  # 一定要有 - 和 .wav 结尾
+|-- 您微调的.ckpt  # 有且只有一个 .ckpt !
+|-- 您微调的.pth  # 有且只有一个 .pth !
+```
+
+4. 修改配置文件 [web_configs.py](`./server/web_configs.py`) 里面的 `TTS_INF_NAME`
+
+```diff
+-TTS_INF_NAME: str = "激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav"
++TTS_INF_NAME: str = "${心情描述}-${参考音频的文字，需要标点符号}.wav"
+```
+
+5. 启动 TTS 服务，可以在终端看到程序使用的模型和参考音频、参考文本：
+
+```bash
+============ TTS 模型信息 ============
+gpt_path dir = weights/gpt_sovits_weights/star/艾丝妲-e10.ckpt
+sovits_path dir = weights/gpt_sovits_weights/star/艾丝妲_e25_s925.pth
+ref_wav_path = weights/gpt_sovits_weights/star/参考音频/激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav
+prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和
+====================================
+```
 
 
 ## 📧 后记

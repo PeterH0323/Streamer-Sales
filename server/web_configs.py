@@ -63,6 +63,7 @@ class WebConfigs:
     # ==================================================================
     TTS_WAV_GEN_PATH: str = r"./work_dirs/tts_wavs"
     TTS_MODEL_DIR: str = r"./weights/gpt_sovits_weights/"
+    TTS_INF_NAME: str = "激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav"
 
     # ==================================================================
     #                             数字人 配置

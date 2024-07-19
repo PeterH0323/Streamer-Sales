@@ -117,7 +117,7 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
 因为 SD 1.5 默认的输出是 512 x 512，我们还要做个 scale ，让分辨率高一点，这就是右下角的功能。
 
-## 配置视频路径
+## 配置数字人视频路径
 
 生成好了 mp4 我们就可以修改下配置 [web_configs](../../server/web_configs.py#L74) 中的 `DIGITAL_HUMAN_VIDEO_PATH` 参数，后续就会用这个视频来生成口型了。
 
