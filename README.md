@@ -879,7 +879,7 @@ eg. `激动说话-列车巡游银河，我不一定都能帮上忙，但只要�
 |-- 您微调的.pth  # 有且只有一个 .pth !
 ```
 
-4. 修改配置文件 [web_configs.py](`./server/web_configs.py`) 里面的 `TTS_INF_NAME`
+4. 修改配置文件 [web_configs.py](./server/web_configs.py) 里面的 `TTS_INF_NAME`
 
 ```diff
 -TTS_INF_NAME: str = "激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav"
