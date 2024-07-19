@@ -11,9 +11,8 @@ from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
-import yaml
 
-from utils.api import get_server_plugins_info_api, upload_product_api, get_product_info_api
+from utils.api import get_server_plugins_info_api, upload_product_api, get_product_info_api, get_sales_info_api
 from server.web_configs import WEB_CONFIGS
 
 # 初始化 Streamlit 页面配置
@@ -29,6 +28,7 @@ st.set_page_config(
     },
 )
 from utils.tools import resize_image
+
 
 @st.experimental_dialog("说明书", width="large")
 def instruction_dialog(instruction_path):
@@ -202,35 +202,10 @@ def delete_old_files(directory, limit_time_s=60 * 60 * 2):
 
 
 def get_sales_info():
-    """
-    从配置文件中加载销售相关信息，并存储到session状态中。
-
-    该函数不接受参数，也不直接返回任何值，但会更新全局的session状态，包括：
-    - sales_info: 系统问候语，针对销售角色定制
-    - first_input_template: 对话开始时的第一个输入模板
-    - product_info_struct_template: 产品信息结构模板
-
-    """
-
-    # 加载对话配置文件
-    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
-        dataset_yaml = yaml.safe_load(f)
-
-    # 从配置中提取角色信息
-    sales_info = dataset_yaml["role_type"][WEB_CONFIGS.SALES_NAME]
-
-    # 从配置中提取对话设置相关的信息
-    system = dataset_yaml["conversation_setting"]["system"]
-    first_input = dataset_yaml["conversation_setting"]["first_input"]
-    product_info_struct = dataset_yaml["product_info_struct"]
-
-    # 将销售角色名和角色信息插入到 system prompt
-    system_str = system.replace("{role_type}", WEB_CONFIGS.SALES_NAME).replace("{character}", "、".join(sales_info))
-
     # 更新session状态，存储销售相关信息
-    st.session_state.sales_info = system_str
-    st.session_state.first_input_template = first_input
-    st.session_state.product_info_struct_template = product_info_struct
+    st.session_state.sales_info, st.session_state.first_input_template, st.session_state.product_info_struct_template = (
+        get_sales_info_api(WEB_CONFIGS.SALES_NAME)
+    )
 
 
 def init_product_info():
@@ -257,8 +232,8 @@ def init_product_info():
 def init_tts():
     # TTS 初始化
     if "gen_tts_checkbox" not in st.session_state:
-        st.session_state.gen_tts_checkbox = get_server_plugins_info_api()['tts']
-        
+        st.session_state.gen_tts_checkbox = get_server_plugins_info_api()["tts"]
+
     if WEB_CONFIGS.ENABLE_TTS:
         # 清除 1 小时之前的所有语音
         Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).mkdir(parents=True, exist_ok=True)
@@ -269,9 +244,9 @@ def init_digital_human():
     # 数字人 初始化
     if "digital_human_video_path" not in st.session_state:
         st.session_state.digital_human_video_path = WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_PATH
-        
+
     if "gen_digital_human_checkbox" not in st.session_state:
-        st.session_state.gen_digital_human_checkbox = get_server_plugins_info_api()['digital_human']
+        st.session_state.gen_digital_human_checkbox = get_server_plugins_info_api()["digital_human"]
 
     if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
         # 清除 1 小时之前的所有视频
@@ -285,7 +260,6 @@ def init_asr():
         delete_old_files(WEB_CONFIGS.ASR_WAV_SAVE_PATH)
 
     st.session_state.asr_text_cache = ""
-
 
 
 def main():
@@ -320,8 +294,8 @@ def main():
     init_asr()
 
     if "enable_agent_checkbox" not in st.session_state:
-        st.session_state.enable_agent_checkbox = get_server_plugins_info_api()['agent']
-        
+        st.session_state.enable_agent_checkbox = get_server_plugins_info_api()["agent"]
+
         if st.session_state.enable_agent_checkbox == False:
             WEB_CONFIGS.ENABLE_AGENT = False
 
@@ -462,7 +436,12 @@ def update_product_info(
 
         st.write("更新商品数据库...")
         upload_product_api(
-            product_name_input, heightlight_input, str(image_save_path), str(instruct_save_path), departure_place, delivery_company
+            product_name_input,
+            heightlight_input,
+            str(image_save_path),
+            str(instruct_save_path),
+            departure_place,
+            delivery_company,
         )
 
         # 更新状态
