@@ -280,14 +280,14 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 2. 部署
 
-| 服务名称 | 显存 |
-| :-: | :-: |
-| TTS | 2G （1668MB） |
-| 数字人 | 5G （4734MB） |
-| ASR | 5.5G （5562MB） |
-| RAG | 2G （1974MB） |
-| LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) | 16G （16060MB）</br>  建议使用 40G 显卡|
-| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡|
+|                                              服务名称                                               |                  显存                   |
+| :-------------------------------------------------------------------------------------------------: | :-------------------------------------: |
+|                                                 TTS                                                 |              2G （1668MB）              |
+|                                               数字人                                                |              5G （4734MB）              |
+|                                                 ASR                                                 |             5.5G （5562MB）             |
+|                                                 RAG                                                 |              2G （1974MB）              |
+|      LLM - [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | 16G （16060MB）</br>  建议使用 40G 显卡 |
+| LLM - [lelemiao-7b-4bit](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | 6.5G （6406MB）</br> 可以适配 24G 显卡  |
 
 默认是用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，如果您的机器是 24G 的显卡，请使用以下命令 ：
 
@@ -851,8 +851,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     id: 1
 ...
 ```
-
-**Enjoy ！**
 
 ### 如何自定义数字人
 
