@@ -856,9 +856,9 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ### 如何自定义数字人
 
-本项目支持如何自定义数字人，您可以根据教程自行修改 SD 正反向提示词生成新的数字人，然后修改配置即可。
+本项目支持自定义数字人，支持两种情况：
 
-- 从零开始生成数字人：[ComfyUI 数字人生成](./doc/digital_human/README.md) 
+- 从零开始生成数字人：您可以根据教程 [ComfyUI 数字人生成](./doc/digital_human/README.md) 自行修改 SD 正反向提示词从零开始生成新的数字人，然后修改配置即可。
 - 已有数字人视频，直接修改配置使用： [配置数字人视频路径](./doc/digital_human/README.md#配置数字人视频路径)
 
 ### 如何替换自己的 TTS 
