@@ -863,22 +863,24 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ### 如何替换自己的 TTS 
 
-本项目使用的事 GPT-SoVITs 来实现 TTS，支持替换自己基于 GPT-SoVITs 微调的模型替换，只需几步即可实现
+本项目使用 [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) 来实现 TTS，支持替换自己基于 GPT-SoVITs 微调的模型替换，只需几步即可实现：
 
-1. 将微调好的 `.ckpt` 和 `.pth` 放到 `./weights/gpt_sovits_weights/star` 文件夹中，**注意，每个模型类型有且只有一个，如果多余一个则取第一个**，最终路径：
+1. 将微调好的 `xxx.ckpt` 和 `xxx.pth` 放到 `./weights/gpt_sovits_weights/star` 文件夹中，**注意，每个模型类型有且只有一个，如果多余一个则取第一个**
 
 2. 将参考音频放到 `./weights/gpt_sovits_weights/star/参考音频` 文件夹中，
 
-文件名规范：`${心情描述}-${参考音频的文字，需要标点符号}.wav`, **一定要有 `-` 和 `.wav` 结尾！**
+文件名规范：`${心情描述}-${参考音频的文字，需要标点符号}.wav`, **心情描述后一定要有 `-` 隔开，同时要以 `.wav` 座位后缀名！**
 
-eg. `激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav`
+例子：`激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav`
 
-3. 检查文件：完成上面两步，路径应该是这样的：
+3. 检查
+ 
+完成上面两步，路径应该是这样的：
 
 ```bash
 ./weights/gpt_sovits_weights/star
 |-- 参考音频
-|   `-- ${心情描述}-${参考音频的文字，需要标点符号}.wav  # 一定要有 - 和 .wav 结尾
+|   `-- ${心情描述}-${参考音频的文字，需要标点符号}.wav  # 心情描述后一定要有 `-` 隔开，同时要以 `.wav` 座位后缀名！
 |-- 您微调的.ckpt  # 有且只有一个 .ckpt !
 |-- 您微调的.pth  # 有且只有一个 .pth !
 ```
@@ -887,17 +889,17 @@ eg. `激动说话-列车巡游银河，我不一定都能帮上忙，但只要�
 
 ```diff
 -TTS_INF_NAME: str = "激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav"
-+TTS_INF_NAME: str = "${心情描述}-${参考音频的文字，需要标点符号}.wav"
++TTS_INF_NAME: str = "参考音频文件名，例子如上"
 ```
 
-5. 启动 TTS 服务，可以在终端看到程序使用的模型和参考音频、参考文本：
+5. 启动 TTS 服务，启动过程可以在终端看到程序使用的模型、参考音频和参考文本 以便确认：
 
 ```bash
 ============ TTS 模型信息 ============
 gpt_path dir = weights/gpt_sovits_weights/star/艾丝妲-e10.ckpt
 sovits_path dir = weights/gpt_sovits_weights/star/艾丝妲_e25_s925.pth
 ref_wav_path = weights/gpt_sovits_weights/star/参考音频/激动说话-列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。.wav
-prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和
+prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。
 ====================================
 ```
 
