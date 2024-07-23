@@ -124,12 +124,12 @@ services:
       - -c
       - |
         nvidia-smi
-        lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b-4bit \
+        lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                       --server-port 23333 \
                       --model-name internlm2 \
                       --session-len 32768 \
                       --cache-max-entry-count 0.1 \
-                      --model-format awq
+                      --model-format hf
     restart: always
 
   base:
