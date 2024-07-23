@@ -102,7 +102,10 @@ license: Apache License 2.0
     - [三、训练](#三训练)
     - [四、说明书生成](#四说明书生成)
     - [五、RAG 向量数据库](#五rag-向量数据库)
-    - [六、部署](#六部署)
+    - [六、模型合并 + 量化](#六模型合并--量化)
+    - [七、启动 Web APP](#七启动-web-app)
+      - [Docker-Compose（推荐）](#docker-compose推荐-1)
+      - [宿主机直接部署](#宿主机直接部署-1)
   - [🔧 自定义](#-自定义)
     - [如何添加商品](#如何添加商品)
     - [如何自定义数字人](#如何自定义数字人)
@@ -200,7 +203,7 @@ pip install -r requirements.txt
 <details close>
 <summary><b>前后端分离版本 ( > v0.7.1 )</b>：适合分布式部署，可以配置负载均衡，更适合生产环境。</summary>
 
-**注意**：每个服务都要用一个 terminal 去启动，后面会使用 docker-compose 串起来
+**注意**：每个服务都要用一个 terminal 去启动
 
 1. TTS 服务
 
@@ -706,7 +709,7 @@ python feature_store.py
 
 代码中的 `fix_system_error` 方法会自动解决 `No module named 'faiss.swigfaiss_avx2` 的问题
 
-### 六、部署
+### 六、模型合并 + 量化
 
 1. 将 pth 转为 HF 格式的模型
 
@@ -756,11 +759,38 @@ python ./benchmark/get_benchmark_report.py
 +---------------------------------+------------------------+-----------------+
 ```
 
-6. 启动 Web APP
+### 七、启动 Web APP
 
-- 前后端分离版本 ( > v0.7.1 )：
+#### Docker-Compose（推荐）
 
-**注意**：每个服务都要用一个 terminal 去启动，后面会使用 docker-compose 串起来
+```bash
+git clone https://github.com/PeterH0323/Streamer-Sales.git
+
+docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
+
+docker-compose up
+```
+
+#### 宿主机直接部署
+
+- 环境搭建：
+```bash
+git clone https://github.com/PeterH0323/Streamer-Sales.git
+cd Streamer-Sales
+conda env create -f environment.yml
+conda activate streamer-sales
+pip install -r requirements.txt
+
+```
+
+**注意**：如果您发现下载权重经常 timeout ，参考 [权重文件结构](./weights/README.md) 文档，文档内已有超链接可访问源模型路径，可进行自行下载
+
+启动分为两种方式：
+
+<details close>
+<summary><b>前后端分离版本 ( > v0.7.1 )</b>：适合分布式部署，可以配置负载均衡，更适合生产环境。</summary>
+
+**注意**：每个服务都要用一个 terminal 去启动
 
 1. TTS 服务
 
@@ -781,13 +811,13 @@ uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002
 ```bash
 conda activate streamer-sales
 uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
-
 ```
 
 4. LLM 服务
 
 ```bash
 conda activate streamer-sales
+export MODELSCOPE_CACHE="./weights/llm_weights"
 export LMDEPLOY_USE_MODELSCOPE=True
 lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --server-port 23333 \
@@ -796,6 +826,13 @@ lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --cache-max-entry-count 0.1 \
                           --model-format hf
 ```
+
+使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署建议使用 40G 显存机器。
+
+如果您的机器是 24G 的显卡，需要换成 4bit 模型，修改命令中的两处地方就行：
+
+- `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
+- `--model-format hf` -> `--model-format awq`
 
 5. 中台服务
 
@@ -816,7 +853,10 @@ conda activate streamer-sales
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860 
 ```
 
-- 前后端融合版本 ( <= v0.7.1 )：
+</details>
+
+<details close>
+<summary><b>前后端融合版本 ( <= v0.7.1 )</b>：适合初学者或者只是想部署玩玩的用户</summary>
 
 ```bash
 
@@ -829,8 +869,7 @@ export WEATHER_API_KEY="${天气 API key}"
 streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
-使用浏览器打开 `http://127.0.0.1:7860` 即可访问 Web 页面
-
+</details>
 
 ## 🔧 自定义
 
