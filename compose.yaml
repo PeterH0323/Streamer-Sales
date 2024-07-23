@@ -28,10 +28,6 @@ services:
       - -c
       - |
         nvidia-smi
-        cd ~
-        rm -rf nltk_data
-        cp -r /workspace/Streamer-Sales/weights/nltk_data/nltk_data .
-        cd /workspace/Streamer-Sales/
         uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001
     restart: always
 
@@ -152,6 +148,11 @@ services:
       - asr
     environment:
       HF_ENDPOINT: "https://hf-mirror.com"
+
+      # Agent Key (如果没有请忽略)
+      # DELIVERY_TIME_API_KEY: "${快递 EBusinessID},${快递 api_key}"
+      # WEATHER_API_KEY: "${天气 API key}"
+
     deploy:
       resources:
         reservations:
