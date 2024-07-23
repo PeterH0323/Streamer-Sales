@@ -1,0 +1,17 @@
+# Deploy
+modelscope==1.14.0
+
+# Digital human
+mmengine==0.10.4
+
+-f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
+mmcv==2.1.0
+
+mmdet==3.3.0
+mmpose==1.3.1
+diffusers==0.27.2
+wget==3.2
+
+# Web app 2.0
+fastapi[all]==0.111.0
+sse-starlette==2.1.0

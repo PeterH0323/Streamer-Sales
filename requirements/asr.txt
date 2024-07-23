@@ -1,0 +1,10 @@
+# Deploy
+modelscope==1.14.0
+
+# ASR
+funasr==1.0.27
+streamlit-audiorecorder==0.0.5
+
+# Web app 2.0
+fastapi[all]==0.111.0
+sse-starlette==2.1.0

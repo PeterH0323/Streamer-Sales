@@ -1,6 +1,8 @@
 # 进入虚拟环境
 conda activate streamer-sales
 
+# CUDA_VISIBLE_DEVICES
+export HF_ENDPOINT="https://hf-mirror.com"
 
 # ========================== 后端 =============================
 
@@ -15,6 +17,7 @@ uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003
 
 # LLM
 export LMDEPLOY_USE_MODELSCOPE=True
+export MODELSCOPE_CACHE="./weights/llm_weights"
 lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
                           --server-port 23333 \
                           --model-name internlm2 \

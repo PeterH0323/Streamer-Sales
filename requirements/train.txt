@@ -1,0 +1,4 @@
+# Train
+xtuner[deepspeed]==0.1.19
+lmdeploy==0.4.0
+modelscope==1.14.0
