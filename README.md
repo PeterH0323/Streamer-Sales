@@ -179,10 +179,16 @@ license: Apache License 2.0
 ```bash
 git clone https://github.com/PeterH0323/Streamer-Sales.git
 
+cd Streamer-Sales
 docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
 
 docker-compose up
 ```
+
+> [!NOTE] 
+> 如果出现错误： 
+> 
+> 第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
 
 #### 宿主机直接部署
 
