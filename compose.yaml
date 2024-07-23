@@ -14,6 +14,7 @@ services:
     networks:
       - streamer-sales-network
     environment:
+      USING_DOCKER_COMPOSE: "true"
       HF_ENDPOINT: "https://hf-mirror.com"
       LANG: "en_US.UTF-8"
     deploy:
@@ -45,6 +46,7 @@ services:
     networks:
       - streamer-sales-network
     environment:
+      USING_DOCKER_COMPOSE: "true"
       HF_ENDPOINT: "https://hf-mirror.com"
     deploy:
       resources:
@@ -75,6 +77,7 @@ services:
     networks:
       - streamer-sales-network
     environment:
+      USING_DOCKER_COMPOSE: "true"
       HF_ENDPOINT: "https://hf-mirror.com"
     deploy:
       resources:
@@ -105,6 +108,7 @@ services:
     networks:
       - streamer-sales-network
     environment:
+      USING_DOCKER_COMPOSE: "true"
       LMDEPLOY_USE_MODELSCOPE: "True"
       MODELSCOPE_CACHE: "./weights/llm_weights"
       HF_ENDPOINT: "https://hf-mirror.com"
@@ -147,6 +151,7 @@ services:
       - digital_human
       - asr
     environment:
+      USING_DOCKER_COMPOSE: "true"
       HF_ENDPOINT: "https://hf-mirror.com"
 
       # Agent Key (如果没有请忽略)
@@ -165,6 +170,7 @@ services:
       - -c
       - |
         nvidia-smi
+        sleep 60
         uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000
     restart: always
 
@@ -181,13 +187,15 @@ services:
       - "7860:7860"
     networks:
       - streamer-sales-network
+    environment:
+      USING_DOCKER_COMPOSE: "true"
     depends_on:
       - base
     command:
       - /bin/bash
       - -c
       - |
-        nvidia-smi
+        sleep 90
         streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     restart: always
 

@@ -93,16 +93,25 @@ class ApiConfig:
     # ==================================================================
     #                               URL 配置
     # ==================================================================
-    TTS_URL: str = "http://0.0.0.0:8001/tts"
-    DIGITAL_HUMAN_URL: str = "http://0.0.0.0:8002/digital_human"
-    ASR_URL: str = "http://0.0.0.0:8003/asr"
-    LLM_URL: str = "http://0.0.0.0:23333"
+    USING_DOCKER_COMPOSE: bool = os.environ.get("USING_DOCKER_COMPOSE", "false") == "true"
     
-    CHAT_URL: str = "http://0.0.0.0:8000/streamer-sales/chat"
-    UPLOAD_PRODUCT_URL: str = "http://0.0.0.0:8000/streamer-sales/upload_product"
-    GET_PRODUCT_INFO_URL: str = "http://0.0.0.0:8000/streamer-sales/get_product_info"
-    GET_SALES_INFO_URL: str = "http://0.0.0.0:8000/streamer-sales/get_sales_info"
-    PLUGINS_INFO_URL: str = "http://0.0.0.0:8000/streamer-sales/plugins_info"
+    # 路由名字和 compose.yaml 服务名对应
+    TTS_ROUTER_NAME: str = "tts" if USING_DOCKER_COMPOSE else "0.0.0.0"
+    DIGITAL_ROUTER_NAME: str = "digital_human" if USING_DOCKER_COMPOSE else "0.0.0.0"
+    ASR_ROUTER_NAME: str = "asr" if USING_DOCKER_COMPOSE else "0.0.0.0"
+    LLM_ROUTER_NAME: str = "llm" if USING_DOCKER_COMPOSE else "0.0.0.0"
+    BASE_ROUTER_NAME: str = "base" if USING_DOCKER_COMPOSE else "0.0.0.0"
+    
+    TTS_URL: str = f"http://{TTS_ROUTER_NAME}:8001/tts"
+    DIGITAL_HUMAN_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human"
+    ASR_URL: str = f"http://{ASR_ROUTER_NAME}:8003/asr"
+    LLM_URL: str = f"http://{LLM_ROUTER_NAME}:23333"
+    
+    CHAT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/chat"
+    UPLOAD_PRODUCT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/upload_product"
+    GET_PRODUCT_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/get_product_info"
+    GET_SALES_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/get_sales_info"
+    PLUGINS_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/plugins_info"
 
 
 # 实例化
