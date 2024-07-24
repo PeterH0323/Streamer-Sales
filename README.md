@@ -296,17 +296,19 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 1. 我的开发机器配置：
 
-|  组件名  |                   型号/版本                   |
-| :------: | :-------------------------------------------: |
-|   CPU    | Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz |
-|   内存   |              112G，最小需要 64G               |
-|   磁盘   |                   500G SSD                    |
-|   显卡   |    A100，当然 RTX4090、RTX3090 也是可以的     |
-|  Ubuntu  |              Ubuntu 20.04.6 LTS               |
-|   CUDA   |                     12.2                      |
-| 显卡驱动 |                   535.54.03                   |
-|  Python  |                     3.10                      |
-|  conda   |       23.9.0，conda 版本不需要完全一样        |
+|     组件名     |                   型号/版本                   |
+| :------------: | :-------------------------------------------: |
+|      CPU       | Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz |
+|      内存      |              112G，最小需要 64G               |
+|      磁盘      |                   500G SSD                    |
+|      显卡      |    A100，当然 RTX4090、RTX3090 也是可以的     |
+|     Ubuntu     |              Ubuntu 20.04.6 LTS               |
+|      CUDA      |                     12.2                      |
+|    显卡驱动    |                   535.54.03                   |
+|     Python     |                     3.10                      |
+|     conda      |       23.9.0，conda 版本不需要完全一样        |
+|     docker     |                    24.0.7                     |
+| docker-compose |                    1.29.0                     |
 
 
 2. 微调显存
