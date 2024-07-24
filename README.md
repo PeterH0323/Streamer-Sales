@@ -89,7 +89,7 @@ license: Apache License 2.0
   - [📰 媒体转载](#-媒体转载)
   - [🎨 快速体验](#-快速体验)
     - [在线体验](#在线体验)
-    - [本地](#本地)
+    - [本地部署](#本地部署)
       - [Docker-Compose（推荐）](#docker-compose推荐)
       - [宿主机直接部署](#宿主机直接部署)
   - [🖥️ 配置需求](#️-配置需求)
@@ -172,7 +172,7 @@ license: Apache License 2.0
 
 因为 Agent API 需要计费的关系和显存大小的关系，上面失能了 Agent 和 ASR，但项目本身是支持的，可以自行购买 API 服务和本地部署来体验。
 
-### 本地
+### 本地部署
 
 #### Docker-Compose（推荐）
 
@@ -299,7 +299,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 |     组件名     |                   型号/版本                   |
 | :------------: | :-------------------------------------------: |
 |      CPU       | Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz |
-|      内存      |              112G，最小需要 64G               |
+|      内存      |              128G，最小需要 64G               |
 |      磁盘      |                   500G SSD                    |
 |      显卡      |    A100，当然 RTX4090、RTX3090 也是可以的     |
 |      系统      |              Ubuntu 20.04.6 LTS               |
