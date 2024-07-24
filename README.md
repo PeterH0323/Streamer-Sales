@@ -296,7 +296,7 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 我的开发机器配置：
 
-|          |                                               |
+|  组件名  |                   型号/版本                   |
 | :------: | :-------------------------------------------: |
 |   CPU    | Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz |
 |   内存   |              112G，最小需要 64G               |
