@@ -189,6 +189,7 @@ docker-compose up
 > 如果出现错误： 
 > 
 > 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
+> 
 > 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
 
 #### 宿主机直接部署
