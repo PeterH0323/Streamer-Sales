@@ -301,9 +301,11 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 |   CPU    | Intel(R) Xeon(R) Platinum 8369B CPU @ 2.90GHz |
 |   内存   |              112G，最小需要 64G               |
 |   磁盘   |                   500G SSD                    |
+|   显卡   |    A100，当然 RTX4090、RTX3090 也是可以的     |
 |  Ubuntu  |              Ubuntu 20.04.6 LTS               |
 |   CUDA   |                     12.2                      |
 | 显卡驱动 |                   535.54.03                   |
+|  Python  |                     3.10                      |
 
 1. 微调
 
