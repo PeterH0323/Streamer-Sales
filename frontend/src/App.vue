@@ -1,7 +1,9 @@
 <template>
   <el-container class="layout-container-demo">
     <!-- 侧边栏 -->
-    <AslideComponent />
+    <el-scrollbar>
+      <AslideComponent />
+    </el-scrollbar>
 
     <el-container>
       <el-header style="text-align: right; font-size: 12px">
