@@ -5,33 +5,8 @@
       <AslideComponent />
     </el-scrollbar>
 
-    <el-container>
-      <el-header style="text-align: right; font-size: 12px">
-        <div>
-          <!-- 导航栏左侧 -->
-          <!-- 面包屑 -->
-          <BreadCrumb />
-        </div>
-
-        <div>
-          <!-- 导航栏右边 -->
-          <!-- 退出登录 -->
-          <el-dropdown trigger="click">
-            <span class="el-dropdown-link navbar-bg-hover">
-              <img :src="userAvatar" :style="avatarsStyle" />
-              <p v-if="username" class="dark:text-white">{{ username }}</p>
-            </span>
-            <template #dropdown>
-              <el-dropdown-menu class="logout">
-                <el-dropdown-item @click="logout">
-                  <IconifyIconOffline :icon="LogoutCircleRLine" style="margin: 5px" />
-                  退出系统
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </el-header>
+    <el-container class="header-and-context-container">
+      <HeaderComponent />
 
       <el-main>
         <el-scrollbar>
@@ -47,17 +22,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-
 import AslideComponent from '@/components/AslideComponent.vue'
-import BreadCrumb from '@/components/BreadCrumb.vue'
-
-const username = ref('小明')
-const userAvatar = '@/assets/logo.png"'
-const avatarsStyle = { marginRight: '10px' }
+import HeaderComponent from '@/components/HeaderComponent.vue'
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /*
   进入和离开动画可以使用不同
   持续时间和速度曲线。
@@ -76,27 +45,7 @@ const avatarsStyle = { marginRight: '10px' }
   opacity: 0;
 }
 
-/* .layout-container-demo .el-header {
-  position: relative;
-  background-color: var(--el-color-primary-light-7);
-  color: var(--el-text-color-primary);
-} */
-
-/* .layout-container-demo .el-aside {
-  color: var(--el-text-color-primary);
-  background: var(--el-color-primary-light-8);
-} */
-
-.layout-container-demo .toolbar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  right: 20px;
+.header-and-context-container {
+  flex-direction: column;
 }
-
-/* 
-.el-menu.hover {
-  background-color: #ffffff;
-} */
 </style>
