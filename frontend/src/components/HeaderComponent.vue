@@ -1,7 +1,7 @@
 <template>
   <el-header>
     <!-- 菜单折叠图标 -->
-    <el-icon>
+    <el-icon @click="isCollapse = !isCollapse">
       <Fold v-show="isCollapse" />
       <Expand v-show="!isCollapse" />
     </el-icon>
@@ -34,11 +34,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Menu as Fold, Expand } from '@element-plus/icons-vue'
+import { Fold, Expand } from '@element-plus/icons-vue'
 
 import { ref, reactive, toRefs } from 'vue'
 
-const isCollapse = ref(false)
+import { isCollapse } from '@/utils/navbar'
+
 import BreadCrumb from '@/components/BreadCrumb.vue'
 
 const username = ref('小明')

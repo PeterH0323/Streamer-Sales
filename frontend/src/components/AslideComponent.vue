@@ -55,11 +55,8 @@
 <script lang="ts" setup>
 import { Menu as Present, User, Mic, Setting, House, ShoppingCart } from '@element-plus/icons-vue'
 
-import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-
-// 是否折叠侧边栏
-const isCollapse = ref(false)
+import { isCollapse } from '@/utils/navbar'
 
 const route = useRoute()
 </script>
