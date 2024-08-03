@@ -35,16 +35,14 @@
 
 <script lang="ts" setup>
 import { Fold, Expand } from '@element-plus/icons-vue'
-
 import { ref, reactive, toRefs } from 'vue'
-
 import { isCollapse } from '@/utils/navbar'
 
 import BreadCrumb from '@/components/BreadCrumb.vue'
 
 const username = ref('小明')
-const userAvatar = '@/assets/logo.png"'
-const avatarsStyle = { marginRight: '10px' }
+// const userAvatar = '@/assets/logo.png"'
+// const avatarsStyle = { marginRight: '10px' }
 
 const state = reactive({
   circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'

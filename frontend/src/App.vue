@@ -1,12 +1,13 @@
 <template>
-  <el-container class="layout-container-demo">
+  <el-container>
     <!-- 侧边栏 -->
     <el-scrollbar>
       <AslideComponent />
     </el-scrollbar>
 
     <el-container class="header-and-context-container">
-      <HeaderComponent />
+      <!-- 导航栏 -->
+      <NavbarComponent />
 
       <el-main>
         <el-scrollbar>
@@ -23,7 +24,7 @@
 
 <script lang="ts" setup>
 import AslideComponent from '@/components/AslideComponent.vue'
-import HeaderComponent from '@/components/HeaderComponent.vue'
+import NavbarComponent from '@/components/NavbarComponent.vue'
 </script>
 
 <style scoped lang="scss">
