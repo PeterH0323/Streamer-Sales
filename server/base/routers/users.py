@@ -16,4 +16,4 @@ class UserItem(BaseModel):
 @router.post("/login")
 async def user_login(user_item: UserItem):
     logger.info(f"Got user info = {user_item}")
-    return {"success": True, "message": "success", "state": 1, "content": {"accest_token": "46541354846131"}}
+    return {"success": True, "message": "success", "state": 1, "content": {"access_token": "46541354846131"}}

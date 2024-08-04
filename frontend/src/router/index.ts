@@ -13,13 +13,16 @@ const router = createRouter({
       path: '/home',
       name: 'Home',
       component: () => import('@/components/LayoutComponent.vue'),
-      meta: { title: '主页' }
+      meta: {
+        title: '主页', // 面包屑显示标题
+        requiresAuth: true // 是否需要登录验证，配置根路由即可，子路由会继承
+      }
     },
     {
       path: '/product',
       name: 'Product',
       component: () => import('@/views/ProductInfoView.vue'),
-      meta: { title: '商品管理' },
+      meta: { title: '商品管理', requiresAuth: true },
       children: [
         {
           path: '/product/list',
@@ -42,7 +45,7 @@ const router = createRouter({
       path: '/system',
       name: 'System',
       component: () => import('@/views/SystemView.vue'),
-      meta: { title: '系统配置' },
+      meta: { title: '系统配置', requiresAuth: true },
       children: [
         {
           path: '/system/model',
@@ -71,7 +74,7 @@ const router = createRouter({
       path: '/digital-human',
       name: 'DigitalHuman',
       component: () => import('@/views/DigitalHumanView.vue'),
-      meta: { title: '数字人配置' },
+      meta: { title: '数字人配置', requiresAuth: true },
       children: [
         {
           path: '/digital-human/list',
@@ -93,7 +96,7 @@ const router = createRouter({
     {
       path: '/streaming',
       name: 'Streaming',
-      meta: { title: '直播配置' },
+      meta: { title: '直播配置', requiresAuth: true },
       component: () => import('@/views/StreamingView.vue'),
       children: [
         {
@@ -111,7 +114,7 @@ const router = createRouter({
       path: '/order',
       name: 'Order',
       component: () => import('@/views/OrderView.vue'),
-      meta: { title: '订单总览' },
+      meta: { title: '订单总览', requiresAuth: true },
       children: [
         {
           path: '/order/overview',
@@ -138,7 +141,19 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to) => {
+import { useTokenStore } from '@/stores/userToken'
+
+router.beforeEach((to, from, next) => {
+  //TODO 加入登录验证
+  if (to.matched.some((r) => r.meta?.requiresAuth)) {
+    // 登录状态缓存
+    const tokenStore = useTokenStore()
+
+    if (!tokenStore.token.access_token) {
+      // 没有登录，跳转登录页面，同时记录 想去的地址 to.fullPath，方便执行登陆后跳转回去
+      next({ name: 'Login', query: { redirect: to.fullPath } })
+    }
+  }
   // 动态更改页面 title
   to.matched.some((item) => {
     if (!item.meta.title) return ''
@@ -147,7 +162,8 @@ router.beforeEach((to) => {
     if (Title) document.title = `${item.meta.title} | ${Title}`
     else document.title = item.meta.title as string
   })
-  //TODO 加入登录验证
+
+  next()
 })
 
 export default router
