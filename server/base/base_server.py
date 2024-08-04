@@ -10,9 +10,12 @@ from ..web_configs import WEB_CONFIGS
 from .modules.rag.rag_worker import rebuild_rag_db
 from .server_info import SERVER_PLUGINS_INFO
 from .utils import ChatItem, UploadProductItem, SalesInfo, streamer_sales_process
+from .routers import users
 
 app = FastAPI()
 
+# 注册路由
+app.include_router(users.router)
 
 @app.get("/")
 async def hello():

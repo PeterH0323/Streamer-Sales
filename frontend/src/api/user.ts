@@ -2,7 +2,7 @@ import request_handler from '@/api/base'
 
 // 调用登录接口数据结构定义
 type loginFormType = {
-  name: string
+  username: string
   password: string
   vertify_code?: string
 }
@@ -21,8 +21,6 @@ const login_request = (loginForm: loginFormType) => {
     url: '/user/login',
     data: loginForm
   })
-
-  // return true
 }
 
 export { login_request }
