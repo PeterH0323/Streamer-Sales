@@ -152,6 +152,7 @@ router.beforeEach((to, from, next) => {
     if (!tokenStore.token.access_token) {
       // 没有登录，跳转登录页面，同时记录 想去的地址 to.fullPath，方便执行登陆后跳转回去
       next({ name: 'Login', query: { redirect: to.fullPath } })
+      return
     }
   }
   // 动态更改页面 title
