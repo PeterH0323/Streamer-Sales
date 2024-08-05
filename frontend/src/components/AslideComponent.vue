@@ -1,3 +1,12 @@
+<script lang="ts" setup>
+import { Menu as Present, User, Mic, Setting, House, ShoppingCart } from '@element-plus/icons-vue'
+
+import { useRoute } from 'vue-router'
+import { isCollapse } from '@/utils/navbar'
+
+const route = useRoute()
+</script>
+
 <template>
   <el-aside>
     <el-menu :router="true" :default-active="route.fullPath" :collapse="isCollapse">
@@ -51,15 +60,6 @@
     </el-menu>
   </el-aside>
 </template>
-
-<script lang="ts" setup>
-import { Menu as Present, User, Mic, Setting, House, ShoppingCart } from '@element-plus/icons-vue'
-
-import { useRoute } from 'vue-router'
-import { isCollapse } from '@/utils/navbar'
-
-const route = useRoute()
-</script>
 
 <style lang="scss" scoped>
 // logo 样式

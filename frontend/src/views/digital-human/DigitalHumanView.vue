@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+console.log('DigitalHuman')
 </script>
 
 <template>
-  <div>
-    <router-view />
-  </div>
+  <div>DigitalHumanView</div>
 </template>
 
 <style lang="scss" scoped></style>

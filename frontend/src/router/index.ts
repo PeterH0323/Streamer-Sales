@@ -6,7 +6,7 @@ const router = createRouter({
     {
       path: '/login',
       name: 'Login',
-      component: () => import('@/views/LoginView.vue'),
+      component: () => import('@/views/login/LoginView.vue'),
       meta: { title: '登录页' }
     },
     {
@@ -14,7 +14,7 @@ const router = createRouter({
       redirect: {
         name: 'Home'
       },
-      component: () => import('@/components/LayoutComponent.vue'),
+      component: () => import('@/layouts/BaseLayout.vue'),
       meta: {
         requiresAuth: true // 是否需要登录验证，配置根路由即可，子路由会继承
       },
@@ -22,7 +22,7 @@ const router = createRouter({
         {
           path: '/home',
           name: 'Home',
-          component: () => import('@/views/HomeView.vue'),
+          component: () => import('@/views/home/HomeView.vue'),
           meta: {
             title: '主页' // 面包屑显示标题
           }
@@ -33,14 +33,19 @@ const router = createRouter({
         {
           path: '/product/list',
           name: 'ProductList',
-          component: () => import('@/views/ProductInfoView.vue'),
+          component: () => import('@/views/product/ProductInfoView.vue'),
           meta: { title: '商品列表' }
         },
         {
           path: '/product/add',
           name: 'ProductAdd',
-          component: () => import('@/views/ProductInfoView.vue'),
+          component: () => import('@/views/product/ProductInfoView.vue'),
           meta: { title: '新增商品' }
+        },
+        {
+          path: '/product',
+          name: 'Product',
+          redirect: { name: 'ProductList' }
         },
         // ---------------------
         //       系统配置
@@ -48,20 +53,25 @@ const router = createRouter({
         {
           path: '/system/model',
           name: 'SystemModel',
-          component: () => import('@/views/SystemView.vue'),
+          component: () => import('@/views/system/SystemView.vue'),
           meta: { title: '模型配置' }
         },
         {
           path: '/system/word',
           name: 'SystemWord',
-          component: () => import('@/views/SystemView.vue'),
+          component: () => import('@/views/system/SystemView.vue'),
           meta: { title: '敏感词配置' }
         },
         {
           path: '/system/blacklist-question',
           name: 'SystemBlacklistQuestion',
-          component: () => import('@/views/SystemView.vue'),
+          component: () => import('@/views/system/SystemView.vue'),
           meta: { title: '疑问黑名单' }
+        },
+        {
+          path: '/system',
+          name: 'System',
+          redirect: { name: 'SystemModel' }
         },
         // ---------------------
         //       数字人配置
@@ -69,14 +79,19 @@ const router = createRouter({
         {
           path: '/digital-human/list',
           name: 'DigitalHumanList',
-          component: () => import('@/views/DigitalHumanView.vue'),
+          component: () => import('@/views/digital-human/DigitalHumanView.vue'),
           meta: { title: '角色管理' }
         },
         {
           path: '/digital-human/upload',
           name: 'DigitalHumanUpload',
-          component: () => import('@/views/DigitalHumanView.vue'),
+          component: () => import('@/views/digital-human/DigitalHumanView.vue'),
           meta: { title: '角色上传' }
+        },
+        {
+          path: '/digital-human',
+          name: 'DigitalHuman',
+          redirect: { name: 'DigitalHumanList' }
         },
         // ---------------------
         //       直播配置
@@ -84,8 +99,13 @@ const router = createRouter({
         {
           path: '/streaming/overview',
           name: 'StreamingOverview',
-          component: () => import('@/views/StreamingView.vue'),
+          component: () => import('@/views/streaming/StreamingView.vue'),
           meta: { title: '开始直播' }
+        },
+        {
+          path: '/streaming',
+          name: 'Streaming',
+          redirect: { name: 'StreamingOverview' }
         },
         // ---------------------
         //       订单管理
@@ -93,31 +113,8 @@ const router = createRouter({
         {
           path: '/order/overview',
           name: 'OrderOverview',
-          component: () => import('@/views/OrderView.vue'),
+          component: () => import('@/views/order/OrderView.vue'),
           meta: { title: '订单管理' }
-        },
-        // ---------------------
-        //       重定向
-        // ---------------------
-        {
-          path: '/product',
-          name: 'Product',
-          redirect: { name: 'ProductList' }
-        },
-        {
-          path: '/system',
-          name: 'System',
-          redirect: { name: 'productList' }
-        },
-        {
-          path: '/digital-human',
-          name: 'DigitalHuman',
-          redirect: { name: 'DigitalHumanList' }
-        },
-        {
-          path: '/streaming',
-          name: 'Streaming',
-          redirect: { name: 'StreamingOverview' }
         },
         {
           path: '/order',
@@ -129,7 +126,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      component: () => import('@/views/NotFound.vue'),
+      component: () => import('@/views/error/NotFound.vue'),
       meta: { title: '404' }
     }
   ]

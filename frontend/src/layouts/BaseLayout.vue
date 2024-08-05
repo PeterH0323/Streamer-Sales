@@ -1,3 +1,10 @@
+<script lang="ts" setup>
+import AslideComponent from '@/components/AslideComponent.vue'
+import NavbarComponent from '@/components/NavbarComponent.vue'
+
+import { RouterView } from 'vue-router'
+</script>
+
 <template>
   <el-container>
     <!-- 侧边栏 -->
@@ -23,14 +30,7 @@
   </el-container>
 </template>
 
-<script lang="ts" setup>
-import AslideComponent from '@/components/AslideComponent.vue'
-import NavbarComponent from '@/components/NavbarComponent.vue'
-
-import { RouterView } from 'vue-router'
-</script>
-
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .header-and-context-container {
   flex-direction: column;
 }

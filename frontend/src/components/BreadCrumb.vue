@@ -43,3 +43,5 @@ const handleLink = (item) => {
     </el-breadcrumb-item>
   </el-breadcrumb>
 </template>
+
+<style lang="scss" scoped></style>

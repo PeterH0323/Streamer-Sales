@@ -1,31 +1,3 @@
-<template>
-  <div class="login">
-    <el-form
-      :model="loginForm"
-      :rules="rules"
-      label-width="120px"
-      label-position="top"
-      size="large"
-      ref="formRef"
-    >
-      <h2>销冠 —— 卖货主播大模型</h2>
-
-      <!-- prop -> 校验规则的名称 -->
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="loginForm.username" />
-      </el-form-item>
-
-      <el-form-item label="密码" prop="password">
-        <el-input v-model="loginForm.password" />
-      </el-form-item>
-
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit" :loading="isLogining">确认</el-button>
-      </el-form-item>
-    </el-form>
-  </div>
-</template>
-
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
@@ -107,7 +79,35 @@ const onSubmit = async () => {
 }
 </script>
 
-<style lang="scss">
+<template>
+  <div class="login">
+    <el-form
+      :model="loginForm"
+      :rules="rules"
+      label-width="120px"
+      label-position="top"
+      size="large"
+      ref="formRef"
+    >
+      <h2>销冠 —— 卖货主播大模型</h2>
+
+      <!-- prop -> 校验规则的名称 -->
+      <el-form-item label="用户名" prop="username">
+        <el-input v-model="loginForm.username" />
+      </el-form-item>
+
+      <el-form-item label="密码" prop="password">
+        <el-input v-model="loginForm.password" />
+      </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit" :loading="isLogining">确认</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
+</template>
+
+<style lang="scss" scoped>
 .login {
   background-color: #dddddd;
   height: 100vh; // 满屏
