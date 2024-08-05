@@ -24,6 +24,7 @@ class ChatGenConfig(BaseModel):
     temperature: float = 0.7
     repetition_penalty: float = 1.005
 
+
 class SalesInfo(BaseModel):
     # 主播信息
     sales_name: str
@@ -53,17 +54,6 @@ class ChatItem(BaseModel):
     product_info: ProductInfo  # 商品信息
     plugins: PluginsInfo = PluginsInfo()  # 插件信息
     chat_config: ChatGenConfig = ChatGenConfig()
-
-
-class UploadProductItem(BaseModel):
-    user_id: str  # User 识别号，用于区分不用的用户调用
-    request_id: str  # 请求 ID，用于生成 TTS & 数字人
-    name: str
-    heightlight: str
-    image_path: str
-    instruction_path: str
-    departure_place: str
-    delivery_company: str
 
 
 # 加载 LLM 模型
