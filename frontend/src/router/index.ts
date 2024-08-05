@@ -10,20 +10,26 @@ const router = createRouter({
       meta: { title: '登录页' }
     },
     {
-      path: '/home',
-      name: 'Home',
+      path: '/',
+      redirect: {
+        name: 'Home'
+      },
       component: () => import('@/components/LayoutComponent.vue'),
       meta: {
-        title: '主页', // 面包屑显示标题
         requiresAuth: true // 是否需要登录验证，配置根路由即可，子路由会继承
-      }
-    },
-    {
-      path: '/product',
-      name: 'Product',
-      component: () => import('@/views/ProductInfoView.vue'),
-      meta: { title: '商品管理', requiresAuth: true },
+      },
       children: [
+        {
+          path: '/home',
+          name: 'Home',
+          component: () => import('@/views/HomeView.vue'),
+          meta: {
+            title: '主页' // 面包屑显示标题
+          }
+        },
+        // ---------------------
+        //       商品
+        // ---------------------
         {
           path: '/product/list',
           name: 'ProductList',
@@ -35,18 +41,10 @@ const router = createRouter({
           name: 'ProductAdd',
           component: () => import('@/views/ProductInfoView.vue'),
           meta: { title: '新增商品' }
-        }
-      ],
-      redirect: {
-        name: 'ProductList'
-      }
-    },
-    {
-      path: '/system',
-      name: 'System',
-      component: () => import('@/views/SystemView.vue'),
-      meta: { title: '系统配置', requiresAuth: true },
-      children: [
+        },
+        // ---------------------
+        //       系统配置
+        // ---------------------
         {
           path: '/system/model',
           name: 'SystemModel',
@@ -64,18 +62,10 @@ const router = createRouter({
           name: 'SystemBlacklistQuestion',
           component: () => import('@/views/SystemView.vue'),
           meta: { title: '疑问黑名单' }
-        }
-      ],
-      redirect: {
-        name: 'productList'
-      }
-    },
-    {
-      path: '/digital-human',
-      name: 'DigitalHuman',
-      component: () => import('@/views/DigitalHumanView.vue'),
-      meta: { title: '数字人配置', requiresAuth: true },
-      children: [
+        },
+        // ---------------------
+        //       数字人配置
+        // ---------------------
         {
           path: '/digital-human/list',
           name: 'DigitalHumanList',
@@ -87,56 +77,60 @@ const router = createRouter({
           name: 'DigitalHumanUpload',
           component: () => import('@/views/DigitalHumanView.vue'),
           meta: { title: '角色上传' }
-        }
-      ],
-      redirect: {
-        name: 'DigitalHumanList'
-      }
-    },
-    {
-      path: '/streaming',
-      name: 'Streaming',
-      meta: { title: '直播配置', requiresAuth: true },
-      component: () => import('@/views/StreamingView.vue'),
-      children: [
+        },
+        // ---------------------
+        //       直播配置
+        // ---------------------
         {
           path: '/streaming/overview',
           name: 'StreamingOverview',
           component: () => import('@/views/StreamingView.vue'),
           meta: { title: '开始直播' }
-        }
-      ],
-      redirect: {
-        name: 'StreamingOverview'
-      }
-    },
-    {
-      path: '/order',
-      name: 'Order',
-      component: () => import('@/views/OrderView.vue'),
-      meta: { title: '订单总览', requiresAuth: true },
-      children: [
+        },
+        // ---------------------
+        //       订单管理
+        // ---------------------
         {
           path: '/order/overview',
           name: 'OrderOverview',
           component: () => import('@/views/OrderView.vue'),
           meta: { title: '订单管理' }
+        },
+        // ---------------------
+        //       重定向
+        // ---------------------
+        {
+          path: '/product',
+          name: 'Product',
+          redirect: { name: 'ProductList' }
+        },
+        {
+          path: '/system',
+          name: 'System',
+          redirect: { name: 'productList' }
+        },
+        {
+          path: '/digital-human',
+          name: 'DigitalHuman',
+          redirect: { name: 'DigitalHumanList' }
+        },
+        {
+          path: '/streaming',
+          name: 'Streaming',
+          redirect: { name: 'StreamingOverview' }
+        },
+        {
+          path: '/order',
+          name: 'Order',
+          redirect: { name: 'OrderOverview' }
         }
-      ],
-      redirect: {
-        name: 'OrderOverview'
-      }
-    },
-    {
-      path: '/',
-      redirect: {
-        name: 'Home'
-      }
+      ]
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      component: () => import('@/views/NotFound.vue')
+      component: () => import('@/views/NotFound.vue'),
+      meta: { title: '404' }
     }
   ]
 })

@@ -9,6 +9,7 @@
       <!-- 导航栏 -->
       <NavbarComponent />
 
+      <!-- 信息页 -->
       <el-main>
         <el-scrollbar>
           <router-view v-slot="{ Component }">
@@ -25,6 +26,8 @@
 <script lang="ts" setup>
 import AslideComponent from '@/components/AslideComponent.vue'
 import NavbarComponent from '@/components/NavbarComponent.vue'
+
+import { RouterView } from 'vue-router'
 </script>
 
 <style scoped lang="scss">
