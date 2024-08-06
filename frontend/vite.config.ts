@@ -8,14 +8,8 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   server: {
     proxy: {
-      '/user': {
-        target: loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
-        changeOrigin: true
-      },
-      '/product': {
-        target: loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
-        changeOrigin: true
-      }
+      '/user': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
+      '/products': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL
     }
   },
   plugins: [vue(), vueDevTools()],

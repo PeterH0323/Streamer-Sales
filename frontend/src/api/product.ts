@@ -37,9 +37,11 @@ interface ProductListResultType<T> {
 
 // 查询接口
 const productListRequest = (params: ProductListType) => {
+  console.info(params)
+
   return request_handler<ProductListResultType<ProductData>>({
     method: 'POST',
-    url: '/product/list',
+    url: '/products/list',
     data: { current_page: params.currentPage, page_size: params.pageSize }
   })
 }
@@ -56,8 +58,9 @@ const queriedResult = ref<ProductListResultType<ProductData>>(
 )
 
 // 查询 - 方法
-const getProductList = async (params: ProductListType = {}) => {
-  Object.assign(queryCondition.value, params) // 用于外部灵活使用
+const getProductList = async () => {
+  // params: ProductListType = {}
+  // Object.assign(queryCondition.value, params) // 用于外部灵活使用
   const { data } = await productListRequest(queryCondition.value)
   if (data.state === 0) {
     queriedResult.value = data

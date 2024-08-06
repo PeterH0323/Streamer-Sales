@@ -9,8 +9,8 @@ from ...web_configs import WEB_CONFIGS
 from ..modules.rag.rag_worker import rebuild_rag_db
 
 router = APIRouter(
-    prefix="/product",
-    tags=["product"],
+    prefix="/products",
+    tags=["products"],
     responses={404: {"description": "Not found"}},
 )
 
