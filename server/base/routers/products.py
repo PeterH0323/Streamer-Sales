@@ -27,8 +27,9 @@ class UploadProductItem(BaseModel):
 
 
 class ProductQueryItem(BaseModel):
-    currentPage: int = 1  # 当前页号
-    pageSize: int = 5  # 每页记录数
+    currentPage: int  # 当前页号
+    pageSize: int  # 每页记录数
+    productName: str = ""  # 每页记录数
 
 
 @router.post("/list")
@@ -45,24 +46,29 @@ def get_product_info_api(product_query_item: ProductQueryItem):
     for key in product_info_name_list:
         info = product_info_dict[key]
         info.update({"product_name": key})
+
+        if product_query_item.productName != "" and product_query_item.productName not in key:
+            # 如果有商品名则需要进行过滤处理，实现搜索功能
+            continue
+
         product_list.append(info)
     product_total_size = len(product_list)
-    
+
     # 根据页面大小返回
-    # 前端传过来的 currentPage 最小 = 1 
+    # 前端传过来的 currentPage 最小 = 1
     end_index = product_query_item.currentPage * product_query_item.pageSize
     start_index = (product_query_item.currentPage - 1) * product_query_item.pageSize
     logger.info(f"start_index = {start_index}")
     logger.info(f"end_index = {end_index}")
-    
+
     if start_index == 0 and end_index > len(product_list):
         # 单页数量超过商品数，直接返回
         pass
     elif end_index > len(product_info_dict):
-        product_list = product_list[start_index : ]
+        product_list = product_list[start_index:]
     else:
-        product_list = product_list[start_index : end_index]
-    
+        product_list = product_list[start_index:end_index]
+
     logger.info(product_list)
     logger.info(f"len {len(product_list)}")
     return {

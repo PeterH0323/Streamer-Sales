@@ -11,7 +11,7 @@ getProductList()
       <!-- 头部查询 -->
       <el-form :inline="true" :model="queriedResult.product">
         <el-form-item label="商品名称">
-          <el-input v-model="queriedResult.product_name" placeholder="商品名称" clearable />
+          <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
         </el-form-item>
         <!-- <el-form-item label="分类">
           <el-select v-model="queriedResult.class" placeholder="">
@@ -20,7 +20,6 @@ getProductList()
           </el-select>
         </el-form-item> -->
         <el-form-item>
-          <!-- TODO 支持商品模糊查询 -->
           <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
             >查询</el-button
           >
@@ -59,8 +58,8 @@ getProductList()
         :background="true"
         layout="total, sizes, prev, pager, next, jumper"
         :total="queriedResult.totalSize || 0"
-        @size-change="(pageSize) => getProductList({ pageSize, currentPage: 1 })"
-        @current-change="(currentPage) => getProductList({ currentPage })"
+        @size-change="(pageSize: number) => getProductList({ pageSize, currentPage: 1 })"
+        @current-change="(currentPage: number) => getProductList({ currentPage })"
       />
     </template>
   </el-card>

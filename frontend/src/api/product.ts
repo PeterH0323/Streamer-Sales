@@ -7,12 +7,14 @@ type ProductListType = {
   // accessToken: string // 登录验证 header
   currentPage?: number // 当前页号
   pageSize?: number // 每页记录数
+  productName?: string // 商品名称
+  class?: string // 商品分类
 }
 
 interface ProductListItem {
   user_id: string // User 识别号，用于区分不用的用户调用
   request_id: string // 请求 ID，用于生成 TTS & 数字人
-  product_id: int
+  product_id: number
   product_name: string
   heighlights: string[]
   image_path: string
@@ -58,12 +60,10 @@ const queryCondition = ref<ProductListType>({
 } as ProductListType)
 
 // 查询 - 结果
-const queriedResult = ref<ProductListResultType<ProductData>>(
-  {} as ProductListResultType<ProductData>
-)
+const queriedResult = ref<ProductData>({} as ProductData)
 
 // 查询 - 方法
-const getProductList = async (params: ProductListType) => {
+const getProductList = async (params: ProductListType = {}) => {
   Object.assign(queryCondition.value, params) // 用于外部灵活使用，传参的字典更新
   const { data } = await productListRequest(queryCondition.value)
   if (data.state === 0) {
