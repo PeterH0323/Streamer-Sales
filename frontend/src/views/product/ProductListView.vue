@@ -1,30 +1,42 @@
 <script setup lang="ts">
 import { queryCondition, queriedResult, getProductList } from '@/api/product'
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-// 获取商品信息
-getProductList()
+const router = useRouter()
+
+onMounted(() => {
+  // 获取商品信息
+  getProductList()
+})
 </script>
 
 <template>
   <el-card>
     <template #header>
-      <!-- 头部查询 -->
-      <el-form :inline="true" :model="queriedResult.product">
-        <el-form-item label="商品名称">
-          <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
-        </el-form-item>
-        <!-- <el-form-item label="分类">
-          <el-select v-model="queriedResult.class" placeholder="">
-            <el-option label="全部" value="" />
-            <el-option label="电子" value="电子" />
-          </el-select>
-        </el-form-item> -->
-        <el-form-item>
-          <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
-            >查询</el-button
-          >
-        </el-form-item>
-      </el-form>
+      <!-- 头部 -->
+      <div class="card-header">
+        <el-form :inline="true" :model="queriedResult.product">
+          <el-form-item label="商品名称">
+            <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
+          </el-form-item>
+          <!-- <el-form-item label="分类">
+            <el-select v-model="queriedResult.class" placeholder="">
+              <el-option label="全部" value="" />
+              <el-option label="电子" value="电子" />
+            </el-select>
+          </el-form-item> -->
+          <el-form-item>
+            <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
+              >查询</el-button
+            >
+          </el-form-item>
+        </el-form>
+        <!-- 添加商品 -->
+        <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
+          添加商品
+        </el-button>
+      </div>
     </template>
 
     <!-- 中部表格信息 -->
@@ -42,8 +54,13 @@ getProductList()
       <el-table-column prop="departure_place" label="发货地" align="center" />
       <el-table-column prop="delivery_company" label="快递公司" align="center" />
       <el-table-column prop="upload_date" label="上传时间" align="center" />
-      <el-table-column label="操作" align="center">
-        <el-button size="small">修改</el-button>
+      <el-table-column label="操作" align="center" v-slot="{ row }">
+        <el-button
+          size="small"
+          @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
+        >
+          编辑
+        </el-button>
         <el-button size="small" type="danger">归档</el-button>
         <el-button size="small">分配直播间</el-button>
       </el-table-column>
@@ -51,6 +68,7 @@ getProductList()
 
     <!-- 分页栏 -->
     <template #footer>
+      <!-- TODO 保持在页面最低位置 -->
       <el-pagination
         v-model:current-page="queriedResult.current"
         v-model:page-size="queriedResult.pageSize"
@@ -81,5 +99,9 @@ getProductList()
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.card-header {
+  display: flex;
 }
 </style>

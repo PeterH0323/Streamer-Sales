@@ -41,10 +41,17 @@ const router = createRouter({
               meta: { title: '商品列表' }
             },
             {
-              path: '/product/add',
-              name: 'ProductAdd',
+              path: '/product/create',
+              name: 'ProductCreate',
               component: () => import('@/views/product/ProductEditView.vue'),
               meta: { title: '新增商品' }
+            },
+            {
+              path: '/product/:productId/edit',
+              name: 'ProductEdit',
+              component: () => import('@/views/product/ProductEditView.vue'),
+              meta: { title: '商品修改' },
+              props: true
             }
           ]
         },

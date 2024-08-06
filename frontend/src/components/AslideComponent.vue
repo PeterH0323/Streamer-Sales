@@ -28,7 +28,6 @@ const route = useRoute()
           <el-icon> <present /> </el-icon><span>商品管理</span>
         </template>
         <el-menu-item index="/product/list"><span>商品列表</span></el-menu-item>
-        <el-menu-item index="/product/add"><span>新增商品</span></el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="/system">
         <template #title>
