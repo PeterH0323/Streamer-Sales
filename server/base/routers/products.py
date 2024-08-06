@@ -40,20 +40,20 @@ def get_product_info_api(product_query_item: ProductQueryItem):
         product_info_dict = yaml.safe_load(f)
 
     # 根据 ID 排序，避免乱序
-    product_info_name_list = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"])).keys()
+    product_info_name_list = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"])).keys()
     product_list = []
     for key in product_info_name_list:
         info = product_info_dict[key]
-        info.update({"name": key})
+        info.update({"product_name": key})
         product_list.append(info)
 
     # 根据页面大小返回
     if (product_query_item.current_page * product_query_item.page_size) <= len(product_list):
         end_index = product_query_item.current_page * product_query_item.page_size
         if end_index > len(product_info_dict):
-            product_list = product_list[product_query_item.current_page - 1 * product_query_item.page_size : end_index]
+            product_list = product_list[product_query_item.current_page - 1 * product_query_item.page_size : ]
         else:
-            product_list = product_list[product_query_item.current_page - 1 * product_query_item.page_size :]
+            product_list = product_list[product_query_item.current_page - 1 * product_query_item.page_size : end_index]
 
     return {
         "success": True,
