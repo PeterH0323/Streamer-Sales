@@ -12,12 +12,19 @@ type ProductListType = {
 interface ProductListItem {
   user_id: string // User 识别号，用于区分不用的用户调用
   request_id: string // 请求 ID，用于生成 TTS & 数字人
-  name: string
-  heightlight: string
+  product_id: int
+  product_name: string
+  heighlights: string[]
   image_path: string
   instruction_path: string
   departure_place: string
   delivery_company: string
+  class: string
+  selling_price: number
+  amount: number
+  upload_date: string
+  sales_doc: string
+  digital_human_video: string
 }
 
 interface ProductData {
@@ -37,12 +44,10 @@ interface ProductListResultType<T> {
 
 // 查询接口
 const productListRequest = (params: ProductListType) => {
-  console.info(params)
-
   return request_handler<ProductListResultType<ProductData>>({
     method: 'POST',
     url: '/products/list',
-    data: { current_page: params.currentPage, page_size: params.pageSize }
+    data: params
   })
 }
 
@@ -58,12 +63,11 @@ const queriedResult = ref<ProductListResultType<ProductData>>(
 )
 
 // 查询 - 方法
-const getProductList = async () => {
-  // params: ProductListType = {}
-  // Object.assign(queryCondition.value, params) // 用于外部灵活使用
+const getProductList = async (params: ProductListType) => {
+  Object.assign(queryCondition.value, params) // 用于外部灵活使用，传参的字典更新
   const { data } = await productListRequest(queryCondition.value)
   if (data.state === 0) {
-    queriedResult.value = data
+    queriedResult.value = data.data
   } else {
     ElMessage.error('商品接口错误')
     throw new Error('商品接口错误')

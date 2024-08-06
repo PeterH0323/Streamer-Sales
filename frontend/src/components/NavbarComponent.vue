@@ -41,7 +41,8 @@ const { circleUrl } = toRefs(state)
         <el-dropdown-menu class="logout">
           <el-dropdown-item>{{ username }}</el-dropdown-item>
           <el-dropdown-item>用户配置</el-dropdown-item>
-          <el-dropdown-item @click="logout">
+          <el-dropdown-item>
+            <!-- <el-dropdown-item @click="logout"> -->
             <!-- <IconifyIconOffline :icon="LogoutCircleRLine" style="margin: 5px" /> -->
             退出系统
           </el-dropdown-item>

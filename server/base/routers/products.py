@@ -27,8 +27,8 @@ class UploadProductItem(BaseModel):
 
 
 class ProductQueryItem(BaseModel):
-    current_page: int = 1  # 当前页号
-    page_size: int = 5  # 每页记录数
+    currentPage: int = 1  # 当前页号
+    pageSize: int = 5  # 每页记录数
 
 
 @router.post("/list")
@@ -46,24 +46,34 @@ def get_product_info_api(product_query_item: ProductQueryItem):
         info = product_info_dict[key]
         info.update({"product_name": key})
         product_list.append(info)
-
+    product_total_size = len(product_list)
+    
     # 根据页面大小返回
-    if (product_query_item.current_page * product_query_item.page_size) <= len(product_list):
-        end_index = product_query_item.current_page * product_query_item.page_size
-        if end_index > len(product_info_dict):
-            product_list = product_list[product_query_item.current_page - 1 * product_query_item.page_size : ]
-        else:
-            product_list = product_list[product_query_item.current_page - 1 * product_query_item.page_size : end_index]
-
+    # 前端传过来的 currentPage 最小 = 1 
+    end_index = product_query_item.currentPage * product_query_item.pageSize
+    start_index = (product_query_item.currentPage - 1) * product_query_item.pageSize
+    logger.info(f"start_index = {start_index}")
+    logger.info(f"end_index = {end_index}")
+    
+    if start_index == 0 and end_index > len(product_list):
+        # 单页数量超过商品数，直接返回
+        pass
+    elif end_index > len(product_info_dict):
+        product_list = product_list[start_index : ]
+    else:
+        product_list = product_list[start_index : end_index]
+    
+    logger.info(product_list)
+    logger.info(f"len {len(product_list)}")
     return {
         "success": True,
         "state": 0,
         "message": "success",
         "data": {
             "product": product_list,
-            "current": product_query_item.current_page,
-            "pageSize": product_query_item.current_page,
-            "totalSize": len(product_list),
+            "current": product_query_item.currentPage,
+            "pageSize": product_query_item.pageSize,
+            "totalSize": product_total_size,
         },
     }
 
