@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div>ProductAddView</div>
+  <div>ProductEditView</div>
 </template>
 
 <style lang="scss" scoped></style>

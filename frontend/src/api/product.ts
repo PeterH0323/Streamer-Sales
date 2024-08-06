@@ -18,7 +18,7 @@ interface ProductListItem {
   product_name: string
   heighlights: string[]
   image_path: string
-  instruction_path: string
+  instruction: string
   departure_place: string
   delivery_company: string
   class: string

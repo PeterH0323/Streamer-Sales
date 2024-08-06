@@ -37,7 +37,7 @@ getProductList()
       <el-table-column prop="selling_price" label="价格" align="center" />
       <el-table-column prop="amount" label="库存" align="center" />
       <el-table-column prop="sales_doc" label="解说文案" align="center" />
-      <el-table-column prop="instruction_path" label="说明书" align="center" />
+      <el-table-column prop="instruction" label="说明书" align="center" />
       <el-table-column prop="digital_human_video" label="数字人视频" align="center" />
       <el-table-column prop="departure_place" label="发货地" align="center" />
       <el-table-column prop="delivery_company" label="快递公司" align="center" />

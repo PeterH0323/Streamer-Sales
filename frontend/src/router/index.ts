@@ -43,7 +43,7 @@ const router = createRouter({
             {
               path: '/product/add',
               name: 'ProductAdd',
-              component: () => import('@/views/product/ProductAddView.vue'),
+              component: () => import('@/views/product/ProductEditView.vue'),
               meta: { title: '新增商品' }
             }
           ]
