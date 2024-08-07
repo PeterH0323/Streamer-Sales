@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { Picture, UploadFilled } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+
+import { Picture } from '@element-plus/icons-vue'
+
+import { type ProductListItem } from '@/api/product'
+import FileUpload from '@/components/FileUpload.vue'
 
 const router = useRouter()
 
@@ -17,7 +21,7 @@ const props = defineProps({
 const currentStep = ref(0)
 
 // 商品信息
-const productInfo = ref({})
+const productInfo = ref({} as ProductListItem)
 </script>
 
 <template>
@@ -43,28 +47,82 @@ const productInfo = ref({})
         <!-- 步骤条 -->
         <!-- TODO 完善图标 -->
         <el-steps class="mb-4" :space="200" :active="currentStep" simple>
-          <el-step title="商品图片" :icon="Picture" @click="currentStep = 0" />
-          <el-step title="说明书" :icon="UploadFilled" @click="currentStep = 1" />
-          <el-step title="商品信息" :icon="Picture" @click="currentStep = 2" />
-          <el-step title="解说文案" :icon="Picture" @click="currentStep = 3" />
-          <el-step title="数字人视频" :icon="Picture" @click="currentStep = 4" />
-          <el-step title="更多配置" :icon="Picture" @click="currentStep = 5" />
+          <el-step title="头图 & 说明书" :icon="Picture" @click="currentStep = 0" />
+          <el-step title="商品信息" :icon="Picture" @click="currentStep = 1" />
+          <el-step title="解说文案" :icon="Picture" @click="currentStep = 2" />
+          <el-step title="数字人视频" :icon="Picture" @click="currentStep = 3" />
         </el-steps>
       </template>
       <!-- 表单 -->
-      <el-form :model="productInfo">
-        <div v-show="currentStep === 0"><h1>商品图片</h1></div>
-        <div v-show="currentStep === 1"><h1>说明书</h1></div>
-        <div v-show="currentStep === 2"><h1>商品信息</h1></div>
-        <div v-show="currentStep === 3"><h1>解说文案</h1></div>
-        <div v-show="currentStep === 4"><h1>数字人视频</h1></div>
-        <div v-show="currentStep === 5"><h1>更多配置</h1></div>
+      <!-- label-width 用于对其 el-form-item 标签 -->
+      <el-form :model="productInfo" label-width="120" size="large">
+        <div v-show="currentStep === 0">
+          <!-- 商品头图 & 说明书-->
+          <el-form-item label="商品图片">
+            <FileUpload v-model="productInfo.image_path" file-type="image" />
+          </el-form-item>
+
+          <el-form-item label="商品说明书">
+            <FileUpload v-model="productInfo.instruction" file-type="doc" />
+          </el-form-item>
+        </div>
+
+        <div v-show="currentStep === 1">
+          <!-- 商品信息 -->
+          <el-button> AI 生成 </el-button>
+          <el-form-item label="商品名称">
+            <el-input v-model="productInfo.product_name" maxlength="50" show-word-limit />
+          </el-form-item>
+          <el-form-item label="商品分类">
+            <!-- TODO 改为下拉框 -->
+            <el-input v-model="productInfo.class" />
+          </el-form-item>
+          <el-form-item label="商品亮点">
+            <el-input v-model="productInfo.heighlights" maxlength="200" show-word-limit />
+          </el-form-item>
+          <el-form-item label="价格">
+            <el-input-number
+              v-model="productInfo.selling_price"
+              :min="0.01"
+              :precision="2"
+              :step="0.1"
+              :max="99999"
+              size="large"
+            />
+          </el-form-item>
+          <el-form-item label="库存数量">
+            <el-input-number
+              v-model="productInfo.amount"
+              :min="0"
+              :step="50"
+              :max="99999"
+              size="large"
+            />
+          </el-form-item>
+          <el-form-item label="发货地">
+            <!-- TODO 改为下拉框选择 ? -->
+            <el-input v-model="productInfo.departure_place" maxlength="100" show-word-limit />
+          </el-form-item>
+          <el-form-item label="快递公司">
+            <!-- TODO 改为下拉框 -->
+            <el-input v-model="productInfo.delivery_company" maxlength="50" show-word-limit />
+          </el-form-item>
+        </div>
+
+        <div v-show="currentStep === 2">
+          <!-- 解说文案 -->
+          <el-form-item label="解说文案">
+            <el-input v-model="productInfo.sales_doc" maxlength="2000" show-word-limit />
+          </el-form-item>
+        </div>
+        <div v-show="currentStep === 3"><h1>数字人视频</h1></div>
       </el-form>
+
       <template #footer>
         <div class="form-bottom-btn">
           <el-button v-show="currentStep > 0" @click="currentStep--">上一步</el-button>
-          <el-button v-show="currentStep < 5" @click="currentStep++">下一步</el-button>
-          <el-button v-show="currentStep === 5" type="primary">保存</el-button>
+          <el-button v-show="currentStep < 3" @click="currentStep++">下一步</el-button>
+          <el-button v-show="currentStep === 3" type="primary">保存</el-button>
         </div>
       </template>
     </el-card>
@@ -87,5 +145,10 @@ const productInfo = ref({})
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+// 中间表单控件
+.el-form {
+  padding: 0px 180px 0px 100px; // 从上开始顺时针四个放心
 }
 </style>

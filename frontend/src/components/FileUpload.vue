@@ -1,0 +1,126 @@
+<script setup lang="ts">
+import { ElMessage, type UploadProps, type UploadProgressEvent } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+
+// 定义组件入参
+const props = defineProps({
+  fileType: {
+    type: String,
+    default: 'image'
+  }
+})
+
+// 定义 和父组件通信的双向绑定 model
+const modelFilePath = defineModel({ default: '' })
+
+// 子组件更新变量 callback
+function updateImagePath(newPath: string) {
+  modelFilePath.value = newPath
+}
+
+// 上传文件，上传后为本机内存地址，方便加载
+const imageUrl = ref('')
+
+// 是否显示进度条
+const isShowProgress = ref(false)
+
+// 文件上传成功后的 callback
+const handleFileUploadSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
+  imageUrl.value = URL.createObjectURL(uploadFile.raw!) // 生成内存地址，方便加载
+  updateImagePath(response.image_path)
+  isShowProgress.value = false
+}
+
+// 文件上传前的校验 callback
+const beforeFileUploadUpload: UploadProps['beforeUpload'] = (rawFile) => {
+  console.log(rawFile)
+  if (props.fileType === 'image' && rawFile.type !== 'image/png' && rawFile.type !== 'image/jpeg') {
+    ElMessage.error('商品图片必须是 PNG / JPG 格式!')
+    return false
+  } else if (props.fileType === 'doc' && !rawFile.name.endsWith('.md')) {
+    ElMessage.error('商品说明书必须是 markdown 格式!')
+    return false
+  } else if (rawFile.size / 1024 / 1024 > 2) {
+    ElMessage.error('文件大小不能超过 2MB!')
+    return false
+  }
+
+  isShowProgress.value = true
+  return true
+}
+
+// 文件上传成功后的 callback
+const handleFileUploadFail: UploadProps['onError'] = (error: Error) => {
+  ElMessage.error('上传文件失败')
+  console.error(error)
+  isShowProgress.value = false
+}
+
+// 文件上传进度条
+const uploadPercentage = ref(0)
+
+// 文件上传进度回调
+const handleUploadProgress = (evt: UploadProgressEvent) => {
+  uploadPercentage.value = Math.floor(evt.percent)
+}
+</script>
+
+<template>
+  <el-progress v-show="isShowProgress" type="circle" :percentage="uploadPercentage" />
+
+  <el-upload
+    v-show="!isShowProgress"
+    class="avatar-uploader"
+    action="/products/upload/file"
+    method="post"
+    drag
+    :multiple="false"
+    :show-file-list="false"
+    :on-success="handleFileUploadSuccess"
+    :before-upload="beforeFileUploadUpload"
+    :on-progress="handleUploadProgress"
+    :on-error="handleFileUploadFail"
+  >
+    <img v-if="imageUrl" :src="imageUrl" class="avatar" @load="isShowProgress = false" />
+    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+  </el-upload>
+</template>
+
+<style lang="scss" scoped>
+// 上传图片
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+</style>
+
+<style>
+// 上传图片全局 css
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+
+// 进度条
+.el-progress--circle {
+  margin-right: 15px;
+}
+</style>

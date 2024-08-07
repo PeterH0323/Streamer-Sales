@@ -74,4 +74,4 @@ const getProductList = async (params: ProductListType = {}) => {
   }
 }
 
-export { queryCondition, queriedResult, getProductList }
+export { queryCondition, queriedResult, getProductList, type ProductListItem }
