@@ -97,7 +97,7 @@ const onSubmit = async () => {
       </el-form-item>
 
       <el-form-item label="密码" prop="password">
-        <el-input v-model="loginForm.password" />
+        <el-input v-model="loginForm.password" type="password" />
       </el-form-item>
 
       <el-form-item>
