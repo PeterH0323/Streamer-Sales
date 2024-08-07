@@ -33,6 +33,7 @@ onMounted(() => {
           </el-form-item>
         </el-form>
         <!-- 添加商品 -->
+        <!-- TODO 按钮放到最右边 -->
         <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
           添加商品
         </el-button>
