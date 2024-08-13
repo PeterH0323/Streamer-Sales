@@ -1,6 +1,8 @@
-import request_handler from '@/api/base'
-import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+
+import request_handler from '@/api/base'
+import type { NoSubstitutionTemplateLiteral } from 'typescript/lib/typescript'
 
 // 调用登录接口数据结构定义
 type ProductListType = {
@@ -8,7 +10,16 @@ type ProductListType = {
   currentPage?: number // 当前页号
   pageSize?: number // 每页记录数
   productName?: string // 商品名称
-  class?: string // 商品分类
+  product_class?: string // 商品分类
+}
+
+interface StreamerInfo {
+  id: number
+  character: string
+  imageUrl: string
+  name: string
+  videoUrl: string
+  value: string
 }
 
 interface ProductListItem {
@@ -21,12 +32,13 @@ interface ProductListItem {
   instruction: string
   departure_place: string
   delivery_company: string
-  class: string
+  product_class: string
   selling_price: number
   amount: number
   upload_date: string
   sales_doc: string
   digital_human_video: string
+  streamer_info: StreamerInfo
 }
 
 interface ProductData {
@@ -42,15 +54,6 @@ interface ProductListResultType<T> {
   state: number
   message: string
   data: T
-}
-
-// 查询接口
-const productListRequest = (params: ProductListType) => {
-  return request_handler<ProductListResultType<ProductData>>({
-    method: 'POST',
-    url: '/products/list',
-    data: params
-  })
 }
 
 // 查询 - 条件
@@ -74,4 +77,66 @@ const getProductList = async (params: ProductListType = {}) => {
   }
 }
 
-export { queryCondition, queriedResult, getProductList, type ProductListItem }
+// 接口
+
+// 查询接口
+const productListRequest = (params: ProductListType) => {
+  return request_handler<ProductListResultType<ProductData>>({
+    method: 'POST',
+    url: '/products/list',
+    data: params
+  })
+}
+
+// 查询制定商品的信息接口
+const getProductByIdRequest = (productId: string) => {
+  return request_handler<ProductListItem>({
+    method: 'GET',
+    url: '/products/info/',
+    params: {
+      // 使用 query 的方式去获取
+      productId
+    }
+  })
+}
+
+// 添加或者更新商品接口
+const productCreadeOrEditRequest = (params: ProductListType) => {
+  console.info(params)
+
+  return request_handler<ProductListResultType<ProductData>>({
+    method: 'POST',
+    url: '/products/upload/form',
+    data: params
+  })
+}
+
+// 使用说明书总结生成商品信息解耦
+const genProductInfoByLlmRequest = (salesDoc: string) => {
+  return request_handler({
+    method: 'POST',
+    url: '/llm/gen_product_info',
+    data: salesDoc
+  })
+}
+
+// 生成数字人视频接口
+const productGenDigitalHuamnVideoRequest = (salesDoc: string) => {
+  return request_handler({
+    method: 'POST',
+    url: '/digital_human/gen',
+    data: salesDoc
+  })
+}
+
+export {
+  type ProductListItem,
+  type StreamerInfo,
+  queryCondition,
+  queriedResult,
+  getProductList,
+  productCreadeOrEditRequest,
+  productGenDigitalHuamnVideoRequest,
+  genProductInfoByLlmRequest,
+  getProductByIdRequest
+}

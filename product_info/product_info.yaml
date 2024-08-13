@@ -10,7 +10,7 @@
     sales_doc: "声波电动牙刷"
     digital_human_video: "666"
     product_id: 1
-    class: "电子"
+    product_class: "电子"
 
 
 唇膏: 
@@ -25,7 +25,7 @@
     sales_doc: "唇膏"
     digital_human_video: "666"
     product_id: 2
-    class: "美妆"
+    product_class: "美妆"
 
 
 本草精华洗发露: 
@@ -40,7 +40,7 @@
     sales_doc: "本草精华洗发露"
     digital_human_video: "666"
     product_id: 3
-    class: "日用品"
+    product_class: "日用品"
 
 
 光感润颜面膜: 
@@ -55,7 +55,7 @@
     sales_doc: "光感润颜面膜"
     digital_human_video: "666"
     product_id: 4
-    class: "美妆"
+    product_class: "美妆"
 
 
 薰衣草淡香氛: 
@@ -70,7 +70,7 @@
     sales_doc: "薰衣草淡香氛"
     digital_human_video: "666"
     product_id: 5
-    class: "家居用品"
+    product_class: "家居用品"
 
 
 墨水钢笔: 
@@ -85,7 +85,7 @@
     sales_doc: "墨水钢笔"
     digital_human_video: "666"
     product_id: 6
-    class: "文具"
+    product_class: "文具"
 
 
 瑜伽垫: 
@@ -100,7 +100,7 @@
     sales_doc: "瑜伽垫"
     digital_human_video: "666"
     product_id: 7
-    class: "运动"
+    product_class: "运动"
 
 
 速干运动裤: 
@@ -115,7 +115,7 @@
     sales_doc: "速干运动裤"
     digital_human_video: "666"
     product_id: 8
-    class: "衣服"
+    product_class: "衣服"
 
 
 不粘煎炒锅: 
@@ -130,7 +130,7 @@
     sales_doc: "不粘煎炒锅"
     digital_human_video: "666"
     product_id: 9
-    class: "厨具"
+    product_class: "厨具"
 
 
 14英寸平板电脑: 
@@ -145,7 +145,7 @@
     sales_doc: "14英寸平板电脑"
     digital_human_video: "666"
     product_id: 10
-    class: "电子"
+    product_class: "电子"
 
 
 65英寸OLED电视: 
@@ -160,7 +160,7 @@
     sales_doc: "65英寸OLED电视"
     digital_human_video: "666"
     product_id: 11
-    class: "家电"
+    product_class: "家电"
 
 
 进口和牛羽下肉: 
@@ -175,4 +175,4 @@
     sales_doc: "进口和牛羽下肉"
     digital_human_video: "666"
     product_id: 12
-    class: "食品"
+    product_class: "食品"

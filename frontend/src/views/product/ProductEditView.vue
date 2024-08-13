@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 import { Picture } from '@element-plus/icons-vue'
 
-import { type ProductListItem } from '@/api/product'
+import { type ProductListItem, type StreamerInfo } from '@/api/product'
 import FileUpload from '@/components/FileUpload.vue'
+import VideoComponent from '@/components/VideoComponent.vue'
+
+import {
+  productCreadeOrEditRequest,
+  productGenDigitalHuamnVideoRequest,
+  getProductByIdRequest
+} from '@/api/product'
+import { ElMessage, timeUnits } from 'element-plus/es'
 
 const router = useRouter()
 
@@ -22,6 +30,54 @@ const currentStep = ref(0)
 
 // 商品信息
 const productInfo = ref({} as ProductListItem)
+
+const salesInfoSelected = ref({} as StreamerInfo)
+
+// 表单提交
+const onSubmit = async () => {
+  const statusInof = props.productId ? '编辑商品' : '新建商品'
+  productInfo.value.streamer_info = salesInfoSelected.value
+
+  const { data } = await productCreadeOrEditRequest(productInfo.value)
+  if (data.code === 0) {
+    ElMessage.info(`${statusInof}成功!`)
+    router.push({ name: 'Product' })
+  } else {
+    ElMessage.error(`${statusInof}失败, ${data.message}`)
+    throw new Error(`${statusInof}失败, ${data.message}`)
+  }
+}
+
+// 生成数据人视频
+const getDigitalHumanVideo = async () => {
+  // const res = await productGenDigitalHuamnVideoRequest(productInfo.value.sales_doc)
+  productInfo.value.digital_human_video =
+    'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4'
+}
+
+// 获取主播信息
+const streamerNameOptions = ref([
+  {
+    id: 0,
+    name: '乐乐喵',
+    value: 'lelemiao',
+    character: '开朗',
+    imageUrl: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
+  }
+])
+
+onMounted(async () => {
+  if (props.productId) {
+    //编辑情况下调取接口获取对应商品信息
+    const { data } = await getProductByIdRequest(props.productId)
+    console.log(data)
+    if (data.state === 0) {
+      productInfo.value = data.product
+      salesInfoSelected.value = productInfo.value.streamer_info
+      ElMessage.success('获取数据成功')
+    }
+  }
+})
 </script>
 
 <template>
@@ -37,7 +93,7 @@ const productInfo = ref({} as ProductListItem)
       </template>
       <template #extra>
         <div class="flex items-center">
-          <el-button type="primary" class="ml-2">保存</el-button>
+          <el-button type="primary" class="ml-2" @click="onSubmit">保存</el-button>
         </div>
       </template>
     </el-page-header>
@@ -49,7 +105,7 @@ const productInfo = ref({} as ProductListItem)
         <el-steps class="mb-4" :space="200" :active="currentStep" simple>
           <el-step title="头图 & 说明书" :icon="Picture" @click="currentStep = 0" />
           <el-step title="商品信息" :icon="Picture" @click="currentStep = 1" />
-          <el-step title="解说文案" :icon="Picture" @click="currentStep = 2" />
+          <el-step title="主播 & 文案" :icon="Picture" @click="currentStep = 2" />
           <el-step title="数字人视频" :icon="Picture" @click="currentStep = 3" />
         </el-steps>
       </template>
@@ -75,7 +131,7 @@ const productInfo = ref({} as ProductListItem)
           </el-form-item>
           <el-form-item label="商品分类">
             <!-- TODO 改为下拉框 -->
-            <el-input v-model="productInfo.class" />
+            <el-input v-model="productInfo.product_class" />
           </el-form-item>
           <el-form-item label="商品亮点">
             <el-input v-model="productInfo.heighlights" maxlength="200" show-word-limit />
@@ -111,18 +167,63 @@ const productInfo = ref({} as ProductListItem)
 
         <div v-show="currentStep === 2">
           <!-- 解说文案 -->
+          <el-form-item label="选择主播">
+            <el-select
+              v-model="productInfo.streamer_info"
+              placeholder="选择主播"
+              size="large"
+              style="width: 240px"
+            >
+              <el-option
+                v-for="item in streamerNameOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item"
+              />
+              <!-- TODO hover 的时候显示头图？使用一个概览筐 or 弹窗加载缩略图然后让客户选择？ -->
+            </el-select>
+          </el-form-item>
+          <el-form-item label="主播形象">
+            <el-image
+              style="width: 100px; height: 100px"
+              :src="salesInfoSelected.imageUrl"
+              :zoom-rate="1.2"
+              :max-scale="7"
+              :min-scale="0.2"
+              :preview-src-list="[salesInfoSelected.imageUrl]"
+              fit="scale-down"
+            />
+          </el-form-item>
+          <el-form-item label="主播性格">
+            <el-input v-model="salesInfoSelected.character" />
+          </el-form-item>
+
+          <el-button> AI 生成 </el-button>
           <el-form-item label="解说文案">
-            <el-input v-model="productInfo.sales_doc" maxlength="2000" show-word-limit />
+            <el-input
+              type="textarea"
+              v-model="productInfo.sales_doc"
+              maxlength="2000"
+              :autosize="{ minRows: 20 }"
+              show-word-limit
+            />
           </el-form-item>
         </div>
-        <div v-show="currentStep === 3"><h1>数字人视频</h1></div>
+        <div v-show="currentStep === 3">
+          <!-- 数字人视频 -->
+          <el-button @click="getDigitalHumanVideo"> 生成数字人视频 </el-button>
+          <VideoComponent
+            :src="productInfo.digital_human_video"
+            :key="productInfo.digital_human_video"
+          />
+        </div>
       </el-form>
 
       <template #footer>
         <div class="form-bottom-btn">
           <el-button v-show="currentStep > 0" @click="currentStep--">上一步</el-button>
           <el-button v-show="currentStep < 3" @click="currentStep++">下一步</el-button>
-          <el-button v-show="currentStep === 3" type="primary">保存</el-button>
+          <el-button v-show="currentStep === 3" type="primary" @click="onSubmit">保存</el-button>
         </div>
       </template>
     </el-card>
@@ -150,5 +251,10 @@ const productInfo = ref({} as ProductListItem)
 // 中间表单控件
 .el-form {
   padding: 0px 180px 0px 100px; // 从上开始顺时针四个放心
+}
+
+.video-container {
+  width: 800px;
+  height: 600px;
 }
 </style>

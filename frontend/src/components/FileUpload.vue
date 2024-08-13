@@ -68,7 +68,7 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
 
 <template>
   <el-progress v-show="isShowProgress" type="circle" :percentage="uploadPercentage" />
-
+  <!-- TODO 长时间上传后端会断开？ -->
   <el-upload
     v-show="!isShowProgress"
     class="avatar-uploader"

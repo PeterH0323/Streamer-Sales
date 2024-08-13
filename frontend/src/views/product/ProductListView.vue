@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { queryCondition, queriedResult, getProductList } from '@/api/product'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+
+import { queryCondition, queriedResult, getProductList } from '@/api/product'
 
 const router = useRouter()
 
@@ -45,7 +46,7 @@ onMounted(() => {
       <el-table-column prop="product_id" label="ID" align="center" />
       <el-table-column prop="image_path" label="图片" align="center" />
       <el-table-column prop="product_name" label="名称" align="center" />
-      <el-table-column prop="class" label="分类" align="center" />
+      <el-table-column prop="product_class" label="分类" align="center" />
       <el-table-column prop="heighlights" label="亮点" align="center" />
       <el-table-column prop="selling_price" label="价格" align="center" />
       <el-table-column prop="amount" label="库存" align="center" />

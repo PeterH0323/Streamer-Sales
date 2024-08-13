@@ -19,7 +19,8 @@
     "pinia": "^2.1.7",
     "sass": "^1.77.8",
     "vue": "^3.4.29",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.3.3",
+    "xgplayer": "^3.0.19"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.8.0",
