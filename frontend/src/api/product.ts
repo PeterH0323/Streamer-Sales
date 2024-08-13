@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import request_handler from '@/api/base'
-import type { NoSubstitutionTemplateLiteral } from 'typescript/lib/typescript'
+import type { StreamerInfo } from './streamerInfo'
 
 // 调用登录接口数据结构定义
 type ProductListType = {
@@ -11,15 +11,6 @@ type ProductListType = {
   pageSize?: number // 每页记录数
   productName?: string // 商品名称
   product_class?: string // 商品分类
-}
-
-interface StreamerInfo {
-  id: number
-  character: string
-  imageUrl: string
-  name: string
-  videoUrl: string
-  value: string
 }
 
 interface ProductListItem {
@@ -38,7 +29,7 @@ interface ProductListItem {
   upload_date: string
   sales_doc: string
   digital_human_video: string
-  streamer_info: StreamerInfo
+  streamer_id: number
 }
 
 interface ProductData {

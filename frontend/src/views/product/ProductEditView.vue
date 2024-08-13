@@ -5,6 +5,7 @@ import { onMounted, ref } from 'vue'
 import { Picture } from '@element-plus/icons-vue'
 
 import { type ProductListItem, type StreamerInfo } from '@/api/product'
+import { streamerInfoListRequest } from '@/api/streamerInfo'
 import FileUpload from '@/components/FileUpload.vue'
 import VideoComponent from '@/components/VideoComponent.vue'
 
@@ -13,7 +14,7 @@ import {
   productGenDigitalHuamnVideoRequest,
   getProductByIdRequest
 } from '@/api/product'
-import { ElMessage, timeUnits } from 'element-plus/es'
+import { ElMessage } from 'element-plus/es'
 
 const router = useRouter()
 
@@ -31,12 +32,9 @@ const currentStep = ref(0)
 // 商品信息
 const productInfo = ref({} as ProductListItem)
 
-const salesInfoSelected = ref({} as StreamerInfo)
-
 // 表单提交
 const onSubmit = async () => {
   const statusInof = props.productId ? '编辑商品' : '新建商品'
-  productInfo.value.streamer_info = salesInfoSelected.value
 
   const { data } = await productCreadeOrEditRequest(productInfo.value)
   if (data.code === 0) {
@@ -56,24 +54,25 @@ const getDigitalHumanVideo = async () => {
 }
 
 // 获取主播信息
-const streamerNameOptions = ref([
-  {
-    id: 0,
-    name: '乐乐喵',
-    value: 'lelemiao',
-    character: '开朗',
-    imageUrl: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
-  }
-])
+const streamerNameOptions = ref([] as StreamerInfo[])
+
+const streamInfoSelected = ref({} as StreamerInfo)
 
 onMounted(async () => {
+  // 获取主播信息
+  const { data } = await streamerInfoListRequest()
+  if (data.status === 0) {
+    streamerNameOptions.value = data.data
+    ElMessage.success('获取主播信息成功')
+  }
+
   if (props.productId) {
     //编辑情况下调取接口获取对应商品信息
     const { data } = await getProductByIdRequest(props.productId)
     console.log(data)
     if (data.state === 0) {
       productInfo.value = data.product
-      salesInfoSelected.value = productInfo.value.streamer_info
+      streamInfoSelected.value.id = productInfo.value.streamer_id
       ElMessage.success('获取数据成功')
     }
   }
@@ -169,10 +168,11 @@ onMounted(async () => {
           <!-- 解说文案 -->
           <el-form-item label="选择主播">
             <el-select
-              v-model="productInfo.streamer_info"
+              v-model="streamInfoSelected"
               placeholder="选择主播"
               size="large"
               style="width: 240px"
+              @change="productInfo.streamer_id = streamInfoSelected.id"
             >
               <el-option
                 v-for="item in streamerNameOptions"
@@ -186,16 +186,16 @@ onMounted(async () => {
           <el-form-item label="主播形象">
             <el-image
               style="width: 100px; height: 100px"
-              :src="salesInfoSelected.imageUrl"
+              :src="streamInfoSelected.imageUrl"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="[salesInfoSelected.imageUrl]"
+              :preview-src-list="[streamInfoSelected.imageUrl]"
               fit="scale-down"
             />
           </el-form-item>
           <el-form-item label="主播性格">
-            <el-input v-model="salesInfoSelected.character" />
+            <el-input v-model="streamInfoSelected.character" />
           </el-form-item>
 
           <el-button> AI 生成 </el-button>

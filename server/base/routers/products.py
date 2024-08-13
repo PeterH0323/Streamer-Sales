@@ -1,6 +1,6 @@
 from pathlib import Path
 import yaml
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile
 from loguru import logger
 from pydantic import BaseModel
 import shutil
@@ -16,26 +16,36 @@ router = APIRouter(
 
 
 class UploadProductItem(BaseModel):
-    user_id: str  # User 识别号，用于区分不用的用户调用
-    request_id: str  # 请求 ID，用于生成 TTS & 数字人
-    name: str
-    heightlight: str
-    image_path: str
-    instruction_path: str
-    departure_place: str
-    delivery_company: str
+    user_id: str = ""  # User 识别号，用于区分不用的用户调用
+    request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
+    product_name: str
+    heighlights: str  # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
+    image_path: str  # "./product_info/images/pants.png"
+    instruction: str  # "./product_info/instructions/pants.md"
+    departure_place: str  # "广州"
+    delivery_company: str  # "圆通"
+    selling_price: float  # 66.9
+    amount: int  # 12435
+    upload_date: str = ""  # "1722944888"
+    sales_doc: str  # "速干运动裤"
+    digital_human_video: str  # "666"
+    product_id: int = -1  # 8
+    product_class: str  # "衣服"
+    streamer_id: int
+
+
+class UploadFileItem(BaseModel):
+    file: bytes = File(...)
 
 
 class ProductQueryItem(BaseModel):
     currentPage: int  # 当前页号
     pageSize: int  # 每页记录数
-    productName: str = ""  # 每页记录数
+    productName: str = ""  # 商品名
+    productId: str = "-1"  # 商品ID
 
 
-@router.post("/list")
-def get_product_info_api(product_query_item: ProductQueryItem):
-
-    logger.info(f"Got product_query_item = {product_query_item}")
+async def get_product_list(product_name="", id=-1):
     # 读取 yaml 文件
     with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
@@ -47,11 +57,27 @@ def get_product_info_api(product_query_item: ProductQueryItem):
         info = product_info_dict[key]
         info.update({"product_name": key})
 
-        if product_query_item.productName != "" and product_query_item.productName not in key:
+        # TODO 先默认写入 lelemiao
+        info.update({"streamer_id": 1})
+
+        if product_name != "" and product_name not in key:
             # 如果有商品名则需要进行过滤处理，实现搜索功能
             continue
 
+        if id > 0 and info["product_id"] == id:
+            product_list.append(info)
+            break
+
         product_list.append(info)
+
+    return product_list, len(product_info_dict)
+
+
+@router.post("/list")
+async def get_product_info_api(product_query_item: ProductQueryItem):
+
+    logger.info(f"Got product_query_item = {product_query_item}")
+    product_list, db_product_size = await get_product_list(product_name=product_query_item.productName)
     product_total_size = len(product_list)
 
     # 根据页面大小返回
@@ -64,7 +90,7 @@ def get_product_info_api(product_query_item: ProductQueryItem):
     if start_index == 0 and end_index > len(product_list):
         # 单页数量超过商品数，直接返回
         pass
-    elif end_index > len(product_info_dict):
+    elif end_index > db_product_size:
         product_list = product_list[start_index:]
     else:
         product_list = product_list[start_index:end_index]
@@ -84,9 +110,29 @@ def get_product_info_api(product_query_item: ProductQueryItem):
     }
 
 
-@router.post("/add")
+@router.get("/info")
+async def get_product_info_api(productId: str):
+    product_list, _ = await get_product_list(id=int(productId))
+
+    logger.info(product_list)
+    return {
+        "success": True,
+        "state": 0,
+        "message": "success",
+        "product": product_list[0],
+    }
+
+
+@router.post("/upload/file")
+async def upload_product_api():
+    # TODO 保存图片并返回服务器地址
+    return {"code": 0, "message": "success", "image_path": "./product_info/instructions/beef.md"}
+
+
+@router.post("/upload/form")
 async def upload_product_api(upload_product_item: UploadProductItem):
     # 上传商品
+    return {"code": 0, "message": "success"}
 
     # TODO 可以不输入商品名称和特性，大模型根据说明书自动生成一版让用户自行修改
 
