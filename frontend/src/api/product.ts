@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import request_handler from '@/api/base'
-import type { StreamerInfo } from './streamerInfo'
+import { request_handler } from '@/api/base'
+import type { StreamerInfo } from '@/api/streamerInfo'
 
 // 调用登录接口数据结构定义
 type ProductListType = {
@@ -18,12 +18,12 @@ interface ProductListItem {
   request_id: string // 请求 ID，用于生成 TTS & 数字人
   product_id: number
   product_name: string
+  product_class: string
   heighlights: string[]
   image_path: string
   instruction: string
   departure_place: string
   delivery_company: string
-  product_class: string
   selling_price: number
   amount: number
   upload_date: string
@@ -111,15 +111,6 @@ const genProductInfoByLlmRequest = (salesDoc: string) => {
   })
 }
 
-// 生成数字人视频接口
-const productGenDigitalHuamnVideoRequest = (salesDoc: string) => {
-  return request_handler({
-    method: 'POST',
-    url: '/digital_human/gen',
-    data: salesDoc
-  })
-}
-
 export {
   type ProductListItem,
   type StreamerInfo,
@@ -127,7 +118,6 @@ export {
   queriedResult,
   getProductList,
   productCreadeOrEditRequest,
-  productGenDigitalHuamnVideoRequest,
   genProductInfoByLlmRequest,
   getProductByIdRequest
 }

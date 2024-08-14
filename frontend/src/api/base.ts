@@ -4,4 +4,13 @@ const request_handler = axios.create({
   // baseURL: import.meta.env.BASE_SERVER_URL
 })
 
-export default request_handler
+interface ResultPackage<T> {
+  success: boolean
+  code: number
+  message: string
+  data: T
+  timestamp: number
+}
+
+export { request_handler }
+export { type ResultPackage }

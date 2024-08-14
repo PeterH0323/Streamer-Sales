@@ -1,15 +1,18 @@
 import shutil
 from pathlib import Path
 
+from loguru import logger
 import uvicorn
 import yaml
 from fastapi import FastAPI, HTTPException, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import PlainTextResponse
 from sse_starlette import EventSourceResponse
 
 from ..web_configs import WEB_CONFIGS
+from .routers import llm, products, streamer_info, users
 from .server_info import SERVER_PLUGINS_INFO
 from .utils import ChatItem, streamer_sales_process
-from .routers import users, products, llm, streamer_info
 
 app = FastAPI()
 
@@ -44,6 +47,20 @@ async def streamer_sales_chat(chat_item: ChatItem, response: Response):
     return EventSourceResponse(streamer_sales_process(chat_item))
 
 
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    """调 API 入参错误的回调接口
+
+    Args:
+        request (_type_): _description_
+        exc (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    logger.info(request.json)
+    logger.info(exc)
+    return PlainTextResponse(str(exc), status_code=400)
 
 # 执行
 # uvicorn server.main:app --reload

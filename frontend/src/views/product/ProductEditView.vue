@@ -4,14 +4,16 @@ import { onMounted, ref } from 'vue'
 
 import { Picture } from '@element-plus/icons-vue'
 
-import { type ProductListItem, type StreamerInfo } from '@/api/product'
-import { streamerInfoListRequest } from '@/api/streamerInfo'
 import FileUpload from '@/components/FileUpload.vue'
 import VideoComponent from '@/components/VideoComponent.vue'
 
+import { streamerInfoListRequest } from '@/api/streamerInfo'
+import { genSalesDocRequest } from '@/api/llm'
+
 import {
+  type ProductListItem,
+  type StreamerInfo,
   productCreadeOrEditRequest,
-  productGenDigitalHuamnVideoRequest,
   getProductByIdRequest
 } from '@/api/product'
 import { ElMessage } from 'element-plus/es'
@@ -53,6 +55,21 @@ const getDigitalHumanVideo = async () => {
     'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4'
 }
 
+// 是否正在生成文案标识
+const isGeneratingDoc = ref(false)
+// 生成解说文案
+const handleGenSalesDocClick = async () => {
+  isGeneratingDoc.value = true
+  ElMessage.success('正在生成，请稍候')
+  const { data } = await genSalesDocRequest(productInfo.value, streamInfoSelected.value)
+  console.log(data)
+  if (data.code === 0) {
+    productInfo.value.sales_doc = data.data
+    ElMessage.success('生成文案成功')
+  }
+  isGeneratingDoc.value = false
+}
+
 // 获取主播信息
 const streamerNameOptions = ref([] as StreamerInfo[])
 
@@ -61,7 +78,7 @@ const streamInfoSelected = ref({} as StreamerInfo)
 onMounted(async () => {
   // 获取主播信息
   const { data } = await streamerInfoListRequest()
-  if (data.status === 0) {
+  if (data.code === 0) {
     streamerNameOptions.value = data.data
     ElMessage.success('获取主播信息成功')
   }
@@ -124,7 +141,7 @@ onMounted(async () => {
 
         <div v-show="currentStep === 1">
           <!-- 商品信息 -->
-          <el-button> AI 生成 </el-button>
+
           <el-form-item label="商品名称">
             <el-input v-model="productInfo.product_name" maxlength="50" show-word-limit />
           </el-form-item>
@@ -162,6 +179,9 @@ onMounted(async () => {
             <!-- TODO 改为下拉框 -->
             <el-input v-model="productInfo.delivery_company" maxlength="50" show-word-limit />
           </el-form-item>
+          <div class="bottom-gen-btn">
+            <el-button type="success"> AI 生成 </el-button>
+          </div>
         </div>
 
         <div v-show="currentStep === 2">
@@ -198,7 +218,6 @@ onMounted(async () => {
             <el-input v-model="streamInfoSelected.character" />
           </el-form-item>
 
-          <el-button> AI 生成 </el-button>
           <el-form-item label="解说文案">
             <el-input
               type="textarea"
@@ -208,14 +227,23 @@ onMounted(async () => {
               show-word-limit
             />
           </el-form-item>
+          <div class="bottom-gen-btn">
+            <el-button @click="handleGenSalesDocClick" :loading="isGeneratingDoc" type="success">
+              AI 生成
+            </el-button>
+          </div>
         </div>
         <div v-show="currentStep === 3">
           <!-- 数字人视频 -->
-          <el-button @click="getDigitalHumanVideo"> 生成数字人视频 </el-button>
-          <VideoComponent
-            :src="productInfo.digital_human_video"
-            :key="productInfo.digital_human_video"
-          />
+          <div clas="video-container">
+            <VideoComponent
+              :src="productInfo.digital_human_video"
+              :key="productInfo.digital_human_video"
+            />
+          </div>
+          <div class="bottom-gen-btn">
+            <el-button @click="getDigitalHumanVideo" type="success"> AI 生成数字人视频 </el-button>
+          </div>
         </div>
       </el-form>
 
@@ -253,8 +281,17 @@ onMounted(async () => {
   padding: 0px 180px 0px 100px; // 从上开始顺时针四个放心
 }
 
+// 视频控件
 .video-container {
-  width: 800px;
-  height: 600px;
+  // margin-left: 1000px;
+}
+
+// 每个表单底部 AI 生成按钮
+.bottom-gen-btn {
+  margin-top: 15px;
+  margin-left: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

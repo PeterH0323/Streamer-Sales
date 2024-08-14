@@ -1,4 +1,6 @@
 import asyncio
+from dataclasses import dataclass
+from datetime import datetime
 import json
 import wave
 from pathlib import Path
@@ -8,6 +10,7 @@ from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
+import yaml
 
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 
@@ -235,3 +238,37 @@ async def streamer_sales_process(chat_item: ChatItem):
         },
         ensure_ascii=False,
     )
+
+
+async def get_all_streamer_info():
+    # 加载对话配置文件
+    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
+        dataset_yaml = yaml.safe_load(f)
+
+    # 从配置中提取角色信息
+    streamer_info = dataset_yaml["role_type"]  # [WEB_CONFIGS.streamer_NAME]
+
+    return streamer_info
+
+
+async def get_llm_product_prompt_base_info():
+    # 加载对话配置文件
+    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
+        dataset_yaml = yaml.safe_load(f)
+
+    return dataset_yaml
+
+@dataclass
+class ResultCode:
+    SUCCESS: int = 0000  # 成功
+    FAIL: int = 1000  # 失败
+
+
+def make_return_data(success_flag: bool, code: ResultCode, message: str, data: dict):
+    return {
+        "success": success_flag,
+        "code": code,
+        "message": message,
+        "data": data,
+        "timestamp": datetime.now(),
+    }

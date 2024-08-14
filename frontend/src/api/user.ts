@@ -1,4 +1,4 @@
-import request_handler from '@/api/base'
+import { request_handler } from '@/api/base'
 
 // 调用登录接口数据结构定义
 type loginFormType = {

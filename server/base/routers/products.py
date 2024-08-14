@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 import yaml
 from fastapi import APIRouter, File, UploadFile
 from loguru import logger
@@ -18,8 +19,10 @@ router = APIRouter(
 class UploadProductItem(BaseModel):
     user_id: str = ""  # User 识别号，用于区分不用的用户调用
     request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
+    product_id: int = -1  # 8
     product_name: str
-    heighlights: str  # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
+    product_class: str  # "衣服"
+    heighlights: str | List[str] # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
     image_path: str  # "./product_info/images/pants.png"
     instruction: str  # "./product_info/instructions/pants.md"
     departure_place: str  # "广州"
@@ -29,8 +32,6 @@ class UploadProductItem(BaseModel):
     upload_date: str = ""  # "1722944888"
     sales_doc: str  # "速干运动裤"
     digital_human_video: str  # "666"
-    product_id: int = -1  # 8
-    product_class: str  # "衣服"
     streamer_id: int
 
 
