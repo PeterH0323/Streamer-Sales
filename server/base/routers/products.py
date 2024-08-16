@@ -1,13 +1,16 @@
+import shutil
 from pathlib import Path
+import time
 from typing import List
+import uuid
 import yaml
 from fastapi import APIRouter, File, UploadFile
 from loguru import logger
 from pydantic import BaseModel
-import shutil
 
-from ...web_configs import WEB_CONFIGS
+from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..modules.rag.rag_worker import rebuild_rag_db
+from ..utils import ResultCode, make_return_data
 
 router = APIRouter(
     prefix="/products",
@@ -22,7 +25,7 @@ class UploadProductItem(BaseModel):
     product_id: int = -1  # 8
     product_name: str
     product_class: str  # "衣服"
-    heighlights: str | List[str] # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
+    heighlights: str | List[str]  # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
     image_path: str  # "./product_info/images/pants.png"
     instruction: str  # "./product_info/instructions/pants.md"
     departure_place: str  # "广州"
@@ -125,9 +128,21 @@ async def get_product_info_api(productId: str):
 
 
 @router.post("/upload/file")
-async def upload_product_api():
-    # TODO 保存图片并返回服务器地址
-    return {"code": 0, "message": "success", "image_path": "./product_info/instructions/beef.md"}
+async def upload_product_api(file: UploadFile = File(...)):
+
+    file_type = file.filename.split(".")[-1]  # eg. image/png
+    logger.info(f"upload file type = {file_type}")
+    upload_time = str(int(time.time())) + "__" + str(uuid.uuid4().hex)
+    save_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(upload_time + "." + file_type)
+    logger.info(f"save path = {save_path}")
+
+    # 使用流式处理接收文件
+    with open(save_path, "wb") as buffer:
+        while chunk := await file.read(1024 * 1024 * 5):  # 每次读取 5MB 的数据块
+            buffer.write(chunk)
+
+    file_url = f"{API_CONFIG.REQUEST_FILES_URL}/{Path(save_path).name}"
+    return make_return_data(True, ResultCode.SUCCESS, "成功", file_url)
 
 
 @router.post("/upload/form")

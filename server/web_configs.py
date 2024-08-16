@@ -9,6 +9,11 @@ class WebConfigs:
     """
 
     # ==================================================================
+    #                             上传文件配置
+    # ==================================================================
+    UPLOAD_FILE_SAVE_DIR = r"./static/upload_files"
+
+    # ==================================================================
     #                             LLM 模型配置
     # ==================================================================
     SALES_NAME: str = "乐乐喵"  # 启动的角色名
@@ -94,24 +99,26 @@ class ApiConfig:
     #                               URL 配置
     # ==================================================================
     USING_DOCKER_COMPOSE: bool = os.environ.get("USING_DOCKER_COMPOSE", "false") == "true"
-    
+
     # 路由名字和 compose.yaml 服务名对应
     TTS_ROUTER_NAME: str = "tts" if USING_DOCKER_COMPOSE else "0.0.0.0"
     DIGITAL_ROUTER_NAME: str = "digital_human" if USING_DOCKER_COMPOSE else "0.0.0.0"
     ASR_ROUTER_NAME: str = "asr" if USING_DOCKER_COMPOSE else "0.0.0.0"
     LLM_ROUTER_NAME: str = "llm" if USING_DOCKER_COMPOSE else "0.0.0.0"
-    BASE_ROUTER_NAME: str = "base" if USING_DOCKER_COMPOSE else "0.0.0.0"
-    
+    BASE_ROUTER_NAME: str = "base" if USING_DOCKER_COMPOSE else "127.0.0.1"
+
     TTS_URL: str = f"http://{TTS_ROUTER_NAME}:8001/tts"
     DIGITAL_HUMAN_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human"
     ASR_URL: str = f"http://{ASR_ROUTER_NAME}:8003/asr"
     LLM_URL: str = f"http://{LLM_ROUTER_NAME}:23333"
-    
+
     CHAT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/chat"
     UPLOAD_PRODUCT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/upload_product"
     GET_PRODUCT_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/get_product_info"
     GET_SALES_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/get_sales_info"
     PLUGINS_INFO_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/plugins_info"
+
+    REQUEST_FILES_URL = f"http://{BASE_ROUTER_NAME}:8000/files"
 
 
 # 实例化

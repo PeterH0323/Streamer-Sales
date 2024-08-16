@@ -1,20 +1,19 @@
 import asyncio
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import wave
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
+import yaml
 from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
-import yaml
-
-from ..web_configs import API_CONFIG, WEB_CONFIGS
 
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
+from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -257,6 +256,7 @@ async def get_llm_product_prompt_base_info():
         dataset_yaml = yaml.safe_load(f)
 
     return dataset_yaml
+
 
 @dataclass
 class ResultCode:
