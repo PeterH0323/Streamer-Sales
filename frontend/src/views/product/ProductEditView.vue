@@ -89,7 +89,16 @@ onMounted(async () => {
     console.log(data)
     if (data.state === 0) {
       productInfo.value = data.product
+
+      //更新主播选择器
       streamInfoSelected.value.id = productInfo.value.streamer_id
+      for (let i of streamerNameOptions.value) {
+        if (i.id === streamInfoSelected.value.id) {
+          streamInfoSelected.value = i
+          break
+        }
+      }
+
       ElMessage.success('获取数据成功')
     }
   }
