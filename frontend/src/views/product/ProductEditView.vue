@@ -108,7 +108,7 @@ onMounted(async () => {
 <template>
   <div>
     <!-- 返回栏 -->
-    <el-page-header @back="router.go(-1)" title="返回">
+    <el-page-header @back="router.push({ name: 'ProductList' })" title="返回">
       <template #content>
         <div class="flex items-center">
           <span class="text-large font-600 mr-3">
