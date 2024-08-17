@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElMessage, type UploadProps, type UploadProgressEvent } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 
 // 定义组件入参
 const props = defineProps({
@@ -21,6 +21,10 @@ function updateImagePath(newPath: string) {
 
 // 上传文件，上传后为本机内存地址，方便加载
 const imageUrl = ref('')
+watchEffect(() => {
+  // 用于在编辑模式下显示图片
+  imageUrl.value = modelFilePath.value
+})
 
 // 是否显示进度条
 const isShowProgress = ref(false)
