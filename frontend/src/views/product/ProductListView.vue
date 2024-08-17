@@ -6,6 +6,21 @@ import { queryCondition, queriedResult, getProductList } from '@/api/product'
 
 const router = useRouter()
 
+// 点击按钮查看说明书
+const handleInstructionClick = (instruction: string) => {
+  console.info(instruction)
+}
+
+// 点击按钮查看解说文案
+const handleSalesDocClick = (instruction: string) => {
+  console.info(instruction)
+}
+
+// 点击查看数字人视频
+const handleDigitalHumanClick = (digitalHumanPath: string) => {
+  console.info(digitalHumanPath)
+}
+
 onMounted(() => {
   // 获取商品信息
   getProductList()
@@ -43,28 +58,65 @@ onMounted(() => {
 
     <!-- 中部表格信息 -->
     <el-table :data="queriedResult.product" max-height="1000" border>
-      <el-table-column prop="product_id" label="ID" align="center" />
-      <el-table-column prop="image_path" label="图片" align="center" />
+      <el-table-column prop="product_id" label="ID" align="center" width="50px" />
+
+      <el-table-column prop="image_path" label="图片" align="center">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            <!-- TODO 加上  :preview-src-list="[scope.row.image_path]"  -->
+            <el-image :src="scope.row.image_path" />
+          </div>
+        </template>
+      </el-table-column>
+
       <el-table-column prop="product_name" label="名称" align="center" />
       <el-table-column prop="product_class" label="分类" align="center" />
       <el-table-column prop="heighlights" label="亮点" align="center" />
       <el-table-column prop="selling_price" label="价格" align="center" />
       <el-table-column prop="amount" label="库存" align="center" />
-      <el-table-column prop="sales_doc" label="解说文案" align="center" />
-      <el-table-column prop="instruction" label="说明书" align="center" />
-      <el-table-column prop="digital_human_video" label="数字人视频" align="center" />
+      <!-- <el-table-column prop="sales_doc" label="解说文案" align="center" /> -->
+      <!-- <el-table-column prop="instruction" label="说明书" align="center">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            <el-button size="small" @click="handleInstructionClick(scope.row.instruction)">
+              查看
+            </el-button>
+          </div>
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="digital_human_video" label="数字人视频" align="center">
+        <template #default="scope">
+          <div style="display: flex; align-items: center">
+            <el-button size="small" @click="handleDigitalHumanClick(scope.row.digital_human_video)">
+              查看
+            </el-button>
+          </div>
+        </template>
+      </el-table-column> -->
+
       <el-table-column prop="departure_place" label="发货地" align="center" />
       <el-table-column prop="delivery_company" label="快递公司" align="center" />
       <el-table-column prop="upload_date" label="上传时间" align="center" />
-      <el-table-column label="操作" align="center" v-slot="{ row }">
-        <el-button
-          size="small"
-          @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
-        >
-          编辑
-        </el-button>
-        <el-button size="small" type="danger">归档</el-button>
-        <el-button size="small">分配直播间</el-button>
+      <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
+        <div class="control-item">
+          <el-button size="small" @click="handleSalesDocClick(row.sales_doc)"> 解说文案 </el-button>
+          <el-button size="small" @click="handleInstructionClick(row.instruction)">
+            说明书
+          </el-button>
+          <el-button size="small" @click="handleDigitalHumanClick(row.digital_human_video)">
+            数字人视频
+          </el-button>
+
+          <el-button
+            size="small"
+            @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
+          >
+            编辑
+          </el-button>
+          <el-button size="small" type="danger">归档</el-button>
+          <el-button size="small">分配直播间</el-button>
+        </div>
       </el-table-column>
     </el-table>
 
@@ -105,5 +157,10 @@ onMounted(() => {
 
 .card-header {
   display: flex;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
 }
 </style>
