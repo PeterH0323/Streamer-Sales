@@ -39,8 +39,6 @@ let player = null
 onMounted(() => {
   player = new Player(playerOpts)
 })
-
-console.log('video component reflash')
 </script>
 
 <template>

@@ -87,8 +87,8 @@ onMounted(async () => {
     //编辑情况下调取接口获取对应商品信息
     const { data } = await getProductByIdRequest(props.productId)
     console.log(data)
-    if (data.state === 0) {
-      productInfo.value = data.product
+    if (data.code === 0) {
+      productInfo.value = data.data
 
       //更新主播选择器
       streamInfoSelected.value.id = productInfo.value.streamer_id

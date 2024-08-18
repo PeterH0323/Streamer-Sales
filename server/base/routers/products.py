@@ -123,17 +123,14 @@ async def get_product_info_api(product_query_item: ProductQueryItem):
 
     logger.info(product_list)
     logger.info(f"len {len(product_list)}")
-    return {
-        "success": True,
-        "state": 0,
-        "message": "success",
-        "data": {
-            "product": product_list,
-            "current": product_query_item.currentPage,
-            "pageSize": product_query_item.pageSize,
-            "totalSize": product_total_size,
-        },
+
+    res_data = {
+        "product": product_list,
+        "current": product_query_item.currentPage,
+        "pageSize": product_query_item.pageSize,
+        "totalSize": product_total_size,
     }
+    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
 @router.get("/info")
@@ -141,12 +138,7 @@ async def get_product_info_api(productId: str):
     product_list, _ = await get_product_list(id=int(productId))
 
     logger.info(product_list)
-    return {
-        "success": True,
-        "state": 0,
-        "message": "success",
-        "product": product_list[0],
-    }
+    return make_return_data(True, ResultCode.SUCCESS, "成功", product_list[0])
 
 
 @router.post("/upload/file")

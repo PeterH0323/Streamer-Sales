@@ -11,7 +11,9 @@ class WebConfigs:
     # ==================================================================
     #                             上传文件配置
     # ==================================================================
-    UPLOAD_FILE_SAVE_DIR = r"./static/upload_files"
+    UPLOAD_FILE_SAVE_DIR = r"./static/product_files"
+    INSTRUCTIONS_DIR = "instructions"
+    IMAGES_DIR = "images"
 
     # ==================================================================
     #                             LLM 模型配置

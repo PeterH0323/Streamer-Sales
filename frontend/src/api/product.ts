@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import { request_handler } from '@/api/base'
+import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo } from '@/api/streamerInfo'
 
 // 调用登录接口数据结构定义
@@ -39,14 +39,6 @@ interface ProductData {
   totalSize: number
 }
 
-// 登录接口返回数据结构定义
-interface ProductListResultType<T> {
-  success: boolean
-  state: number
-  message: string
-  data: T
-}
-
 // 查询 - 条件
 const queryCondition = ref<ProductListType>({
   currentPage: 1,
@@ -60,7 +52,7 @@ const queriedResult = ref<ProductData>({} as ProductData)
 const getProductList = async (params: ProductListType = {}) => {
   Object.assign(queryCondition.value, params) // 用于外部灵活使用，传参的字典更新
   const { data } = await productListRequest(queryCondition.value)
-  if (data.state === 0) {
+  if (data.code === 0) {
     queriedResult.value = data.data
   } else {
     ElMessage.error('商品接口错误')
@@ -72,7 +64,7 @@ const getProductList = async (params: ProductListType = {}) => {
 
 // 查询接口
 const productListRequest = (params: ProductListType) => {
-  return request_handler<ProductListResultType<ProductData>>({
+  return request_handler<ResultPackage<ProductData>>({
     method: 'POST',
     url: '/products/list',
     data: params
@@ -81,7 +73,7 @@ const productListRequest = (params: ProductListType) => {
 
 // 查询制定商品的信息接口
 const getProductByIdRequest = (productId: string) => {
-  return request_handler<ProductListItem>({
+  return request_handler<ResultPackage<ProductListItem>>({
     method: 'GET',
     url: '/products/info/',
     params: {
@@ -95,7 +87,7 @@ const getProductByIdRequest = (productId: string) => {
 const productCreadeOrEditRequest = (params: ProductListType) => {
   console.info(params)
 
-  return request_handler<ProductListResultType<ProductData>>({
+  return request_handler<ResultPackage<ProductData>>({
     method: 'POST',
     url: '/products/upload/form',
     data: params
