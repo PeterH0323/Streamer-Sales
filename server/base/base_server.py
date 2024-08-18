@@ -13,7 +13,7 @@ from sse_starlette import EventSourceResponse
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .routers import llm, products, streamer_info, users
 from .server_info import SERVER_PLUGINS_INFO
-from .utils import ChatItem, streamer_sales_process
+from .utils import ChatItem, ResultCode, make_return_data, streamer_sales_process
 
 app = FastAPI()
 
@@ -39,6 +39,29 @@ app.mount(
 @app.get("/")
 async def hello():
     return {"message": "Hello Streamer-Sales"}
+
+
+@app.post("/dashboard")
+async def get_dashboard_info():
+    """首页展示数据
+    """
+    dashboard_data = {
+        "registeredBrandNum": 98431, # 入驻品牌方
+        "productNum": 49132, # 商品数
+        "dailyActivity": 684113546, # 日活
+        "todayOrder": 8461321, # 订单量
+        "totalSales": 245578131857, # 销售额
+        "conversionRate": 90.0, # 转化率
+
+        "newUser": 54681, # 新增用户
+
+        "knowledgeBasesNum": 887, # 知识库数量
+        "digitalHumanNum": 3, # 数字人数量
+        "LiveRoomNum": 5, # 直播间数量
+    }
+    
+    return make_return_data(True, ResultCode.SUCCESS, "成功", dashboard_data)
+
 
 
 @app.get("/streamer-sales/plugins_info")
