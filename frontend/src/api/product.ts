@@ -111,6 +111,15 @@ const genProductInfoByLlmRequest = (salesDoc: string) => {
   })
 }
 
+// 根据 ID 获取说明书内容
+const genProductInstructionContentRequest = (instructionPath_: string) => {
+  return request_handler({
+    method: 'POST',
+    url: '/products/instruction',
+    data: { instructionPath: instructionPath_ }
+  })
+}
+
 export {
   type ProductListItem,
   type StreamerInfo,
@@ -119,5 +128,6 @@ export {
   getProductList,
   productCreadeOrEditRequest,
   genProductInfoByLlmRequest,
-  getProductByIdRequest
+  getProductByIdRequest,
+  genProductInstructionContentRequest
 }

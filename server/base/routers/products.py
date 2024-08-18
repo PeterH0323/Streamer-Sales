@@ -48,6 +48,9 @@ class ProductQueryItem(BaseModel):
     productName: str = ""  # 商品名
     productId: str = "-1"  # 商品ID
 
+class ProductInstructionItem(BaseModel):
+    instructionPath: str
+
 
 async def get_product_list(product_name="", id=-1):
     # 读取 yaml 文件
@@ -133,7 +136,9 @@ async def upload_product_api(file: UploadFile = File(...)):
     file_type = file.filename.split(".")[-1]  # eg. image/png
     logger.info(f"upload file type = {file_type}")
     upload_time = str(int(time.time())) + "__" + str(uuid.uuid4().hex)
-    save_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(upload_time + "." + file_type)
+    sub_dir_name = WEB_CONFIGS.INSTRUCTIONS_DIR if file_type == "markdown" else WEB_CONFIGS.IMAGES_DIR
+    save_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(sub_dir_name, upload_time + "." + file_type)
+    save_path.parent.mkdir(exist_ok=True, parents=True)
     logger.info(f"save path = {save_path}")
 
     # 使用流式处理接收文件
@@ -141,7 +146,7 @@ async def upload_product_api(file: UploadFile = File(...)):
         while chunk := await file.read(1024 * 1024 * 5):  # 每次读取 5MB 的数据块
             buffer.write(chunk)
 
-    file_url = f"{API_CONFIG.REQUEST_FILES_URL}/{Path(save_path).name}"
+    file_url = f"{API_CONFIG.REQUEST_FILES_URL}/{sub_dir_name}/{Path(save_path).name}"
     return make_return_data(True, ResultCode.SUCCESS, "成功", file_url)
 
 
@@ -192,3 +197,17 @@ async def upload_product_api(upload_product_item: UploadProductItem):
         "message": "success uploaded product",
         "status": "success",
     }
+
+
+@router.post("/instruction")
+async def get_product_info_api(instruction_path: ProductInstructionItem):
+
+    loacl_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name)
+    if not loacl_path.exists():
+        return make_return_data(False, ResultCode.FAIL, "文件不存在", "")
+
+    with open(loacl_path, "r") as f:
+        instruction_content = f.read()
+
+    logger.info(instruction_content)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", instruction_content)

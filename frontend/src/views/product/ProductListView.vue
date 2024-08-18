@@ -1,25 +1,14 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import ProductInfoDialogView from '@/views/product/ProductInfoDialogView.vue'
 
 import { queryCondition, queriedResult, getProductList } from '@/api/product'
 
 const router = useRouter()
 
-// 点击按钮查看说明书
-const handleInstructionClick = (instruction: string) => {
-  console.info(instruction)
-}
-
-// 点击按钮查看解说文案
-const handleSalesDocClick = (instruction: string) => {
-  console.info(instruction)
-}
-
-// 点击查看数字人视频
-const handleDigitalHumanClick = (digitalHumanPath: string) => {
-  console.info(digitalHumanPath)
-}
+// 信息弹窗显示标识
+const ShowItemInfo = ref()
 
 onMounted(() => {
   // 获取商品信息
@@ -56,8 +45,8 @@ onMounted(() => {
       </div>
     </template>
 
-    <!-- 中部表格信息 -->
-    <el-table :data="queriedResult.product" max-height="1000" border>
+    <!-- 中部表格信息 border-->
+    <el-table :data="queriedResult.product" max-height="1000">
       <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
       <el-table-column prop="image_path" label="图片" align="center">
@@ -100,13 +89,33 @@ onMounted(() => {
       <el-table-column prop="upload_date" label="上传时间" align="center" />
       <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
         <div class="control-item">
-          <el-button size="small" @click="handleSalesDocClick(row.sales_doc)"> 解说文案 </el-button>
-          <el-button size="small" @click="handleInstructionClick(row.instruction)">
+          <el-button
+            size="small"
+            @click="ShowItemInfo.showItemInfoDialog('SalesDoc', row.sales_doc, row.product_id)"
+          >
+            解说文案
+          </el-button>
+          <el-button
+            size="small"
+            @click="ShowItemInfo.showItemInfoDialog('Instruction', row.instruction, row.product_id)"
+          >
             说明书
           </el-button>
-          <el-button size="small" @click="handleDigitalHumanClick(row.digital_human_video)">
+          <el-button
+            size="small"
+            @click="
+              ShowItemInfo.showItemInfoDialog(
+                'DigitalHuman',
+                row.digital_human_video,
+                row.product_id
+              )
+            "
+          >
             数字人视频
           </el-button>
+
+          <!-- 信息弹窗 -->
+          <ProductInfoDialogView ref="ShowItemInfo" />
 
           <el-button
             size="small"
@@ -163,4 +172,27 @@ onMounted(() => {
   display: flex;
   align-items: center;
 }
+
+// // 去掉表格右边框线
+// .el-table--border::after {
+//   width: 0;
+// }
+
+// // 去掉表格上边框线
+// :deep(.el-table__inner-wrapper::after) {
+//   height: 0;
+// }
+
+// 去掉表格下边框线
+:deep(.el-table__inner-wrapper::before) {
+  height: 0;
+}
+
+// // 去掉表格左边框线
+// .el-table::before {
+//   width: 0;
+// }
+// :deep(.el-table__border-left-patch) {
+//   width: 0;
+// }
 </style>
