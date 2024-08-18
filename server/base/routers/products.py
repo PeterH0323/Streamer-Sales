@@ -1,3 +1,4 @@
+from datetime import datetime
 import shutil
 from pathlib import Path
 import time
@@ -48,14 +49,22 @@ class ProductQueryItem(BaseModel):
     productName: str = ""  # 商品名
     productId: str = "-1"  # 商品ID
 
+
 class ProductInstructionItem(BaseModel):
     instructionPath: str
 
 
-async def get_product_list(product_name="", id=-1):
+async def get_db_product_info(user_id: str = ""):
     # 读取 yaml 文件
     with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
+
+    return product_info_dict
+
+
+async def get_product_list(product_name="", id=-1):
+    # 读取数据库
+    product_info_dict = await get_db_product_info()
 
     # 根据 ID 排序，避免乱序
     product_info_name_list = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"])).keys()
@@ -152,31 +161,50 @@ async def upload_product_api(file: UploadFile = File(...)):
 
 @router.post("/upload/form")
 async def upload_product_api(upload_product_item: UploadProductItem):
-    # 上传商品
-    return {"code": 0, "message": "success"}
+    """新增 or 编辑商品
 
-    # TODO 可以不输入商品名称和特性，大模型根据说明书自动生成一版让用户自行修改
+    Args:
+        upload_product_item (UploadProductItem): _description_
 
-    # 显示上传状态，并执行上传操作
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
+    Returns:
+        _type_: _description_
+    """
+
+    # TODO 后续直接插入到数据库就行，无需自行将 id + 1
+    # 获取现有数据
+    product_info_dict = await get_db_product_info()
 
     # 排序防止乱序
-    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["id"]))
-    max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["id"])
+    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"]))
+    max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["product_id"])
 
-    product_info_dict.update(
-        {
-            upload_product_item.name: {
-                "heighlights": upload_product_item.heightlight.split("、"),
-                "images": str(upload_product_item.image_path),
-                "instruction": str(upload_product_item.instruction_path),
-                "id": product_info_dict[max_id_key]["id"] + 1,
-                "departure_place": upload_product_item.departure_place,
-                "delivery_company_name": upload_product_item.delivery_company,
-            }
-        }
+    heighlights_list = (
+        upload_product_item.heighlights
+        if isinstance(upload_product_item.heighlights, list)
+        else upload_product_item.heighlights.split("、")
     )
+    new_info_dict = {
+        "heighlights": heighlights_list,
+        "image_path": str(upload_product_item.image_path),
+        "instruction": str(upload_product_item.instruction),
+        "departure_place": upload_product_item.departure_place,
+        "delivery_company": upload_product_item.delivery_company,
+        "selling_price": upload_product_item.selling_price,
+        "amount": upload_product_item.amount,
+        "upload_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "sales_doc": upload_product_item.sales_doc,
+        "digital_human_video": upload_product_item.digital_human_video,
+        "product_id": product_info_dict[max_id_key]["product_id"] + 1,
+        "product_class": upload_product_item.product_class,
+    }
+
+    if upload_product_item.product_name not in product_info_dict:
+        # 没有则加入
+        product_info_dict.update({upload_product_item.product_name: new_info_dict})
+    else:
+        # 有则更新
+        new_info_dict["product_id"] = product_info_dict[upload_product_item.product_name]["product_id"]  # 使用原来的 ID
+        product_info_dict[upload_product_item.product_name] = new_info_dict
 
     # 备份
     if Path(WEB_CONFIGS.PRODUCT_INFO_YAML_BACKUP_PATH).exists():
@@ -191,18 +219,15 @@ async def upload_product_api(upload_product_item: UploadProductItem):
         # 重新生成 RAG 向量数据库
         rebuild_rag_db()
 
-    return {
-        "user_id": upload_product_item.user_id,
-        "request_id": upload_product_item.request_id,
-        "message": "success uploaded product",
-        "status": "success",
-    }
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
 @router.post("/instruction")
 async def get_product_info_api(instruction_path: ProductInstructionItem):
 
-    loacl_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name)
+    loacl_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(
+        WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name
+    )
     if not loacl_path.exists():
         return make_return_data(False, ResultCode.FAIL, "文件不存在", "")
 

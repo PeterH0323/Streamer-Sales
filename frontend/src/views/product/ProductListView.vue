@@ -63,27 +63,6 @@ onMounted(() => {
       <el-table-column prop="heighlights" label="亮点" align="center" />
       <el-table-column prop="selling_price" label="价格" align="center" />
       <el-table-column prop="amount" label="库存" align="center" />
-      <!-- <el-table-column prop="sales_doc" label="解说文案" align="center" /> -->
-      <!-- <el-table-column prop="instruction" label="说明书" align="center">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            <el-button size="small" @click="handleInstructionClick(scope.row.instruction)">
-              查看
-            </el-button>
-          </div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="digital_human_video" label="数字人视频" align="center">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            <el-button size="small" @click="handleDigitalHumanClick(scope.row.digital_human_video)">
-              查看
-            </el-button>
-          </div>
-        </template>
-      </el-table-column> -->
-
       <el-table-column prop="departure_place" label="发货地" align="center" />
       <el-table-column prop="delivery_company" label="快递公司" align="center" />
       <el-table-column prop="upload_date" label="上传时间" align="center" />

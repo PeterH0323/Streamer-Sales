@@ -40,7 +40,7 @@ const onSubmit = async () => {
 
   const { data } = await productCreadeOrEditRequest(productInfo.value)
   if (data.code === 0) {
-    ElMessage.info(`${statusInof}成功!`)
+    ElMessage.success(`${statusInof}成功!`)
     router.push({ name: 'Product' })
   } else {
     ElMessage.error(`${statusInof}失败, ${data.message}`)
@@ -224,7 +224,7 @@ onMounted(async () => {
             />
           </el-form-item>
           <el-form-item label="主播性格">
-            <el-input v-model="streamInfoSelected.character" />
+            <el-input v-model="streamInfoSelected.character" disabled />
           </el-form-item>
 
           <el-form-item label="解说文案">
