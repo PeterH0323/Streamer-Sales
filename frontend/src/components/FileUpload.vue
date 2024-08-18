@@ -14,11 +14,6 @@ const props = defineProps({
 // 定义 和父组件通信的双向绑定 model
 const modelFilePath = defineModel({ default: '' })
 
-// 子组件更新变量 callback
-function updateImagePath(newPath: string) {
-  modelFilePath.value = newPath
-}
-
 // 上传文件，上传后为本机内存地址，方便加载
 const imageUrl = ref('')
 watchEffect(() => {
@@ -32,7 +27,7 @@ const isShowProgress = ref(false)
 // 文件上传成功后的 callback
 const handleFileUploadSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
   imageUrl.value = URL.createObjectURL(uploadFile.raw!) // 生成内存地址，方便加载
-  updateImagePath(response.image_path)
+  modelFilePath.value = response.data // 更新父组件双向绑定的值
   isShowProgress.value = false
 }
 
