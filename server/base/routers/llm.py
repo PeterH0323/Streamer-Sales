@@ -70,11 +70,8 @@ async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
     character = gen_sales_doc_item.sales_info.character.replace(",", "、")
     system_str = system.replace("{role_type}", gen_sales_doc_item.sales_info.name).replace("{character}", character)
 
-    logger.info(gen_sales_doc_item.product_info.heighlights)
-    heighlights_str = "、".join(gen_sales_doc_item.product_info.heighlights)
-
     product_info_str = product_info_struct_template[0].replace("{name}", gen_sales_doc_item.product_info.product_name)
-    product_info_str += product_info_struct_template[1].replace("{highlights}", heighlights_str)
+    product_info_str += product_info_struct_template[1].replace("{highlights}",  gen_sales_doc_item.product_info.heighlights)
 
     # 生成商品文案 prompt
     first_input = first_input_template.replace("{product_info}", product_info_str)

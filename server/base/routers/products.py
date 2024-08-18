@@ -26,7 +26,7 @@ class UploadProductItem(BaseModel):
     product_id: int = -1  # 8
     product_name: str
     product_class: str  # "衣服"
-    heighlights: str | List[str]  # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
+    heighlights: str  # [快干, 伸缩自如, 吸湿排汗, 防风保暖, 高腰设计, 多口袋实用]
     image_path: str  # "./product_info/images/pants.png"
     instruction: str  # "./product_info/instructions/pants.md"
     departure_place: str  # "广州"
@@ -34,8 +34,8 @@ class UploadProductItem(BaseModel):
     selling_price: float  # 66.9
     amount: int  # 12435
     upload_date: str = ""  # "1722944888"
-    sales_doc: str  # "速干运动裤"
-    digital_human_video: str  # "666"
+    sales_doc: str = ""  # "速干运动裤"
+    digital_human_video: str = ""  # "666"
     streamer_id: int
 
 
@@ -76,15 +76,20 @@ async def get_product_list(product_name="", id=-1):
         # TODO 先默认写入 lelemiao
         info.update({"streamer_id": 1})
 
+        # 将 亮点 数组改为字符串
+        info["heighlights"] = "、".join(info["heighlights"])
+
         if product_name != "" and product_name not in key:
             # 如果有商品名则需要进行过滤处理，实现搜索功能
             continue
 
         if id > 0 and info["product_id"] == id:
-            product_list.append(info)
+            # 根据 ID 获取
+            product_list = [info]
             break
-
-        product_list.append(info)
+        else:
+            # 全部获取
+            product_list.append(info)
 
     return product_list, len(product_info_dict)
 
@@ -110,6 +115,11 @@ async def get_product_info_api(product_query_item: ProductQueryItem):
         product_list = product_list[start_index:]
     else:
         product_list = product_list[start_index:end_index]
+
+    # 拼接服务器地址
+    # for product in product_list:
+    #     product["image_path"] = API_CONFIG.REQUEST_FILES_URL + product["image_path"]
+    #     product["instruction"] =  API_CONFIG.REQUEST_FILES_URL + product["instruction"]
 
     logger.info(product_list)
     logger.info(f"len {len(product_list)}")
@@ -145,7 +155,7 @@ async def upload_product_api(file: UploadFile = File(...)):
     file_type = file.filename.split(".")[-1]  # eg. image/png
     logger.info(f"upload file type = {file_type}")
     upload_time = str(int(time.time())) + "__" + str(uuid.uuid4().hex)
-    sub_dir_name = WEB_CONFIGS.INSTRUCTIONS_DIR if file_type == "markdown" else WEB_CONFIGS.IMAGES_DIR
+    sub_dir_name = WEB_CONFIGS.INSTRUCTIONS_DIR if file_type == "md" else WEB_CONFIGS.IMAGES_DIR
     save_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(sub_dir_name, upload_time + "." + file_type)
     save_path.parent.mkdir(exist_ok=True, parents=True)
     logger.info(f"save path = {save_path}")
@@ -178,13 +188,8 @@ async def upload_product_api(upload_product_item: UploadProductItem):
     product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"]))
     max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["product_id"])
 
-    heighlights_list = (
-        upload_product_item.heighlights
-        if isinstance(upload_product_item.heighlights, list)
-        else upload_product_item.heighlights.split("、")
-    )
     new_info_dict = {
-        "heighlights": heighlights_list,
+        "heighlights": upload_product_item.heighlights.split("、"),
         "image_path": str(upload_product_item.image_path),
         "instruction": str(upload_product_item.instruction),
         "departure_place": upload_product_item.departure_place,

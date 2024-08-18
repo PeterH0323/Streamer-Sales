@@ -71,7 +71,7 @@ async def validation_exception_handler(request, exc):
     Returns:
         _type_: _description_
     """
-    logger.info(request.json)
+    logger.info(request.json())
     logger.info(exc)
     return PlainTextResponse(str(exc), status_code=400)
 
