@@ -270,5 +270,5 @@ def make_return_data(success_flag: bool, code: ResultCode, message: str, data: d
         "code": code,
         "message": message,
         "data": data,
-        "timestamp": datetime.now(),
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
