@@ -148,7 +148,9 @@ async def upload_product_api(file: UploadFile = File(...)):
     logger.info(f"upload file type = {file_type}")
     upload_time = str(int(time.time())) + "__" + str(uuid.uuid4().hex)
     sub_dir_name = WEB_CONFIGS.INSTRUCTIONS_DIR if file_type == "md" else WEB_CONFIGS.IMAGES_DIR
-    save_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(sub_dir_name, upload_time + "." + file_type)
+    save_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(
+        WEB_CONFIGS.PRODUCT_FILE_DIR, sub_dir_name, upload_time + "." + file_type
+    )
     save_path.parent.mkdir(exist_ok=True, parents=True)
     logger.info(f"save path = {save_path}")
 
@@ -222,8 +224,8 @@ async def upload_product_api(upload_product_item: UploadProductItem):
 @router.post("/instruction")
 async def get_product_info_api(instruction_path: ProductInstructionItem):
 
-    loacl_path = Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).joinpath(
-        WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name
+    loacl_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(
+        WEB_CONFIGS.PRODUCT_FILE_DIR, WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name
     )
     if not loacl_path.exists():
         return make_return_data(False, ResultCode.FAIL, "文件不存在", "")

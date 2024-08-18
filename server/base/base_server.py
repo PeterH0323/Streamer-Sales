@@ -25,13 +25,13 @@ app.include_router(streamer_info.router)
 
 
 # 挂载静态文件目录，以便访问上传的文件
-WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR = str(Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).absolute())
-Path(WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR).mkdir(parents=True, exist_ok=True)
-logger.info(f"上传文件挂载路径 {WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR}")
+WEB_CONFIGS.SERVER_FILE_ROOT = str(Path(WEB_CONFIGS.SERVER_FILE_ROOT).absolute())
+Path(WEB_CONFIGS.SERVER_FILE_ROOT).mkdir(parents=True, exist_ok=True)
+logger.info(f"上传文件挂载路径 {WEB_CONFIGS.SERVER_FILE_ROOT}")
 logger.info(f"上传文件访问 URL {API_CONFIG.REQUEST_FILES_URL}")
 app.mount(
     f"/{API_CONFIG.REQUEST_FILES_URL.split('/')[-1]}",
-    StaticFiles(directory=WEB_CONFIGS.UPLOAD_FILE_SAVE_DIR),
+    StaticFiles(directory=WEB_CONFIGS.SERVER_FILE_ROOT),
     name=API_CONFIG.REQUEST_FILES_URL.split("/")[-1],
 )
 

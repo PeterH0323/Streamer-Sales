@@ -241,11 +241,8 @@ async def streamer_sales_process(chat_item: ChatItem):
 
 async def get_all_streamer_info():
     # 加载对话配置文件
-    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
-        dataset_yaml = yaml.safe_load(f)
-
-    # 从配置中提取角色信息
-    streamer_info = dataset_yaml["role_type"]  # [WEB_CONFIGS.streamer_NAME]
+    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
+        streamer_info = yaml.safe_load(f)
 
     return streamer_info
 

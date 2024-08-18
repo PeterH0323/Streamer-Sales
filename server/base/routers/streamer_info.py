@@ -55,17 +55,15 @@ async def get_streamer_info_api():
     streamer_list = await get_all_streamer_info()
 
     streamer_info_dict = []
-    id = 0
-    for streamer_name, streamer_character in streamer_list.items():
-        id += 1
+    for streamer_info in streamer_list:
         streamer_info_dict.append(
             {
-                "id": id,
-                "name": streamer_name,
-                "character": ",".join(streamer_character),
-                "value": f"{id}",
-                "imageUrl": "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
-                "videoUrl": "https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4",
+                "id": streamer_info['id'],
+                "name": streamer_info['name'],
+                "character": ",".join(streamer_info['character']),
+                "value": streamer_info['value'],
+                "imageUrl": streamer_info['digital_human_setting']['base_mp4_path'],
+                "videoUrl": streamer_info['digital_human_setting']['poster'],
             }
         )
 
