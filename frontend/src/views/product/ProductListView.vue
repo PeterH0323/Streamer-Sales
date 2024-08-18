@@ -17,112 +17,116 @@ onMounted(() => {
 </script>
 
 <template>
-  <el-card>
-    <template #header>
-      <!-- 头部 -->
-      <div class="card-header">
-        <el-form :inline="true" :model="queriedResult.product">
-          <el-form-item label="商品名称">
-            <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
-          </el-form-item>
-          <!-- <el-form-item label="分类">
+  <div>
+    <el-card>
+      <template #header>
+        <!-- 头部 -->
+        <div class="card-header">
+          <el-form :inline="true" :model="queriedResult.product">
+            <el-form-item label="商品名称">
+              <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
+            </el-form-item>
+            <!-- <el-form-item label="分类">
             <el-select v-model="queriedResult.class" placeholder="">
               <el-option label="全部" value="" />
               <el-option label="电子" value="电子" />
             </el-select>
           </el-form-item> -->
-          <el-form-item>
-            <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
-              >查询</el-button
-            >
-          </el-form-item>
-        </el-form>
-        <!-- 添加商品 -->
-        <!-- TODO 按钮放到最右边 -->
-        <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
-          添加商品
-        </el-button>
-      </div>
-    </template>
-
-    <!-- 中部表格信息 border-->
-    <el-table :data="queriedResult.product" max-height="1000">
-      <el-table-column prop="product_id" label="ID" align="center" width="50px" />
-
-      <el-table-column prop="image_path" label="图片" align="center">
-        <template #default="scope">
-          <div style="display: flex; align-items: center">
-            <!-- TODO 加上  :preview-src-list="[scope.row.image_path]"  -->
-            <el-image :src="scope.row.image_path" />
-          </div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="product_name" label="名称" align="center" />
-      <el-table-column prop="product_class" label="分类" align="center" />
-      <el-table-column prop="heighlights" label="亮点" align="center" />
-      <el-table-column prop="selling_price" label="价格" align="center" />
-      <el-table-column prop="amount" label="库存" align="center" />
-      <el-table-column prop="departure_place" label="发货地" align="center" />
-      <el-table-column prop="delivery_company" label="快递公司" align="center" />
-      <el-table-column prop="upload_date" label="上传时间" align="center" />
-      <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
-        <div class="control-item">
-          <el-button
-            size="small"
-            @click="ShowItemInfo.showItemInfoDialog('SalesDoc', row.sales_doc, row.product_id)"
-          >
-            解说文案
+            <el-form-item>
+              <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
+                >查询</el-button
+              >
+            </el-form-item>
+          </el-form>
+          <!-- 添加商品 -->
+          <!-- TODO 按钮放到最右边 -->
+          <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
+            添加商品
           </el-button>
-          <el-button
-            size="small"
-            @click="ShowItemInfo.showItemInfoDialog('Instruction', row.instruction, row.product_id)"
-          >
-            说明书
-          </el-button>
-          <el-button
-            size="small"
-            @click="
-              ShowItemInfo.showItemInfoDialog(
-                'DigitalHuman',
-                row.digital_human_video,
-                row.product_id
-              )
-            "
-          >
-            数字人视频
-          </el-button>
-
-          <!-- 信息弹窗 -->
-          <ProductInfoDialogView ref="ShowItemInfo" />
-
-          <el-button
-            size="small"
-            @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
-          >
-            编辑
-          </el-button>
-          <el-button size="small" type="danger">归档</el-button>
-          <el-button size="small">分配直播间</el-button>
         </div>
-      </el-table-column>
-    </el-table>
+      </template>
 
-    <!-- 分页栏 -->
-    <template #footer>
-      <!-- TODO 保持在页面最低位置 -->
-      <el-pagination
-        v-model:current-page="queriedResult.current"
-        v-model:page-size="queriedResult.pageSize"
-        :page-sizes="[5, 10, 15, 20]"
-        :background="true"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="queriedResult.totalSize || 0"
-        @size-change="(pageSize: number) => getProductList({ pageSize, currentPage: 1 })"
-        @current-change="(currentPage: number) => getProductList({ currentPage })"
-      />
-    </template>
-  </el-card>
+      <!-- 中部表格信息 border-->
+      <el-table :data="queriedResult.product" max-height="1000">
+        <el-table-column prop="product_id" label="ID" align="center" width="50px" />
+
+        <el-table-column prop="image_path" label="图片" align="center">
+          <template #default="scope">
+            <div style="display: flex; align-items: center">
+              <!-- TODO 加上  :preview-src-list="[scope.row.image_path]"  -->
+              <el-image :src="scope.row.image_path" />
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="product_name" label="名称" align="center" />
+        <el-table-column prop="product_class" label="分类" align="center" />
+        <el-table-column prop="heighlights" label="亮点" align="center" />
+        <el-table-column prop="selling_price" label="价格" align="center" />
+        <el-table-column prop="amount" label="库存" align="center" />
+        <el-table-column prop="departure_place" label="发货地" align="center" />
+        <el-table-column prop="delivery_company" label="快递公司" align="center" />
+        <el-table-column prop="upload_date" label="上传时间" align="center" />
+        <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
+          <div class="control-item">
+            <el-button
+              size="small"
+              @click="ShowItemInfo.showItemInfoDialog('SalesDoc', row.sales_doc, row.product_id)"
+            >
+              解说文案
+            </el-button>
+            <el-button
+              size="small"
+              @click="
+                ShowItemInfo.showItemInfoDialog('Instruction', row.instruction, row.product_id)
+              "
+            >
+              说明书
+            </el-button>
+            <el-button
+              size="small"
+              @click="
+                ShowItemInfo.showItemInfoDialog(
+                  'DigitalHuman',
+                  row.digital_human_video,
+                  row.product_id
+                )
+              "
+            >
+              数字人视频
+            </el-button>
+
+            <!-- 信息弹窗 -->
+            <ProductInfoDialogView ref="ShowItemInfo" />
+
+            <el-button
+              size="small"
+              @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
+            >
+              编辑
+            </el-button>
+            <el-button size="small" type="danger">归档</el-button>
+            <el-button size="small">分配直播间</el-button>
+          </div>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页栏 -->
+      <template #footer>
+        <!-- TODO 保持在页面最低位置 -->
+        <el-pagination
+          v-model:current-page="queriedResult.current"
+          v-model:page-size="queriedResult.pageSize"
+          :page-sizes="[5, 10, 15, 20]"
+          :background="true"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="queriedResult.totalSize || 0"
+          @size-change="(pageSize: number) => getProductList({ pageSize, currentPage: 1 })"
+          @current-change="(currentPage: number) => getProductList({ currentPage })"
+        />
+      </template>
+    </el-card>
+  </div>
 </template>
 
 <style lang="scss" scoped>

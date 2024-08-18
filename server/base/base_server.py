@@ -43,25 +43,26 @@ async def hello():
 
 @app.post("/dashboard")
 async def get_dashboard_info():
-    """首页展示数据
-    """
+    """首页展示数据"""
     dashboard_data = {
-        "registeredBrandNum": 98431, # 入驻品牌方
-        "productNum": 49132, # 商品数
-        "dailyActivity": 684113546, # 日活
-        "todayOrder": 8461321, # 订单量
-        "totalSales": 245578131857, # 销售额
-        "conversionRate": 90.0, # 转化率
-
-        "newUser": 54681, # 新增用户
-
-        "knowledgeBasesNum": 887, # 知识库数量
-        "digitalHumanNum": 3, # 数字人数量
-        "LiveRoomNum": 5, # 直播间数量
+        "registeredBrandNum": 98431,  # 入驻品牌方
+        "productNum": 49132,  # 商品数
+        "dailyActivity": 68431,  # 日活
+        "todayOrder": 8461321,  # 订单量
+        "totalSales": 245578131857,  # 销售额
+        "conversionRate": 90.0,  # 转化率
+        # 折线图
+        "orderNumList": [46813, 68461, 99561, 138131, 233812, 84613, 846122],  # 订单量
+        "totalSalesList": [46813, 68461, 99561, 138131, 23383, 84613, 841213],  # 销售额
+        "newUserList": [3215, 65131, 6513, 6815, 2338, 84614, 84213],  # 新增用户
+        "activityUserList": [132, 684, 59431, 4618, 31354, 68431, 88431],  # 活跃用户
+        # 柱状图
+        "knowledgeBasesNum": 12,  # 知识库数量
+        "digitalHumanNum": 3,  # 数字人数量
+        "LiveRoomNum": 5,  # 直播间数量
     }
-    
-    return make_return_data(True, ResultCode.SUCCESS, "成功", dashboard_data)
 
+    return make_return_data(True, ResultCode.SUCCESS, "成功", dashboard_data)
 
 
 @app.get("/streamer-sales/plugins_info")
