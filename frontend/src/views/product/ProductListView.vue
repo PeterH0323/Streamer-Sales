@@ -47,7 +47,7 @@ onMounted(() => {
       </template>
 
       <!-- 中部表格信息 border-->
-      <el-table :data="queriedResult.product" max-height="1000">
+      <el-table :data="queriedResult.product" max-height="1000" border>
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
         <el-table-column prop="image_path" label="图片" align="center">

@@ -45,24 +45,28 @@ defineExpose({ showItemInfoDialog })
 <template>
   <div>
     <!-- 显示说明书 or 文案 or 数字人视频-->
-
-    <el-dialog v-model="dialogFormVisible" :title="title" width="1000" top="5vh">
-      <!-- 主播文案 or 说明书 -->
-      <div v-show="itemType === 'SalesDoc' || itemType === 'Instruction'" style="text-align: left">
-        <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
-      </div>
-      <div v-show="itemType === 'DigitalHuman'">
-        <!-- 数字人视频 -->
-        <VideoComponent :src="infoValue" :key="infoValue" />
-      </div>
-
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="handelEditClick"> 编辑 </el-button>
-          <el-button @click="dialogFormVisible = false">关闭</el-button>
+    <teleport to="body">
+      <el-dialog v-model="dialogFormVisible" :title="title" width="1000" top="5vh">
+        <!-- 主播文案 or 说明书 -->
+        <div
+          v-show="itemType === 'SalesDoc' || itemType === 'Instruction'"
+          style="text-align: left"
+        >
+          <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
         </div>
-      </template>
-    </el-dialog>
+        <div v-show="itemType === 'DigitalHuman'">
+          <!-- 数字人视频 -->
+          <VideoComponent :src="infoValue" :key="infoValue" />
+        </div>
+
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button type="primary" @click="handelEditClick"> 编辑 </el-button>
+            <el-button @click="dialogFormVisible = false">关闭</el-button>
+          </div>
+        </template>
+      </el-dialog>
+    </teleport>
   </div>
 </template>
 
