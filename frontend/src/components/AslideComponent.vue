@@ -47,7 +47,7 @@ const route = useRoute()
         <template #title>
           <el-icon> <Mic /> </el-icon><span>直播配置</span>
         </template>
-        <el-menu-item index="/streaming/overview">开始直播<span></span></el-menu-item>
+        <el-menu-item index="/streaming/overview">直播间管理<span></span></el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="/order">
         <template #title>

@@ -98,12 +98,6 @@ const router = createRouter({
               name: 'DigitalHumanList',
               component: () => import('@/views/digital-human/DigitalHumanView.vue'),
               meta: { title: '角色管理' }
-            },
-            {
-              path: '/digital-human/upload',
-              name: 'DigitalHumanUpload',
-              component: () => import('@/views/digital-human/DigitalHumanView.vue'),
-              meta: { title: '角色上传' }
             }
           ]
         },
@@ -120,8 +114,22 @@ const router = createRouter({
             {
               path: '/streaming/overview',
               name: 'StreamingOverview',
-              component: () => import('@/views/streaming/StreamingView.vue'),
-              meta: { title: '开始直播' }
+              component: () => import('@/views/streaming/StreamingRoomListView.vue'),
+              meta: { title: '直播间管理' }
+            },
+            {
+              path: '/streaming/create',
+              name: 'StreamingCreated',
+              component: () => import('@/views/streaming/StreamingRoomeEditView.vue'),
+              meta: { title: '新建直播间' },
+              props: true
+            },
+            {
+              path: '/streaming/:roomId/edit',
+              name: 'StreamingEdit',
+              component: () => import('@/views/streaming/StreamingRoomeEditView.vue'),
+              meta: { title: '编辑直播间' },
+              props: true
             }
           ]
         },

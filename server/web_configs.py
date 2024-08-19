@@ -9,20 +9,34 @@ class WebConfigs:
     """
 
     # ==================================================================
-    #                             上传文件配置
+    #                             服务器文件配置
     # ==================================================================
     SERVER_FILE_ROOT = r"./static"
-    
+
+    # 商品文件
     PRODUCT_FILE_DIR = "product_files"
     INSTRUCTIONS_DIR = "instructions"
     IMAGES_DIR = "images"
-    
-    STREAMER_FILE_DIR = 'digital_human'
+
+    # 数字人文件
+    STREAMER_FILE_DIR = "digital_human"
+
+    # ==================================================================
+    #                             数据配置
+    # ==================================================================
+    PRODUCT_INFO_YAML_PATH: str = r"./configs/product_info.yaml"
+    STREAMER_CONFIG_PATH = r"./configs/streamer_cfg.yaml"
+    STREAMING_ROOM_CONFIG_PATH = r"./configs/streaming_room_cfg.yaml"
+
+    # ==================================================================
+    #                             配置文件路径
+    # ==================================================================
+    CONVERSATION_CFG_YAML_PATH: str = r"./configs/conversation_cfg.yaml"
 
     # ==================================================================
     #                             LLM 模型配置
     # ==================================================================
-    SALES_NAME: str = "乐乐喵"  # 启动的角色名
+    # SALES_NAME: str = "乐乐喵"  # 启动的角色名
     # LLM_MODEL_DIR: str = r"./weights/llm_weights/"
 
     # ==================================================================
@@ -34,14 +48,14 @@ class WebConfigs:
     ENABLE_AGENT: bool = os.environ.get("ENABLE_AGENT", "true") == "true"  # True 启动 Agent，False 不启用
     ENABLE_ASR: bool = os.environ.get("ENABLE_ASR", "true") == "true"  # True 启动 语音转文字，False 不启用
 
-    DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
+    # DISABLE_UPLOAD: bool = os.getenv("DISABLE_UPLOAD") == "true"
 
     # ==================================================================
     #                               页面配置
     # ==================================================================
-    PRODUCT_IMAGE_HEIGHT: int = 400  # 商品图片高度
-    EACH_CARD_OFFSET: int = 100  # 每个商品卡片比图片高度多出的距离
-    EACH_ROW_COL: int = 2  # 商品页显示多少列
+    # PRODUCT_IMAGE_HEIGHT: int = 400  # 商品图片高度
+    # EACH_CARD_OFFSET: int = 100  # 每个商品卡片比图片高度多出的距离
+    # EACH_ROW_COL: int = 2  # 商品页显示多少列
 
     # 定义用户和机器人头像路径
     USER_AVATOR: str = "./assets/user.png"
@@ -50,16 +64,11 @@ class WebConfigs:
     # ==================================================================
     #                               商品配置
     # ==================================================================
-    PRODUCT_INSTRUCTION_DIR: str = r"./product_info/instructions"
-    PRODUCT_IMAGES_DIR: str = r"./product_info/images"
+    # PRODUCT_INSTRUCTION_DIR: str = r"./product_info/instructions"
+    # PRODUCT_IMAGES_DIR: str = r"./product_info/images"
 
-    PRODUCT_INFO_YAML_PATH: str = r"./product_info/product_info.yaml"
-    PRODUCT_INFO_YAML_BACKUP_PATH: str = PRODUCT_INFO_YAML_PATH + ".bk"
-
-    # ==================================================================
-    #                             配置文件路径
-    # ==================================================================
-    CONVERSATION_CFG_YAML_PATH: str = r"./configs/conversation_cfg.yaml"
+    # PRODUCT_INFO_YAML_PATH: str = r"./product_info/product_info.yaml"
+    # PRODUCT_INFO_YAML_BACKUP_PATH: str = PRODUCT_INFO_YAML_PATH + ".bk"
 
     # ==================================================================
     #                               RAG 配置
@@ -79,8 +88,7 @@ class WebConfigs:
     # ==================================================================
     #                             数字人 配置
     # ==================================================================
-    STREAMER_CONFIG_PATH = r'./configs/streamer_cfg.yaml'
-    
+
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
     DIGITAL_HUMAN_VIDEO_OUTPUT_PATH: str = r"./work_dirs/digital_human/vid_output"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./weights/digital_human_weights/"

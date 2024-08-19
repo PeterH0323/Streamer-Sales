@@ -35,7 +35,7 @@ defineExpose({ showItemInfoDialog })
         <el-col :span="12">
           <h2>主播基本信息</h2>
           <el-form-item label="姓名">
-            <el-input v-model="steamerInfo.character" disabled />
+            <el-input v-model="steamerInfo.name" disabled />
           </el-form-item>
           <el-form-item label="主播性格">
             <el-input v-model="steamerInfo.character" disabled />

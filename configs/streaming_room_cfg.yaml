@@ -1,0 +1,19 @@
+- id: 1
+  name: 001号
+  room_poster: 
+  streamer_id: 1
+  background_image: 
+  prohibited_words_id:
+  product_list:
+    - id: 1
+      start_time: 163871351
+      sales_doc:
+      start_stramer_video:
+    - id: 4
+      start_time: 163871351
+      sales_doc:
+      start_stramer_video:
+    - id: 7
+      start_time: 163871351
+      sales_doc:
+      start_stramer_video:
