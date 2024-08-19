@@ -24,7 +24,9 @@ const showItemInfoDialog = async (itemType_: string, itemValue: string, productI
   if (itemType_ === 'Instruction') {
     // 请求接口获取说明书数据
     const { data } = await genProductInstructionContentRequest(itemValue)
-    infoValue.value = data.data
+    if (data.code === 0) {
+      infoValue.value = data.data
+    }
   } else {
     infoValue.value = itemValue
   }
@@ -42,7 +44,7 @@ defineExpose({ showItemInfoDialog })
 
 <template>
   <div>
-    <!-- <div>显示说明书 or 文案 or 数字人视频</div>-->
+    <!-- 显示说明书 or 文案 or 数字人视频-->
 
     <el-dialog v-model="dialogFormVisible" :title="title" width="1000" top="5vh">
       <!-- 主播文案 or 说明书 -->

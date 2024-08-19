@@ -30,42 +30,32 @@ class StreamerInfoItem(BaseModel):
 
 class StreamerInfo(BaseModel):
     # 主播信息
-    streamer_name: str
+    streamerId: int
 
 
 @router.post("/list")
 async def get_streamer_info_api():
-    """获取所有主播信息，用于用户进行主播的选择
-
-    Returns:
-        data: [
-            {
-                "id": id,
-                "name": streamer_name,
-                "character": ",".join(streamer_character),
-                "value": "str(id)",
-                "imageUrl": "xxx.jpeg",
-                "videoUrl": "xxx.mp4",
-            },
-            ...
-        ]
-    """
+    """获取所有主播信息，用于用户进行主播的选择"""
     # TODO 后续需要改造数据结构，目前先简单返回
     # 加载对话配置文件
     streamer_list = await get_all_streamer_info()
 
-    streamer_info_dict = []
-    for streamer_info in streamer_list:
-        streamer_info_dict.append(
-            {
-                "id": streamer_info['id'],
-                "name": streamer_info['name'],
-                "character": ",".join(streamer_info['character']),
-                "value": streamer_info['value'],
-                "imageUrl": streamer_info['digital_human_setting']['base_mp4_path'],
-                "videoUrl": streamer_info['digital_human_setting']['poster'],
-            }
-        )
+    logger.info(streamer_list)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_list)
 
-    logger.info(streamer_info_dict)
-    return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_info_dict)
+
+@router.post("/info")
+async def get_streamer_info_api(streamer_info: StreamerInfo):
+    """获取所有主播信息，用于获取特定主播的信息"""
+    # TODO 后续需要改造数据结构，目前先简单返回
+    # 加载对话配置文件
+    streamer_list = await get_all_streamer_info()
+
+    pick_info = []
+    for i in streamer_list:
+        if i["id"] == streamer_info.streamerId:
+            pick_info = [i]
+            break
+
+    logger.info(pick_info)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", pick_info)

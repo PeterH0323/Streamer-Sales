@@ -11,9 +11,13 @@ class WebConfigs:
     # ==================================================================
     #                             上传文件配置
     # ==================================================================
-    UPLOAD_FILE_SAVE_DIR = r"./static/product_files"
+    SERVER_FILE_ROOT = r"./static"
+    
+    PRODUCT_FILE_DIR = "product_files"
     INSTRUCTIONS_DIR = "instructions"
     IMAGES_DIR = "images"
+    
+    STREAMER_FILE_DIR = 'digital_human'
 
     # ==================================================================
     #                             LLM 模型配置
@@ -75,6 +79,8 @@ class WebConfigs:
     # ==================================================================
     #                             数字人 配置
     # ==================================================================
+    STREAMER_CONFIG_PATH = r'./configs/streamer_cfg.yaml'
+    
     DIGITAL_HUMAN_GEN_PATH: str = r"./work_dirs/digital_human"
     DIGITAL_HUMAN_VIDEO_OUTPUT_PATH: str = r"./work_dirs/digital_human/vid_output"
     DIGITAL_HUMAN_MODEL_DIR: str = r"./weights/digital_human_weights/"

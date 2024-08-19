@@ -95,6 +95,7 @@ onMounted(async () => {
       for (let i of streamerNameOptions.value) {
         if (i.id === streamInfoSelected.value.id) {
           streamInfoSelected.value = i
+          console.info(streamInfoSelected.value)
           break
         }
       }
@@ -215,11 +216,11 @@ onMounted(async () => {
           <el-form-item label="主播形象">
             <el-image
               style="width: 100px; height: 100px"
-              :src="streamInfoSelected.imageUrl"
+              :src="streamInfoSelected.poster_image"
               :zoom-rate="1.2"
               :max-scale="7"
               :min-scale="0.2"
-              :preview-src-list="[streamInfoSelected.imageUrl]"
+              :preview-src-list="[streamInfoSelected.poster_image]"
               fit="scale-down"
             />
           </el-form-item>

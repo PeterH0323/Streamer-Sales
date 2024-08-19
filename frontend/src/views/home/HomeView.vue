@@ -91,7 +91,7 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .el-card {
   margin: 12px 12px 12px 12px;
-  border-radius: 10px;
+  border-radius: 15px;
 
   .info-item {
     margin: 12px 12px 12px 12px;

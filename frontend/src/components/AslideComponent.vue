@@ -42,7 +42,6 @@ const route = useRoute()
           <el-icon> <User /> </el-icon><span>数字人配置</span>
         </template>
         <el-menu-item index="/digital-human/list"><span>角色管理</span></el-menu-item>
-        <el-menu-item index="/digital-human/upload"><span>角色上传</span></el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="/streaming">
         <template #title>

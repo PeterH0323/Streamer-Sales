@@ -243,6 +243,10 @@ async def get_all_streamer_info():
     # 加载对话配置文件
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
+        
+    for i in streamer_info:
+        # 将性格 list 变为字符串
+        i['character'] = "、".join(i['character'])
 
     return streamer_info
 
