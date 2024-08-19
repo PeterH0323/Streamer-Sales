@@ -6,6 +6,7 @@ interface StreamerInfo {
   value: string
   character: string
   tts_weight_path: string
+  tts_tag: string
   tts_reference_audio: string
   tts_reference_sentence: string
   poster_image: string
