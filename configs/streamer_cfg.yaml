@@ -8,6 +8,7 @@
     - 称呼客户为[家人们]
 
   tts_weight_path:
+  tts_tag: 激动说话
   tts_reference_sentence: 列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。
   tts_reference_audio: http://localhost:8000/files/digital_human/lelemiao/lelemiao.wav
 

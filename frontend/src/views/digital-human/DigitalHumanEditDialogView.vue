@@ -52,6 +52,11 @@ defineExpose({ showItemInfoDialog })
             ></audio>
             <div v-else>未找到音频</div>
           </el-form-item>
+
+          <el-form-item label="情感">
+            <el-tag type="primary"> {{ steamerInfo.tts_tag }} </el-tag>
+          </el-form-item>
+
           <el-form-item label="声音参考文字">
             <el-input v-model="steamerInfo.tts_reference_sentence" />
           </el-form-item>
