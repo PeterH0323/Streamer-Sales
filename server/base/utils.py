@@ -243,20 +243,29 @@ async def get_all_streamer_info():
     # 加载对话配置文件
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
-        
+
     for i in streamer_info:
         # 将性格 list 变为字符串
-        i['character'] = "、".join(i['character'])
+        i["character"] = "、".join(i["character"])
 
     return streamer_info
 
-async def get_all_streaming_room_info():
+
+async def get_streaming_room_info(id=-1):
     # 加载对话配置文件
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
         streaming_room_info = yaml.safe_load(f)
-        
-    return streaming_room_info
 
+    if id <= 0:
+        # 全部返回
+        return streaming_room_info
+
+    # 选择特定的直播间
+    for room_info in streaming_room_info:
+        if room_info["id"] == id:
+            return room_info
+
+    return None
 
 async def get_llm_product_prompt_base_info():
     # 加载对话配置文件

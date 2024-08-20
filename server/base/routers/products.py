@@ -94,17 +94,14 @@ async def get_product_list(product_name="", id=-1):
     return product_list, len(product_info_dict)
 
 
-@router.post("/list")
-async def get_product_info_api(product_query_item: ProductQueryItem):
-
-    logger.info(f"Got product_query_item = {product_query_item}")
-    product_list, db_product_size = await get_product_list(product_name=product_query_item.productName)
+async def get_prduct_by_page(currentPage, pageSize, productName=""):
+    product_list, db_product_size = await get_product_list(product_name=productName)
     product_total_size = len(product_list)
 
     # 根据页面大小返回
     # 前端传过来的 currentPage 最小 = 1
-    end_index = product_query_item.currentPage * product_query_item.pageSize
-    start_index = (product_query_item.currentPage - 1) * product_query_item.pageSize
+    end_index = currentPage * pageSize
+    start_index = (currentPage - 1) * pageSize
     logger.info(f"start_index = {start_index}")
     logger.info(f"end_index = {end_index}")
 
@@ -126,10 +123,21 @@ async def get_product_info_api(product_query_item: ProductQueryItem):
 
     res_data = {
         "product": product_list,
-        "current": product_query_item.currentPage,
-        "pageSize": product_query_item.pageSize,
+        "current": currentPage,
+        "pageSize": pageSize,
         "totalSize": product_total_size,
     }
+
+    return res_data
+
+
+@router.post("/list")
+async def get_product_info_api(product_query_item: ProductQueryItem):
+
+    logger.info(f"Got product_query_item = {product_query_item}")
+    res_data = await get_prduct_by_page(
+        product_query_item.currentPage, product_query_item.pageSize, product_query_item.productName
+    )
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
