@@ -71,29 +71,11 @@ onMounted(() => {
           <div class="control-item">
             <el-button
               size="small"
-              @click="ShowItemInfo.showItemInfoDialog('SalesDoc', row.sales_doc, row.product_id)"
-            >
-              解说文案
-            </el-button>
-            <el-button
-              size="small"
               @click="
                 ShowItemInfo.showItemInfoDialog('Instruction', row.instruction, row.product_id)
               "
             >
               说明书
-            </el-button>
-            <el-button
-              size="small"
-              @click="
-                ShowItemInfo.showItemInfoDialog(
-                  'DigitalHuman',
-                  row.digital_human_video,
-                  row.product_id
-                )
-              "
-            >
-              数字人视频
             </el-button>
 
             <!-- 信息弹窗 -->

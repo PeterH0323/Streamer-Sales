@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import Player from 'xgplayer'
 
 // 定义组件入参
 const props = defineProps({
   src: {
     type: String,
-    default: ''
+    default: 'player'
   }
 })
 
+const player_id = ref(props.src)
+
 const playerOpts = {
-  id: 'player', //元素id
+  id: player_id.value, //元素id
   url: props.src, //视频地址
   poster: '@/assets/logo.png', //封面图
   lang: 'zh-cn', //设置中文
@@ -42,5 +44,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="player"></div>
+  <div :id="player_id"></div>
 </template>

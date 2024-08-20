@@ -148,11 +148,11 @@ async def get_streaming_room_api(romm_info: RoomProductListItem):
 
         if product["product_id"] in selected_id:
             sales_doc = selected_id[product["product_id"]]["sales_doc"]
-            start_stramer_video = selected_id[product["product_id"]]["start_stramer_video"]
+            start_video = selected_id[product["product_id"]]["start_video"]
             start_time = selected_id[product["product_id"]]["start_time"]
         else:
             sales_doc = ""
-            start_stramer_video = ""
+            start_video = ""
             start_time = ""
 
         product_all_list.append(
@@ -161,7 +161,7 @@ async def get_streaming_room_api(romm_info: RoomProductListItem):
                 "id": product["product_id"],
                 "image": product["image_path"],
                 "sales_doc": sales_doc,
-                "start_stramer_video": start_stramer_video,
+                "start_video": start_video,
                 "start_time": start_time,
                 "selected": True if product["product_id"] in selected_id.keys() else False,
             }
@@ -204,7 +204,7 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
                 "id": product["id"],
                 "start_time": product["start_time"],
                 "sales_doc": product["sales_doc"],
-                "start_stramer_video": product["start_stramer_video"],
+                "start_video": product["start_video"],
             }
         )
     new_info.update({"product_list": save_product_list})  # 直播间名字

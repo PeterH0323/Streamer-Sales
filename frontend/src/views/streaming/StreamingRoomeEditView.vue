@@ -11,6 +11,7 @@ import {
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import VideoComponent from '@/components/VideoComponent.vue'
+import ProductInfoDialogView from '@/views/product/ProductInfoDialogView.vue'
 
 const router = useRouter()
 
@@ -21,6 +22,9 @@ const props = defineProps({
     default: '0'
   }
 })
+
+// 信息弹窗显示标识
+const ShowItemInfo = ref()
 
 const onSubmit = () => {}
 
@@ -62,6 +66,7 @@ const getProductInfo = async () => {
 // 获取商品表格信息
 const RoomProductList = ref({} as RoomDetailItem)
 RoomProductList.value.streamerInfo = {} as StreamerInfo
+RoomProductList.value.streamerInfo.id = 0
 
 const EditProductList = ref({} as RoomDetailItem)
 
@@ -98,6 +103,13 @@ function confirmClick() {
 
   // 重新获取
   getProductListInfo(1, 10)
+}
+
+// 每个物品的点击按钮
+const handelControlClick = (itemType_: string, itemValue: string, productId: string) => {
+  console.info(itemType_)
+  console.info(itemValue)
+  ShowItemInfo.value.showItemInfoDialog(itemType_, itemValue, productId)
 }
 </script>
 
@@ -207,7 +219,43 @@ function confirmClick() {
         <el-table-column prop="departure_place" label="发货地" align="center" />
         <el-table-column prop="delivery_company" label="快递公司" align="center" />
         <el-table-column prop="upload_date" label="上传时间" align="center" />
+        <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
+          <div class="control-item">
+            <el-button
+              size="small"
+              @click="handelControlClick('SalesDoc', row.sales_doc, row.product_id)"
+            >
+              解说文案
+            </el-button>
+            <el-button
+              size="small"
+              @click="handelControlClick('Instruction', row.instruction, row.product_id)"
+            >
+              说明书
+            </el-button>
+            <el-button
+              size="small"
+              @click="handelControlClick('DigitalHuman', row.start_video, row.product_id)"
+            >
+              数字人视频
+            </el-button>
+
+            <!-- 信息弹窗 -->
+            <ProductInfoDialogView ref="ShowItemInfo" />
+
+            <el-button
+              size="small"
+              @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
+            >
+              编辑
+            </el-button>
+          </div>
+        </el-table-column>
       </el-table>
+
+      <!-- 信息弹窗 -->
+      <ProductInfoDialogView ref="ShowItemInfo" />
+
       <template #footer>
         <el-pagination
           v-model:current-page="RoomProductList.currentPage"

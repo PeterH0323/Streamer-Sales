@@ -28,7 +28,7 @@ interface ProductItem {
   id: number
   image: string
   sales_doc: string
-  start_stramer_video: string
+  start_video: string
   start_time: string
   selected: boolean
 }

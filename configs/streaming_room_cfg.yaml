@@ -1,19 +1,44 @@
-- id: 1
+- room_id: 1
   name: 001号
-  room_poster: 
+  room_poster: ''
   streamer_id: 1
-  background_image: 
-  prohibited_words_id:
+  background_image: ''
+  prohibited_words_id: ''
   product_list:
-    - id: 1
-      start_time: 163871351
-      sales_doc:
-      start_stramer_video:
-    - id: 4
-      start_time: 163871351
-      sales_doc:
-      start_stramer_video:
-    - id: 7
-      start_time: 163871351
-      sales_doc:
-      start_stramer_video:
+  - id: 1
+    sales_doc: '123456'
+    start_video: 'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4'
+    start_time: 163871351
+  - id: 2
+    sales_doc: ''
+    start_video: ''
+    start_time: 163871351
+  - id: 3
+    sales_doc: ''
+    start_video: ''
+    start_time: ''
+  - id: 5
+    sales_doc: ''
+    start_video: ''
+    start_time: ''
+  - id: 6
+    sales_doc: ''
+    start_video: ''
+    start_time: ''
+  - id: 7
+    sales_doc: ''
+    start_video: ''
+    start_time: 163871351
+  - id: 8
+    sales_doc: ''
+    start_video: ''
+    start_time: 163871351
+  - id: 10
+    sales_doc: ''
+    start_video: ''
+    start_time: 163871351
+  - id: 12
+    sales_doc: ''
+    start_video: ''
+    start_time: ''
+
