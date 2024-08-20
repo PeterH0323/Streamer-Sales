@@ -11,7 +11,7 @@ from fastapi.responses import PlainTextResponse
 from sse_starlette import EventSourceResponse
 
 from ..web_configs import API_CONFIG, WEB_CONFIGS
-from .routers import llm, products, streamer_info, users, streaming_room
+from .routers import llm, products, streamer_info, users, streaming_room, digital_human
 from .server_info import SERVER_PLUGINS_INFO
 from .utils import ChatItem, ResultCode, make_return_data, streamer_sales_process
 
@@ -23,6 +23,7 @@ app.include_router(products.router)
 app.include_router(llm.router)
 app.include_router(streamer_info.router)
 app.include_router(streaming_room.router)
+app.include_router(digital_human.router)
 
 
 # 挂载静态文件目录，以便访问上传的文件

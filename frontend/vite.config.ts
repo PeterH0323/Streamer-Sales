@@ -13,7 +13,8 @@ export default defineConfig({
       '/streamer': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/llm': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/dashboard': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
-      '/streaming-room': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL
+      '/streaming-room': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
+      '/digital-human': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL
     }
   },
   plugins: [vue(), vueDevTools()],
