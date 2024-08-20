@@ -250,6 +250,16 @@ async def get_all_streamer_info():
 
     return streamer_info
 
+async def get_streamer_info_by_id(id: int):
+    streamer_list = await get_all_streamer_info()
+
+    pick_info = []
+    for i in streamer_list:
+        if i["id"] == id:
+            pick_info = [i]
+            break
+
+    return pick_info
 
 async def get_streaming_room_info(id=-1):
     # 加载对话配置文件

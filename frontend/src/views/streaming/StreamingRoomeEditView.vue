@@ -2,6 +2,8 @@
 import { useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+
+import { Check, Warning } from '@element-plus/icons-vue'
 import {
   roomDetailRequest,
   roomPorductAddListRequest,
@@ -12,6 +14,7 @@ import {
 import type { StreamerInfo } from '@/api/streamerInfo'
 import VideoComponent from '@/components/VideoComponent.vue'
 import ProductInfoDialogView from '@/views/product/ProductInfoDialogView.vue'
+import { streamerInfoListRequest } from '@/api/streamerInfo'
 
 const router = useRouter()
 
@@ -25,8 +28,6 @@ const props = defineProps({
 
 // 信息弹窗显示标识
 const ShowItemInfo = ref()
-
-const onSubmit = () => {}
 
 // 侧边栏
 const DrawerProductList = ref({} as RoomProductData)
@@ -78,9 +79,24 @@ const getProductListInfo = async (currentPage: number, pageSize: number) => {
   }
 }
 
+// 获取主播信息
+const streamerNameOptions = ref([] as StreamerInfo[])
+
+const getSteramerInfo = async () => {
+  // 获取主播信息
+  const { data } = await streamerInfoListRequest()
+  if (data.code === 0) {
+    streamerNameOptions.value = data.data
+    ElMessage.success('获取主播信息成功')
+  }
+}
+
 onMounted(() => {
   // 获取商品表格信息
   getProductListInfo(1, 10)
+
+  // 获取主播信息
+  getSteramerInfo()
 })
 
 // 新增商品
@@ -93,6 +109,7 @@ const drawerShow = ref(false)
 function cancelClick() {
   drawerShow.value = false
 }
+
 function confirmClick() {
   EditProductList.value = RoomProductList.value
   EditProductList.value.product = DrawerProductList.value.product
@@ -105,11 +122,26 @@ function confirmClick() {
   getProductListInfo(1, 10)
 }
 
+// 保存
+const onSubmit = () => {
+  EditProductList.value = RoomProductList.value
+  EditProductList.value.product = DrawerProductList.value.product
+  // 调用接口更新选择的商品
+  RoomCreadeOrEditRequest(EditProductList.value)
+  ElMessage.success('操作成功')
+}
+
 // 每个物品的点击按钮
-const handelControlClick = (itemType_: string, itemValue: string, productId: string) => {
+const handelControlClick = (
+  itemType_: string,
+  itemValue: string,
+  productId: number,
+  streamerId: number,
+  salesDoc: string
+) => {
   console.info(itemType_)
   console.info(itemValue)
-  ShowItemInfo.value.showItemInfoDialog(itemType_, itemValue, productId)
+  ShowItemInfo.value.showItemInfoDialog(itemType_, itemValue, productId, streamerId, salesDoc)
 }
 </script>
 
@@ -154,6 +186,26 @@ const handelControlClick = (itemType_: string, itemValue: string, productId: str
       <el-row :gutter="20">
         <el-col :span="12">
           <h2>主播基本信息</h2>
+
+          <!-- TODO 修改之后提醒用户会清除生成的文案，可取消 -->
+          <el-form-item label="选择主播">
+            <!-- @change="productInfo.streamer_id = streamInfoSelected.id" -->
+            <el-select
+              v-model="RoomProductList.streamerInfo"
+              placeholder="选择主播"
+              size="large"
+              style="width: 240px"
+            >
+              <el-option
+                v-for="item in streamerNameOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item"
+              />
+              <!-- TODO hover 的时候显示头图？使用一个概览筐 or 弹窗加载缩略图然后让客户选择？ -->
+            </el-select>
+          </el-form-item>
+
           <el-form-item label="姓名">
             <el-input v-model="RoomProductList.streamerInfo.name" disabled />
           </el-form-item>
@@ -219,29 +271,60 @@ const handelControlClick = (itemType_: string, itemValue: string, productId: str
         <el-table-column prop="departure_place" label="发货地" align="center" />
         <el-table-column prop="delivery_company" label="快递公司" align="center" />
         <el-table-column prop="upload_date" label="上传时间" align="center" />
-        <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
+        <el-table-column label="操作" v-slot="{ row }" align="center" width="400px">
           <div class="control-item">
             <el-button
               size="small"
-              @click="handelControlClick('SalesDoc', row.sales_doc, row.product_id)"
-            >
-              解说文案
-            </el-button>
-            <el-button
-              size="small"
-              @click="handelControlClick('Instruction', row.instruction, row.product_id)"
+              :type="row.instruction !== '' ? 'success' : 'warning'"
+              :icon="row.instruction !== '' ? Check : Warning"
+              @click="
+                handelControlClick(
+                  'Instruction',
+                  row.instruction,
+                  row.product_id,
+                  RoomProductList.streamerInfo.id,
+                  row.sales_doc
+                )
+              "
             >
               说明书
             </el-button>
+
             <el-button
               size="small"
-              @click="handelControlClick('DigitalHuman', row.start_video, row.product_id)"
+              v-model="row.sales_doc"
+              :type="row.sales_doc !== '' ? 'success' : 'warning'"
+              :icon="row.sales_doc !== '' ? Check : Warning"
+              @click="
+                handelControlClick(
+                  'SalesDoc',
+                  row.sales_doc,
+                  row.product_id,
+                  RoomProductList.streamerInfo.id,
+                  row.sales_doc
+                )
+              "
+            >
+              解说文案
+            </el-button>
+
+            <el-button
+              size="small"
+              v-model="row.start_video"
+              :type="row.start_video !== '' ? 'success' : 'warning'"
+              :icon="row.start_video !== '' ? Check : Warning"
+              @click="
+                handelControlClick(
+                  'DigitalHuman',
+                  row.start_video,
+                  row.product_id,
+                  RoomProductList.streamerInfo.id,
+                  row.sales_doc
+                )
+              "
             >
               数字人视频
             </el-button>
-
-            <!-- 信息弹窗 -->
-            <ProductInfoDialogView ref="ShowItemInfo" />
 
             <el-button
               size="small"

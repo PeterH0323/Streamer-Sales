@@ -10,7 +10,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 from ...web_configs import WEB_CONFIGS
-from ..utils import ResultCode, get_all_streamer_info, make_return_data
+from ..utils import ResultCode, get_all_streamer_info, get_streamer_info_by_id, make_return_data
 
 router = APIRouter(
     prefix="/streamer",
@@ -36,8 +36,6 @@ class StreamerInfo(BaseModel):
 @router.post("/list")
 async def get_streamer_info_api():
     """获取所有主播信息，用于用户进行主播的选择"""
-    # TODO 后续需要改造数据结构，目前先简单返回
-    # 加载对话配置文件
     streamer_list = await get_all_streamer_info()
 
     logger.info(streamer_list)
@@ -46,16 +44,8 @@ async def get_streamer_info_api():
 
 @router.post("/info")
 async def get_streamer_info_api(streamer_info: StreamerInfo):
-    """获取所有主播信息，用于获取特定主播的信息"""
-    # TODO 后续需要改造数据结构，目前先简单返回
-    # 加载对话配置文件
-    streamer_list = await get_all_streamer_info()
-
-    pick_info = []
-    for i in streamer_list:
-        if i["id"] == streamer_info.streamerId:
-            pick_info = [i]
-            break
+    """用于获取特定主播的信息"""
+    pick_info = await get_streamer_info_by_id(streamer_info.streamerId)
 
     logger.info(pick_info)
     return make_return_data(True, ResultCode.SUCCESS, "成功", pick_info)

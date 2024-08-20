@@ -241,5 +241,4 @@ async def get_product_info_api(instruction_path: ProductInstructionItem):
     with open(loacl_path, "r") as f:
         instruction_content = f.read()
 
-    logger.info(instruction_content)
     return make_return_data(True, ResultCode.SUCCESS, "成功", instruction_content)

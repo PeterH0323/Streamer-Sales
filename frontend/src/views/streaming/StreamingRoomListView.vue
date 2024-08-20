@@ -43,7 +43,7 @@ const chunkedArray = computed(() => chunkArray(streamingList.value, 4))
               <el-button
                 type="primary"
                 plain
-                @click="router.push({ name: 'StreamingEdit', params: { roomId: item.roomId } })"
+                @click="router.push({ name: 'StreamingEdit', params: { roomId: item.room_id } })"
               >
                 详情
               </el-button>

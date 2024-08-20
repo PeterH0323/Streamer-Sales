@@ -1,24 +1,43 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import VideoComponent from '@/components/VideoComponent.vue'
+import { ElMessage } from 'element-plus'
 import { MdPreview } from 'md-editor-v3'
+
 import 'md-editor-v3/lib/preview.css'
+
 import { genProductInstructionContentRequest } from '@/api/product'
+import { genSalesDocRequest } from '@/api/llm'
+import VideoComponent from '@/components/VideoComponent.vue'
+import { genDigitalHuamnVideoRequest } from '@/api/digitalHuman'
 
 const dialogFormVisible = ref(false)
 const router = useRouter()
 
+// AI 生成后的 文案 or 数字人视频 值双向绑定
+const modelGenValue = defineModel({ default: '' })
+
 // 定义标题
 const titleMap = { SalesDoc: '主播文案', Instruction: '说明书', DigitalHuman: '数字人视频' }
 const title = ref('')
-const productId = ref('')
 const infoValue = ref('')
 const itemType = ref('')
-const showItemInfoDialog = async (itemType_: string, itemValue: string, productId_: string) => {
+const productId = ref(0)
+const streamerId = ref(0)
+const salesDoc = ref('')
+const showItemInfoDialog = async (
+  itemType_: string,
+  itemValue: string,
+  productId_: number,
+  streamerId_: number,
+  salesDoc_: string
+) => {
   title.value = titleMap[itemType_]
   itemType.value = itemType_
   productId.value = productId_
+  streamerId.value = streamerId_
+  salesDoc.value = salesDoc_
+
   dialogFormVisible.value = true
 
   if (itemType_ === 'Instruction') {
@@ -30,6 +49,37 @@ const showItemInfoDialog = async (itemType_: string, itemValue: string, productI
   } else {
     infoValue.value = itemValue
   }
+}
+
+// 生成数据人视频
+const getDigitalHumanVideo = async () => {
+  if (salesDoc.value === '') {
+    ElMessage.error('需要先生成文案')
+    return
+  }
+
+  const { data } = await genDigitalHuamnVideoRequest(salesDoc.value)
+  console.log(data)
+  if (data.code === 0) {
+    infoValue.value = data.data
+    modelGenValue.value = infoValue.value
+  }
+}
+
+// 是否正在生成文案标识
+const isGeneratingDoc = ref(false)
+// 生成解说文案
+const handleGenSalesDocClick = async () => {
+  isGeneratingDoc.value = true
+  ElMessage.success('正在生成，请稍候')
+  const { data } = await genSalesDocRequest(Number(productId.value), Number(streamerId.value))
+  console.log(data)
+  if (data.code === 0) {
+    infoValue.value = data.data
+    modelGenValue.value = infoValue.value // 更新与父组件双向绑定的值
+    ElMessage.success('生成文案成功')
+  }
+  isGeneratingDoc.value = false
 }
 
 // 跳转编辑页面
@@ -47,16 +97,35 @@ defineExpose({ showItemInfoDialog })
     <!-- 显示说明书 or 文案 or 数字人视频-->
     <teleport to="body">
       <el-dialog v-model="dialogFormVisible" :title="title" width="1000" top="5vh">
-        <!-- 主播文案 or 说明书 -->
-        <div
-          v-show="itemType === 'SalesDoc' || itemType === 'Instruction'"
-          style="text-align: left"
-        >
+        <!-- 主播文案  -->
+
+        <div v-show="itemType === 'SalesDoc'">
+          <el-input
+            type="textarea"
+            v-model="infoValue"
+            maxlength="2000"
+            :autosize="{ minRows: 20 }"
+            show-word-limit
+          />
+          <div class="bottom-gen-btn">
+            <el-button @click="handleGenSalesDocClick" :loading="isGeneratingDoc" type="success">
+              AI 生成
+            </el-button>
+          </div>
+        </div>
+
+        <!-- 说明书 -->
+        <div v-show="itemType === 'Instruction'" style="text-align: left">
           <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
         </div>
+
+        <!-- 数字人视频 -->
         <div v-show="itemType === 'DigitalHuman'">
-          <!-- 数字人视频 -->
           <VideoComponent :src="infoValue" :key="infoValue" />
+
+          <div class="bottom-gen-btn">
+            <el-button @click="getDigitalHumanVideo" type="success"> AI 生成数字人视频 </el-button>
+          </div>
         </div>
 
         <template #footer>
@@ -70,4 +139,13 @@ defineExpose({ showItemInfoDialog })
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+// 每个表单底部 AI 生成按钮
+.bottom-gen-btn {
+  margin-top: 15px;
+  margin-left: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+</style>

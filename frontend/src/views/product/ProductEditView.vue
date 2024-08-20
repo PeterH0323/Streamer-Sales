@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
-
 import { Picture } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus/es'
 
 import FileUpload from '@/components/FileUpload.vue'
-import VideoComponent from '@/components/VideoComponent.vue'
-
-import { streamerInfoListRequest } from '@/api/streamerInfo'
-import { genSalesDocRequest } from '@/api/llm'
 
 import {
   type ProductListItem,
@@ -16,7 +12,6 @@ import {
   productCreadeOrEditRequest,
   getProductByIdRequest
 } from '@/api/product'
-import { ElMessage } from 'element-plus/es'
 
 const router = useRouter()
 
@@ -47,63 +42,6 @@ const onSubmit = async () => {
     throw new Error(`${statusInof}失败, ${data.message}`)
   }
 }
-
-// 生成数据人视频
-const getDigitalHumanVideo = async () => {
-  // const res = await productGenDigitalHuamnVideoRequest(productInfo.value.sales_doc)
-  productInfo.value.digital_human_video =
-    'https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4'
-}
-
-// 是否正在生成文案标识
-const isGeneratingDoc = ref(false)
-// 生成解说文案
-const handleGenSalesDocClick = async () => {
-  isGeneratingDoc.value = true
-  ElMessage.success('正在生成，请稍候')
-  const { data } = await genSalesDocRequest(productInfo.value, streamInfoSelected.value)
-  console.log(data)
-  if (data.code === 0) {
-    productInfo.value.sales_doc = data.data
-    ElMessage.success('生成文案成功')
-  }
-  isGeneratingDoc.value = false
-}
-
-// 获取主播信息
-const streamerNameOptions = ref([] as StreamerInfo[])
-
-const streamInfoSelected = ref({} as StreamerInfo)
-
-onMounted(async () => {
-  // 获取主播信息
-  const { data } = await streamerInfoListRequest()
-  if (data.code === 0) {
-    streamerNameOptions.value = data.data
-    ElMessage.success('获取主播信息成功')
-  }
-
-  if (props.productId) {
-    //编辑情况下调取接口获取对应商品信息
-    const { data } = await getProductByIdRequest(props.productId)
-    console.log(data)
-    if (data.code === 0) {
-      productInfo.value = data.data
-
-      //更新主播选择器
-      streamInfoSelected.value.id = productInfo.value.streamer_id
-      for (let i of streamerNameOptions.value) {
-        if (i.id === streamInfoSelected.value.id) {
-          streamInfoSelected.value = i
-          console.info(streamInfoSelected.value)
-          break
-        }
-      }
-
-      ElMessage.success('获取数据成功')
-    }
-  }
-})
 </script>
 
 <template>
@@ -131,8 +69,6 @@ onMounted(async () => {
         <el-steps class="mb-4" :space="200" :active="currentStep" simple>
           <el-step title="头图 & 说明书" :icon="Picture" @click="currentStep = 0" />
           <el-step title="商品信息" :icon="Picture" @click="currentStep = 1" />
-          <el-step title="主播 & 文案" :icon="Picture" @click="currentStep = 2" />
-          <el-step title="数字人视频" :icon="Picture" @click="currentStep = 3" />
         </el-steps>
       </template>
       <!-- 表单 -->
@@ -193,75 +129,13 @@ onMounted(async () => {
             <el-button type="success"> AI 生成 </el-button>
           </div>
         </div>
-
-        <div v-show="currentStep === 2">
-          <!-- 解说文案 -->
-          <el-form-item label="选择主播">
-            <el-select
-              v-model="streamInfoSelected"
-              placeholder="选择主播"
-              size="large"
-              style="width: 240px"
-              @change="productInfo.streamer_id = streamInfoSelected.id"
-            >
-              <el-option
-                v-for="item in streamerNameOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item"
-              />
-              <!-- TODO hover 的时候显示头图？使用一个概览筐 or 弹窗加载缩略图然后让客户选择？ -->
-            </el-select>
-          </el-form-item>
-          <el-form-item label="主播形象">
-            <el-image
-              style="width: 100px; height: 100px"
-              :src="streamInfoSelected.poster_image"
-              :zoom-rate="1.2"
-              :max-scale="7"
-              :min-scale="0.2"
-              :preview-src-list="[streamInfoSelected.poster_image]"
-              fit="scale-down"
-            />
-          </el-form-item>
-          <el-form-item label="主播性格">
-            <el-input v-model="streamInfoSelected.character" disabled />
-          </el-form-item>
-
-          <el-form-item label="解说文案">
-            <el-input
-              type="textarea"
-              v-model="productInfo.sales_doc"
-              maxlength="2000"
-              :autosize="{ minRows: 20 }"
-              show-word-limit
-            />
-          </el-form-item>
-          <div class="bottom-gen-btn">
-            <el-button @click="handleGenSalesDocClick" :loading="isGeneratingDoc" type="success">
-              AI 生成
-            </el-button>
-          </div>
-        </div>
-        <div v-show="currentStep === 3">
-          <!-- 数字人视频 -->
-          <div clas="video-container">
-            <VideoComponent
-              :src="productInfo.digital_human_video"
-              :key="productInfo.digital_human_video"
-            />
-          </div>
-          <div class="bottom-gen-btn">
-            <el-button @click="getDigitalHumanVideo" type="success"> AI 生成数字人视频 </el-button>
-          </div>
-        </div>
       </el-form>
 
       <template #footer>
         <div class="form-bottom-btn">
           <el-button v-show="currentStep > 0" @click="currentStep--">上一步</el-button>
-          <el-button v-show="currentStep < 3" @click="currentStep++">下一步</el-button>
-          <el-button v-show="currentStep === 3" type="primary" @click="onSubmit">保存</el-button>
+          <el-button v-show="currentStep < 1" @click="currentStep++">下一步</el-button>
+          <el-button v-show="currentStep === 1" type="primary" @click="onSubmit">保存</el-button>
         </div>
       </template>
     </el-card>
