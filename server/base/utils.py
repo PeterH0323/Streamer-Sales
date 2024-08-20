@@ -262,7 +262,7 @@ async def get_streaming_room_info(id=-1):
 
     # 选择特定的直播间
     for room_info in streaming_room_info:
-        if room_info["id"] == id:
+        if room_info["room_id"] == id:
             return room_info
 
     return None

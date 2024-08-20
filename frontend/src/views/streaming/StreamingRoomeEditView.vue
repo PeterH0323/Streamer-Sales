@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import {
   roomDetailRequest,
   roomPorductAddListRequest,
+  RoomCreadeOrEditRequest,
   type RoomProductData,
   type RoomDetailItem
 } from '@/api/streamingRoom'
@@ -32,24 +33,27 @@ const currentPage = ref(1)
 const pageSize = ref(-1)
 
 const getProductInfo = async () => {
-  // 调用接口获取商品
+  // 调用接口获取商品缩略图用于抽屉
   const { data } = await roomPorductAddListRequest(
     Number(props.roomId),
     currentPage.value,
     pageSize.value
   )
   if (data.code === 0) {
-    if (DrawerProductList.value.product.length === 0) {
-      DrawerProductList.value = data.data
-    } else {
-      for (let i of data.data.product) {
-        // 根据返回数据继续添加商品
-        DrawerProductList.value.product.push(i)
-      }
-      DrawerProductList.value.currentPage = data.data.currentPage
-      DrawerProductList.value.pageSize = data.data.pageSize
-      DrawerProductList.value.totalSize = data.data.totalSize
-    }
+    DrawerProductList.value = data.data
+
+    // 分页获取
+    // if (DrawerProductList.value.product.length === 0) {
+    //   DrawerProductList.value = data.data
+    // } else {
+    //   for (let i of data.data.product) {
+    //     // 根据返回数据继续添加商品
+    //     DrawerProductList.value.product.push(i)
+    //   }
+    //   DrawerProductList.value.currentPage = data.data.currentPage
+    //   DrawerProductList.value.pageSize = data.data.pageSize
+    //   DrawerProductList.value.totalSize = data.data.totalSize
+    // }
     console.info(DrawerProductList.value)
     ElMessage.success('获取商品成功')
   }
@@ -58,6 +62,8 @@ const getProductInfo = async () => {
 // 获取商品表格信息
 const RoomProductList = ref({} as RoomDetailItem)
 RoomProductList.value.streamerInfo = {} as StreamerInfo
+
+const EditProductList = ref({} as RoomDetailItem)
 
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
   const { data } = await roomDetailRequest(props.roomId, currentPage, pageSize)
@@ -68,7 +74,7 @@ const getProductListInfo = async (currentPage: number, pageSize: number) => {
 }
 
 onMounted(() => {
-  // 获取商品信息
+  // 获取商品表格信息
   getProductListInfo(1, 10)
 })
 
@@ -82,7 +88,17 @@ const drawerShow = ref(false)
 function cancelClick() {
   drawerShow.value = false
 }
-function confirmClick() {}
+function confirmClick() {
+  EditProductList.value = RoomProductList.value
+  EditProductList.value.product = DrawerProductList.value.product
+  // 调用接口更新选择的商品
+  RoomCreadeOrEditRequest(EditProductList.value)
+  ElMessage.success('操作成功')
+  drawerShow.value = false
+
+  // 重新获取
+  getProductListInfo(1, 10)
+}
 </script>
 
 <template>
@@ -170,7 +186,7 @@ function confirmClick() {}
     </el-card>
 
     <el-card>
-      <el-button type="primary" class="ml-2" @click="handelAddProductClick">新增商品</el-button>
+      <el-button type="primary" class="ml-2" @click="handelAddProductClick">增删商品</el-button>
       <el-table :data="RoomProductList.product" max-height="1000" border>
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 

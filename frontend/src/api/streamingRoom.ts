@@ -1,5 +1,5 @@
 import { request_handler, type ResultPackage } from '@/api/base'
-import { type ProductListItem, type StreamerInfo } from '@/api/product'
+import { type StreamerInfo } from '@/api/product'
 
 interface StreamingRoomProductList {
   product_id: number
@@ -9,7 +9,7 @@ interface StreamingRoomProductList {
 }
 
 interface StreamingRoomInfo {
-  id: number
+  roomId: number
   room_poster: string
   name: string
   streamer_id: number
@@ -27,6 +27,9 @@ interface ProductItem {
   name: string
   id: number
   image: string
+  sales_doc: string
+  start_stramer_video: string
+  start_time: string
   selected: boolean
 }
 
@@ -36,6 +39,12 @@ interface RoomDetailItem {
   totalSize: number
   product: []
   streamerInfo: StreamerInfo
+  roomId: number
+  name: string
+  room_poster: string
+  streamer_id: string
+  background_image: string
+  prohibited_words_id: string
 }
 
 // 获取后端主播信息
@@ -64,6 +73,15 @@ const roomPorductAddListRequest = (roomId_: number, currentPage_: number, pageSi
   })
 }
 
+// 添加或者更新直播间接口
+const RoomCreadeOrEditRequest = (params: RoomDetailItem) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/streaming-room/edit/form',
+    data: params
+  })
+}
+
 export {
   type StreamingRoomInfo,
   type ProductItem,
@@ -71,5 +89,6 @@ export {
   type RoomDetailItem,
   streamerRoomListRequest,
   roomDetailRequest,
-  roomPorductAddListRequest
+  roomPorductAddListRequest,
+  RoomCreadeOrEditRequest
 }
