@@ -124,24 +124,30 @@ function confirmClick() {
 
 // 保存
 const onSubmit = () => {
-  EditProductList.value = RoomProductList.value
-  EditProductList.value.product = DrawerProductList.value.product
-  // 调用接口更新选择的商品
-  RoomCreadeOrEditRequest(EditProductList.value)
+  // 调用接口保存商品
+  RoomCreadeOrEditRequest(RoomProductList.value)
   ElMessage.success('操作成功')
 }
 
 // 每个物品的点击按钮
 const handelControlClick = (
-  itemType_: string,
+  titleName: string,
+  itemType: string,
   itemValue: string,
   productId: number,
   streamerId: number,
   salesDoc: string
 ) => {
-  console.info(itemType_)
+  console.info(itemType)
   console.info(itemValue)
-  ShowItemInfo.value.showItemInfoDialog(itemType_, itemValue, productId, streamerId, salesDoc)
+  ShowItemInfo.value.showItemInfoDialog(
+    titleName,
+    itemType,
+    itemValue,
+    productId,
+    streamerId,
+    salesDoc
+  )
 }
 </script>
 
@@ -279,6 +285,7 @@ const handelControlClick = (
               :icon="row.instruction !== '' ? Check : Warning"
               @click="
                 handelControlClick(
+                  row.product_name,
                   'Instruction',
                   row.instruction,
                   row.product_id,
@@ -297,6 +304,7 @@ const handelControlClick = (
               :icon="row.sales_doc !== '' ? Check : Warning"
               @click="
                 handelControlClick(
+                  row.product_name,
                   'SalesDoc',
                   row.sales_doc,
                   row.product_id,
@@ -315,6 +323,7 @@ const handelControlClick = (
               :icon="row.start_video !== '' ? Check : Warning"
               @click="
                 handelControlClick(
+                  row.product_name,
                   'DigitalHuman',
                   row.start_video,
                   row.product_id,
@@ -337,7 +346,7 @@ const handelControlClick = (
       </el-table>
 
       <!-- 信息弹窗 -->
-      <ProductInfoDialogView ref="ShowItemInfo" />
+      <ProductInfoDialogView ref="ShowItemInfo" v-model="RoomProductList.product" />
 
       <template #footer>
         <el-pagination

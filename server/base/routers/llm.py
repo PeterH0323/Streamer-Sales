@@ -2,10 +2,9 @@ from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
-from .products import UploadProductItem
-from .streamer_info import StreamerInfoItem
+from .products import get_product_list
 
-from ..utils import LLM_MODEL_HANDLER, ResultCode, get_llm_product_prompt_base_info, make_return_data
+from ..utils import LLM_MODEL_HANDLER, ResultCode, get_llm_product_prompt_base_info, get_streamer_info_by_id, make_return_data
 
 router = APIRouter(
     prefix="/llm",
@@ -24,8 +23,8 @@ class GenProductItem(BaseModel):
 class GenSalesDocItem(BaseModel):
     user_id: str = ""  # User 识别号，用于区分不用的用户调用
     request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
-    sales_info: StreamerInfoItem  # "./product_info/images/pants.png"
-    product_info: UploadProductItem  # "./product_info/instructions/pants.md"
+    streamerId: int
+    productId: int
 
 
 @router.post("/gen_product_info")
@@ -66,12 +65,19 @@ async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
     first_input_template = dataset_yaml["conversation_setting"]["first_input"]
     product_info_struct_template = dataset_yaml["product_info_struct"]
 
-    # 将销售角色名和角色信息插入到 system prompt
-    character = gen_sales_doc_item.sales_info.character.replace(",", "、")
-    system_str = system.replace("{role_type}", gen_sales_doc_item.sales_info.name).replace("{character}", character)
+    # 根据 ID 获取主播信息
+    streamer_info = await get_streamer_info_by_id(gen_sales_doc_item.streamerId)
+    streamer_info = streamer_info[0]
 
-    product_info_str = product_info_struct_template[0].replace("{name}", gen_sales_doc_item.product_info.product_name)
-    product_info_str += product_info_struct_template[1].replace("{highlights}",  gen_sales_doc_item.product_info.heighlights)
+    # 将销售角色名和角色信息插入到 system prompt
+    system_str = system.replace("{role_type}", streamer_info["name"]).replace("{character}", streamer_info["character"])
+
+    # 根据 ID 获取商品信息
+    product_list, _ = await get_product_list(id=gen_sales_doc_item.productId)
+    product_info = product_list[0]
+
+    product_info_str = product_info_struct_template[0].replace("{name}", product_info["product_name"])
+    product_info_str += product_info_struct_template[1].replace("{highlights}", product_info["heighlights"])
 
     # 生成商品文案 prompt
     first_input = first_input_template.replace("{product_info}", product_info_str)

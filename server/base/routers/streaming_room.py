@@ -56,7 +56,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
     # 将直播间的商品 ID 进行提取，后续作为 选中 id
     selected_id = dict()
     for room_item in streaming_room_info["product_list"]:
-        selected_id.update({room_item["id"]: room_item})
+        selected_id.update({room_item["product_id"]: room_item})
 
     product_list, _ = await get_product_list()
 
@@ -66,10 +66,10 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
 
             # 更新信息详情
             for k, v in selected_id[product["product_id"]].items():
-                if k == "id":
+                if k == "product_id":
                     continue
                 product.update({k: v})
-
+            product.update({"selected": True})
             filter_list.append(product)
 
     total_size = len(filter_list)
@@ -138,7 +138,7 @@ async def get_streaming_room_api(romm_info: RoomProductListItem):
     # 将直播间的商品 ID 进行提取，后续作为 选中 id
     selected_id = dict()
     for room_item in streaming_room_info["product_list"]:
-        selected_id.update({room_item["id"]: room_item})
+        selected_id.update({room_item["product_id"]: room_item})
 
     logger.info(selected_id)
 
@@ -158,7 +158,7 @@ async def get_streaming_room_api(romm_info: RoomProductListItem):
         product_all_list.append(
             {
                 "name": product["product_name"],
-                "id": product["product_id"],
+                "product_id": product["product_id"],
                 "image": product["image_path"],
                 "sales_doc": sales_doc,
                 "start_video": start_video,
@@ -197,11 +197,11 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     logger.info(edit_item.product)
     save_product_list = []
     for product in edit_item.product:
-        if product["selected"] is False:
+        if product.get("selected", False) is False:
             continue
         save_product_list.append(
             {
-                "id": product["id"],
+                "product_id": product["product_id"],
                 "start_time": product["start_time"],
                 "sales_doc": product["sales_doc"],
                 "start_video": product["start_video"],

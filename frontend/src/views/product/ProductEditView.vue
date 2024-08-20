@@ -6,12 +6,7 @@ import { ElMessage } from 'element-plus/es'
 
 import FileUpload from '@/components/FileUpload.vue'
 
-import {
-  type ProductListItem,
-  type StreamerInfo,
-  productCreadeOrEditRequest,
-  getProductByIdRequest
-} from '@/api/product'
+import { type ProductListItem, productCreadeOrEditRequest } from '@/api/product'
 
 const router = useRouter()
 

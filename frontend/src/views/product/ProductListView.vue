@@ -72,7 +72,12 @@ onMounted(() => {
             <el-button
               size="small"
               @click="
-                ShowItemInfo.showItemInfoDialog('Instruction', row.instruction, row.product_id)
+                ShowItemInfo.showItemInfoDialog(
+                  row.product_name,
+                  'Instruction',
+                  row.instruction,
+                  row.product_id
+                )
               "
             >
               说明书

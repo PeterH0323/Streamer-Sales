@@ -20,19 +20,22 @@ const modelGenValue = defineModel({ default: '' })
 // 定义标题
 const titleMap = { SalesDoc: '主播文案', Instruction: '说明书', DigitalHuman: '数字人视频' }
 const title = ref('')
+const titleName = ref('')
 const infoValue = ref('')
 const itemType = ref('')
 const productId = ref(0)
 const streamerId = ref(0)
 const salesDoc = ref('')
 const showItemInfoDialog = async (
+  titleName_: string,
   itemType_: string,
   itemValue: string,
   productId_: number,
-  streamerId_: number,
-  salesDoc_: string
+  streamerId_: number = 0,
+  salesDoc_: string = ''
 ) => {
   title.value = titleMap[itemType_]
+  titleName.value = titleName_ + ' - '
   itemType.value = itemType_
   productId.value = productId_
   streamerId.value = streamerId_
@@ -51,6 +54,19 @@ const showItemInfoDialog = async (
   }
 }
 
+const updateGenValue = (newValue: string) => {
+  let index = -1
+  // 更新与父组件双向绑定的值
+  for (let i = 0; i < modelGenValue.value.length; i++) {
+    // 根据返回数据继续添加商品
+    if (modelGenValue.value[i].product_id === productId.value) {
+      index = i
+      break
+    }
+  }
+  modelGenValue.value[index].sales_doc = newValue
+}
+
 // 生成数据人视频
 const getDigitalHumanVideo = async () => {
   if (salesDoc.value === '') {
@@ -62,7 +78,7 @@ const getDigitalHumanVideo = async () => {
   console.log(data)
   if (data.code === 0) {
     infoValue.value = data.data
-    modelGenValue.value = infoValue.value
+    updateGenValue(infoValue.value)
   }
 }
 
@@ -76,7 +92,8 @@ const handleGenSalesDocClick = async () => {
   console.log(data)
   if (data.code === 0) {
     infoValue.value = data.data
-    modelGenValue.value = infoValue.value // 更新与父组件双向绑定的值
+    updateGenValue(infoValue.value) // 更新与父组件双向绑定的值
+
     ElMessage.success('生成文案成功')
   }
   isGeneratingDoc.value = false
@@ -96,7 +113,7 @@ defineExpose({ showItemInfoDialog })
   <div>
     <!-- 显示说明书 or 文案 or 数字人视频-->
     <teleport to="body">
-      <el-dialog v-model="dialogFormVisible" :title="title" width="1000" top="5vh">
+      <el-dialog v-model="dialogFormVisible" :title="titleName + title" width="1000" top="5vh">
         <!-- 主播文案  -->
 
         <div v-show="itemType === 'SalesDoc'">
@@ -108,7 +125,7 @@ defineExpose({ showItemInfoDialog })
             show-word-limit
           />
           <div class="bottom-gen-btn">
-            <el-button @click="handleGenSalesDocClick" :loading="isGeneratingDoc" type="success">
+            <el-button @click="handleGenSalesDocClick" :loading="isGeneratingDoc" type="primary">
               AI 生成
             </el-button>
           </div>
@@ -124,13 +141,21 @@ defineExpose({ showItemInfoDialog })
           <VideoComponent :src="infoValue" :key="infoValue" />
 
           <div class="bottom-gen-btn">
-            <el-button @click="getDigitalHumanVideo" type="success"> AI 生成数字人视频 </el-button>
+            <el-button @click="getDigitalHumanVideo" type="primary"> AI 生成数字人视频 </el-button>
           </div>
         </div>
 
         <template #footer>
-          <div class="dialog-footer">
-            <el-button type="primary" @click="handelEditClick"> 编辑 </el-button>
+          <div class="dialog-footer bottom-gen-btn">
+            <!-- <el-button type="primary" @click="handelEditClick"> 编辑 </el-button> -->
+
+            <el-button
+              v-show="itemType !== 'Instruction'"
+              @click="dialogFormVisible = false"
+              type="success"
+            >
+              保存
+            </el-button>
             <el-button @click="dialogFormVisible = false">关闭</el-button>
           </div>
         </template>
@@ -143,7 +168,6 @@ defineExpose({ showItemInfoDialog })
 // 每个表单底部 AI 生成按钮
 .bottom-gen-btn {
   margin-top: 15px;
-  margin-left: 70px;
   display: flex;
   justify-content: center;
   align-items: center;
