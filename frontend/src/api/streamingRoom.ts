@@ -1,5 +1,5 @@
 import { request_handler, type ResultPackage } from '@/api/base'
-import { type ProductListItem } from '@/api/product'
+import { type ProductListItem, type StreamerInfo } from '@/api/product'
 
 interface StreamingRoomProductList {
   product_id: number
@@ -18,16 +18,24 @@ interface StreamingRoomInfo {
   product_list: StreamingRoomProductList[]
 }
 interface RoomProductData {
-  product: ProductItem[]
   currentPage: number
   pageSize: number
   totalSize: number
+  product: ProductItem[]
 }
 interface ProductItem {
   name: string
   id: number
   image: string
   selected: boolean
+}
+
+interface RoomDetailItem {
+  currentPage: number
+  pageSize: number
+  totalSize: number
+  product: []
+  streamerInfo: StreamerInfo
 }
 
 // 获取后端主播信息
@@ -39,11 +47,11 @@ const streamerRoomListRequest = () => {
 }
 
 // 获取特定直播间的详情
-const roomDetailRequest = (roomId: string) => {
-  return request_handler<ResultPackage<ProductListItem[]>>({
+const roomDetailRequest = (roomId_: string, currentPage_: number, pageSize_: number) => {
+  return request_handler<ResultPackage<RoomDetailItem>>({
     method: 'POST',
-    url: '/streaming-room/product',
-    data: roomId
+    url: '/streaming-room/detail',
+    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ }
   })
 }
 
@@ -60,6 +68,7 @@ export {
   type StreamingRoomInfo,
   type ProductItem,
   type RoomProductData,
+  type RoomDetailItem,
   streamerRoomListRequest,
   roomDetailRequest,
   roomPorductAddListRequest
