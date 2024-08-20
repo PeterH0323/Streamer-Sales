@@ -64,7 +64,12 @@ const updateGenValue = (newValue: string) => {
       break
     }
   }
-  modelGenValue.value[index].sales_doc = newValue
+
+  if (itemType.value === 'SalesDoc') {
+    modelGenValue.value[index].sales_doc = newValue
+  } else if (itemType.value === 'DigitalHuman') {
+    modelGenValue.value[index].start_video = newValue
+  }
 }
 
 // 生成数据人视频

@@ -257,6 +257,8 @@ const handelControlClick = (
 
     <el-card>
       <el-button type="primary" class="ml-2" @click="handelAddProductClick">增删商品</el-button>
+
+      <!-- TODO 商品表格可以做成 component 组件 -->
       <el-table :data="RoomProductList.product" max-height="1000" border>
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
