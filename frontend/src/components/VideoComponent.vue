@@ -7,6 +7,18 @@ const props = defineProps({
   src: {
     type: String,
     default: 'player'
+  },
+  autoplay: {
+    type: Boolean,
+    default: false
+  },
+  width: {
+    type: Number,
+    default: 600
+  },
+  height: {
+    type: Number,
+    default: 337.5
   }
 })
 
@@ -15,23 +27,21 @@ const player_id = ref(props.src)
 const playerOpts = {
   id: player_id.value, //元素id
   url: props.src, //视频地址
+  width: props.width, // 播放器宽度
+  height: props.height, //播放器高度
   poster: '@/assets/logo.png', //封面图
   lang: 'zh-cn', //设置中文
-  lastPlayTime: 0, //视频起播时间（单位：秒）
-  lastPlayTimeHideDelay: 5, //提示文字展示时长（单位：秒）
   closeVideoClick: false, // true - 禁止pc端单击暂停，反之
-  closeVideoTouch: true, // true - 禁止移动端单击暂停，反之
-  videoInit: true,
+  videoInit: true, // 是否默认初始化video，当autoplay为true时，该配置为false无效
   fluid: true, //填满屏幕
-  autoplay: false, //自动播放
+  autoplay: props.autoplay, //自动播放
   loop: false, //循环播放
-  pip: true,
+  pip: false, //是否使用画中画插件
   volume: 1, //音量 0 -  1
-  playbackRate: [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
+  playbackRate: false, // [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
   // 删除控件
   // ignores: ['time', 'definition', 'error', 'fullscreen', 'i18n', 'loading', 'mobile', 'pc', 'play', 'poster', 'progress', 'replay', 'volume'],
-  ignores: ['volume'],
-  rotateFullscreen: true
+  ignores: ['volume']
 }
 
 //  播放器
