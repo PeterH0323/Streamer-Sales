@@ -79,29 +79,32 @@ const getDigitalHumanVideo = async () => {
     return
   }
 
+  isGenerating.value = true
+  ElMessage.success('正在生成，请稍候')
   const { data } = await genDigitalHuamnVideoRequest(salesDoc.value)
   console.log(data)
   if (data.code === 0) {
     infoValue.value = data.data
     updateGenValue(infoValue.value)
+    ElMessage.success('生成数字人视频成功')
   }
+  isGenerating.value = false
 }
 
 // 是否正在生成文案标识
-const isGeneratingDoc = ref(false)
+const isGenerating = ref(false)
 // 生成解说文案
 const handleGenSalesDocClick = async () => {
-  isGeneratingDoc.value = true
+  isGenerating.value = true
   ElMessage.success('正在生成，请稍候')
   const { data } = await genSalesDocRequest(Number(productId.value), Number(streamerId.value))
   console.log(data)
   if (data.code === 0) {
     infoValue.value = data.data
     updateGenValue(infoValue.value) // 更新与父组件双向绑定的值
-
     ElMessage.success('生成文案成功')
   }
-  isGeneratingDoc.value = false
+  isGenerating.value = false
 }
 
 // 跳转编辑页面
@@ -130,7 +133,7 @@ defineExpose({ showItemInfoDialog })
             show-word-limit
           />
           <div class="bottom-gen-btn">
-            <el-button @click="handleGenSalesDocClick" :loading="isGeneratingDoc" type="primary">
+            <el-button @click="handleGenSalesDocClick" :loading="isGenerating" type="primary">
               AI 生成
             </el-button>
           </div>
@@ -146,7 +149,9 @@ defineExpose({ showItemInfoDialog })
           <VideoComponent :src="infoValue" :key="infoValue" />
 
           <div class="bottom-gen-btn">
-            <el-button @click="getDigitalHumanVideo" type="primary"> AI 生成数字人视频 </el-button>
+            <el-button @click="getDigitalHumanVideo" :loading="isGenerating" type="primary">
+              AI 生成数字人视频
+            </el-button>
           </div>
         </div>
 

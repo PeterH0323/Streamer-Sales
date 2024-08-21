@@ -3,7 +3,7 @@ from loguru import logger
 from pydantic import BaseModel
 
 
-from .modules.tts_worker import gen_tts_in_spinner
+from .modules.tts_worker import gen_tts_wav_app
 
 
 app = FastAPI()
@@ -19,7 +19,7 @@ class TextToSpeechItem(BaseModel):
 @app.post("/tts")
 async def get_tts(tts_item: TextToSpeechItem):
     # 语音转文字
-    wav_path = await gen_tts_in_spinner(tts_item.sentence, tts_item.request_id + f"-{str(tts_item.chunk_id).zfill(8)}.wav")
+    wav_path = await gen_tts_wav_app(tts_item.sentence, tts_item.request_id + f"-{str(tts_item.chunk_id).zfill(8)}.wav")
     logger.info(f"tts wav path = {wav_path}")
     return {"user_id": tts_item.user_id, "request_id": tts_item.request_id, "wav_path": wav_path}
 

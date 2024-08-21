@@ -15,11 +15,14 @@ else:
     TTS_HANDLER = None
 
 
-async def gen_tts_in_spinner(cur_response, save_tag):
+async def gen_tts_wav_app(cur_response, save_tag):
     # if save_tag == "":
     #     save_tag = datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".wav"
 
     tts_save_path = str(Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).joinpath(save_tag).absolute())
+    if not Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).exists():
+        Path(WEB_CONFIGS.TTS_WAV_GEN_PATH).mkdir(parents=True, exist_ok=True)
+
     # gen_tts_wav(st.session_state.tts_handler, cur_response, tts_save_path)
 
     # inp_ref = r"/root/hingwen_camp/utils/tts/gpt_sovits/weights/ref_wav/【开心】处理完之前的事情，这几天甚至都有空闲来车上转转了。.wav"

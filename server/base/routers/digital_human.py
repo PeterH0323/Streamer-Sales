@@ -1,7 +1,11 @@
+from pathlib import Path
+import uuid
+import requests
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
+from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..utils import ResultCode, make_return_data
 
 router = APIRouter(
@@ -25,10 +29,36 @@ async def get_digital_human_according_doc_api(gen_item: GenDigitalHumanVideoItem
     """
     logger.info(gen_item.salesDoc)
 
-    video_path = "https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/mp4/xgplayer-demo-360p.mp4"
+    request_id = str(uuid.uuid1())
+    sentence_id = 1 # 直接推理，所以设置成 1
+    user_id = "123"
 
     # 生成 TTS wav
+    tts_json = {
+        "user_id": user_id,
+        "request_id": request_id,
+        "sentence": gen_item.salesDoc,
+        "chunk_id": sentence_id,
+        # "wav_save_name": chat_item.request_id + f"{str(sentence_id).zfill(8)}.wav",
+    }
+    tts_save_path = Path(WEB_CONFIGS.TTS_WAV_GEN_PATH, request_id + f"-{str(1).zfill(8)}.wav")
+    logger.info(f"waiting for wav generating done: {tts_save_path}")
+    _ = requests.post(API_CONFIG.TTS_URL, json=tts_json)
 
-    # 生成 数字人视频
+    # 生成数字人视频
+    digital_human_gen_info = {
+        "user_id": user_id,
+        "request_id": request_id,
+        "chunk_id": 0,
+        "tts_path": str(tts_save_path),
+    }
+    video_path = Path(WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_OUTPUT_PATH).joinpath(request_id + ".mp4")
+    logger.info(f"Generating digital human: {video_path}")
+    _ = requests.post(API_CONFIG.DIGITAL_HUMAN_URL, json=digital_human_gen_info)
 
-    return make_return_data(True, ResultCode.SUCCESS, "成功", video_path)
+    # 删除过程文件
+    tts_save_path.unlink()
+    
+    server_video_path = f"{API_CONFIG.REQUEST_FILES_URL}/{WEB_CONFIGS.STREAMER_FILE_DIR}/vid_output/{request_id}.mp4"
+    logger.info(server_video_path)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", server_video_path)

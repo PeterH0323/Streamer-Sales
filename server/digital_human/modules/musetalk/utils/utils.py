@@ -15,7 +15,7 @@ from ..whisper.audio2feature import Audio2Feature
 from ..models.vae import VAE
 from ..models.unet import UNet,PositionalEncoding
 
-def load_all_model(audio2feature_model_path, vae_model_path, unet_model_dict, ):
+def load_all_model(audio2feature_model_path, vae_model_path, unet_model_dict):
     audio_processor = Audio2Feature(model_path=audio2feature_model_path)
     vae = VAE(model_path =vae_model_path)
     unet = UNet(unet_config=unet_model_dict['unet_config'],

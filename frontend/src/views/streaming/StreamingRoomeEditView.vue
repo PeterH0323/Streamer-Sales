@@ -190,7 +190,7 @@ const handelControlClick = (
     <el-card>
       <!-- TODO 后续主播信息做成 component -->
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :span="16">
           <h2>主播基本信息</h2>
 
           <!-- TODO 修改之后提醒用户会清除生成的文案，可取消 -->
@@ -243,7 +243,7 @@ const handelControlClick = (
           </el-form-item>
         </el-col>
 
-        <el-col :span="12">
+        <el-col :span="8">
           <div>
             <!-- 数字人视频 -->
             <VideoComponent

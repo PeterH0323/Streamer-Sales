@@ -3,7 +3,7 @@ from .realtime_inference import DIGITAL_HUMAN_HANDLER, gen_digital_human_video
 from ...web_configs import WEB_CONFIGS
 
 
-async def gen_digital_human_video_in_spinner(audio_path, save_tag):
+async def gen_digital_human_video_app(audio_path, save_tag):
     if DIGITAL_HUMAN_HANDLER is None:
         return None
 
