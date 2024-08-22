@@ -47,7 +47,6 @@ const chunkedArray = computed(() => chunkArray(streamingList.value, 4))
               >
                 详情
               </el-button>
-              <el-button type="primary" plain> 开启直播 </el-button>
               <el-button type="danger" plain> 删除 </el-button>
             </div>
           </el-card>

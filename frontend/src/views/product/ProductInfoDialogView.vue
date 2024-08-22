@@ -123,38 +123,42 @@ defineExpose({ showItemInfoDialog })
     <teleport to="body">
       <el-dialog v-model="dialogFormVisible" :title="titleName + title" width="1000" top="5vh">
         <!-- 主播文案  -->
-
-        <div v-show="itemType === 'SalesDoc'">
-          <el-input
-            type="textarea"
-            v-model="infoValue"
-            maxlength="2000"
-            :autosize="{ minRows: 20 }"
-            show-word-limit
-          />
-          <div class="bottom-gen-btn">
-            <el-button @click="handleGenSalesDocClick" :loading="isGenerating" type="primary">
-              AI 生成
-            </el-button>
+        <template v-if="itemType === 'SalesDoc'">
+          <div>
+            <el-input
+              type="textarea"
+              v-model="infoValue"
+              maxlength="2000"
+              :autosize="{ minRows: 20 }"
+              show-word-limit
+            />
+            <div class="bottom-gen-btn">
+              <el-button @click="handleGenSalesDocClick" :loading="isGenerating" type="primary">
+                AI 生成
+              </el-button>
+            </div>
           </div>
-        </div>
+        </template>
 
         <!-- 说明书 -->
-        <div v-show="itemType === 'Instruction'" style="text-align: left">
-          <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
-        </div>
+        <template v-else-if="itemType === 'Instruction'">
+          <div style="text-align: left">
+            <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
+          </div>
+        </template>
 
         <!-- 数字人视频 -->
-        <div v-show="itemType === 'DigitalHuman'">
-          <VideoComponent :src="infoValue" :key="infoValue" />
+        <template v-else-if="itemType === 'DigitalHuman'">
+          <div>
+            <VideoComponent :src="infoValue" :key="infoValue" />
 
-          <div class="bottom-gen-btn">
-            <el-button @click="getDigitalHumanVideo" :loading="isGenerating" type="primary">
-              AI 生成数字人视频
-            </el-button>
+            <div class="bottom-gen-btn">
+              <el-button @click="getDigitalHumanVideo" :loading="isGenerating" type="primary">
+                AI 生成数字人视频
+              </el-button>
+            </div>
           </div>
-        </div>
-
+        </template>
         <template #footer>
           <div class="dialog-footer bottom-gen-btn">
             <!-- <el-button type="primary" @click="handelEditClick"> 编辑 </el-button> -->

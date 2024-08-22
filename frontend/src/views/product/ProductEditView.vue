@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { Picture } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus/es'
 

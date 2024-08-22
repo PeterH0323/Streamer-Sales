@@ -121,14 +121,20 @@ const router = createRouter({
               path: '/streaming/create',
               name: 'StreamingCreated',
               component: () => import('@/views/streaming/StreamingRoomeEditView.vue'),
-              meta: { title: '新建直播间' },
-              props: true
+              meta: { title: '新建直播间' }
             },
             {
               path: '/streaming/:roomId/edit',
               name: 'StreamingEdit',
               component: () => import('@/views/streaming/StreamingRoomeEditView.vue'),
               meta: { title: '编辑直播间' },
+              props: true
+            },
+            {
+              path: '/streaming/:roomId/on-air',
+              name: 'StreamingOnAir',
+              component: () => import('@/views/streaming/StreamingOnAirView.vue'),
+              meta: { title: '直播间' },
               props: true
             }
           ]

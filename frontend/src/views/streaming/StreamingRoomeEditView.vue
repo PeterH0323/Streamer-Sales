@@ -129,6 +129,11 @@ const onSubmit = () => {
   ElMessage.success('操作成功')
 }
 
+const handelOnAirClick = () => {
+  // TODO 校验所有数字人视频生成完毕
+  router.push({ name: 'StreamingOnAir', params: { roomId: props.roomId } })
+}
+
 // 每个物品的点击按钮
 const handelControlClick = (
   titleName: string,
@@ -364,7 +369,7 @@ const handelControlClick = (
           "
         />
         <div class="form-bottom-btn">
-          <el-button type="primary" class="ml-2" @click="onSubmit">开始直播</el-button>
+          <el-button type="primary" class="ml-2" @click="handelOnAirClick">开始直播</el-button>
           <el-button type="primary" class="ml-2" @click="onSubmit">保存</el-button>
         </div>
       </template>

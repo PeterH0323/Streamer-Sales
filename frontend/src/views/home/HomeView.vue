@@ -3,8 +3,8 @@ import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { getDashboardInfoRequest, type DashboardItem } from '@/api/dashboard'
-import barChartComponent from '@/components/barChartComponent.vue'
-import lineChartComponent from '@/components/lineChartComponent.vue'
+import BarChartComponent from '@/components/BarChartComponent.vue'
+import LineChartComponent from '@/components/LineChartComponent.vue'
 
 const systemInfo = ref({} as DashboardItem)
 
@@ -65,7 +65,7 @@ onMounted(async () => {
     <el-row>
       <el-col :span="14">
         <el-card shadow="never">
-          <lineChartComponent
+          <LineChartComponent
             :orderNumList="systemInfo.orderNumList"
             :totalSalesList="systemInfo.totalSalesList"
             :newUserList="systemInfo.newUserList"
@@ -76,7 +76,7 @@ onMounted(async () => {
       </el-col>
       <el-col :span="10">
         <el-card shadow="never">
-          <barChartComponent
+          <BarChartComponent
             :knowledgeBasesNum="systemInfo.knowledgeBasesNum"
             :digitalHumanNum="systemInfo.digitalHumanNum"
             :LiveRoomNum="systemInfo.LiveRoomNum"
