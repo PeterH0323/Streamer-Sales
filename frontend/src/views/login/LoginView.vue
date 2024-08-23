@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { ElMessage, ElNotification, type FormInstance, type FormRules } from 'element-plus'
 import { login_request } from '@/api/user'
 import { useTokenStore } from '@/stores/userToken'
 
@@ -74,7 +74,13 @@ const onSubmit = async () => {
   // 设置已经完成登录
   isLogining.value = false
 
-  ElMessage.success('登录成功')
+  // 弹窗提示
+  ElNotification({
+    title: '登录成功',
+    message: '欢迎',
+    type: 'success'
+  })
+
   router.push(route.query.redirect || '/') // 页面跳转，如果是被未登录拦截的话，登录成功后跳转会目标页面
 }
 </script>
