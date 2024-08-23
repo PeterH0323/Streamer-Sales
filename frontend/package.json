@@ -14,6 +14,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@vueuse/core": "^11.0.1",
     "axios": "^1.7.3",
     "echarts": "^5.5.1",
     "element-plus": "^2.7.8",
