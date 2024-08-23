@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { ChatDotRound, Mic } from '@element-plus/icons-vue'
+
 import VideoComponent from '@/components/VideoComponent.vue'
 import MessageComponent from '@/components/MessageComponent.vue'
 import {
@@ -33,21 +34,63 @@ const getRoomInfo = async () => {
   }
 }
 
+const userInfo = ref({
+  userId: '123',
+  userName: 'no1-user',
+  avater: 'xxxx'
+})
+
+// 主播回答提示符
+const loadingStreamRes = ref(false)
+
+// 输入框使能与否
+const disableInput = ref(false)
+
 // 发送按钮
 const handelSendClick = async () => {
   console.info(inputValue.value)
   // 显示在对话框-用户
+  currentStatus.value.conversation.push({
+    role: 'user',
+    userId: userInfo.value.userId,
+    userName: userInfo.value.userName,
+    avater: userInfo.value.avater,
+    message: inputValue.value,
+    datetime: ''
+  })
   // disable 输入框
+  disableInput.value = true
   // 显示 loading 图标 - 主播
-  // 发送
+  loadingStreamRes.value = true
+
   // request(roomId, userId, newValue)
-  // 接收
-  // 取消 loading ，更新为返回值 - 主播
   // 将对话记录更新到数据库
-  const { data } = await onAirRoomChatRequest(Number(props.roomId), '123', inputValue.value)
+  const { data } = await onAirRoomChatRequest(
+    Number(props.roomId),
+    userInfo.value.userId,
+    inputValue.value
+  )
+
+  // 取消 loading
+  loadingStreamRes.value = false
   if (data.code === 0) {
+    // 更新 list
     await getRoomInfo()
   }
+
+  // 启动输入框
+  disableInput.value = false
+
+  // 在 DOM 更新后滚动到底部
+  nextTick(scrollToBottom)
+}
+
+// 用于滚动条
+const scrollbarRef = ref<HTMLElement | null>(null)
+const scrollToBottom = async () => {
+  // 注意：需要通过 nextTick 以等待 DOM 更新完成
+  await nextTick()
+  scrollbarRef.value.setScrollTop(10000) // TODO 先设置一个比较大的值，后续需要获取控件的高度进行赋值
 }
 
 onMounted(() => {
@@ -71,7 +114,7 @@ onMounted(() => {
       </el-col>
       <el-col :span="8">
         <div>
-          <el-scrollbar height="1000px">
+          <el-scrollbar height="1000px" ref="scrollbarRef" id="scrollbarRef">
             <!-- 对话记录显示在右上角 -->
             <MessageComponent
               v-for="(item, index) in currentStatus.conversation"
@@ -82,6 +125,9 @@ onMounted(() => {
               :message="item.message"
               :datetime="item.datetime"
             />
+
+            <!-- 加载标识 -->
+            <!-- <el-button :loading="loadingStreamRes" v-show="loadingStreamRes" /> -->
           </el-scrollbar>
 
           <div class="bottom-items">
@@ -94,6 +140,7 @@ onMounted(() => {
               :autosize="{ minRows: 1, maxRows: 12 }"
               type="textarea"
               placeholder="向主播提问"
+              :disabled="disableInput"
             />
             <el-button circle @click="handelSendClick">
               <el-icon><ChatDotRound /></el-icon>

@@ -312,6 +312,9 @@ async def get_conversation_list(conversion_id: str):
     with open(WEB_CONFIGS.CONVERSATION_MESSAGE_STORE_CONFIG_PATH, "r", encoding="utf-8") as f:
         conversation_all = yaml.safe_load(f)
 
+    if conversation_all is None:
+        return []
+
     conversation_list = conversation_all[conversion_id]
 
     # 根据 message index 排序
