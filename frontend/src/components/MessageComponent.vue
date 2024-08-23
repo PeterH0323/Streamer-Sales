@@ -32,7 +32,7 @@ const props = defineProps({
       <el-col :span="2">
         <div>
           <!-- 头像: {{ props.avater }} -->
-          <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+          <el-avatar :src="props.avater" />
         </div>
       </el-col>
       <el-col :span="22">
@@ -42,9 +42,9 @@ const props = defineProps({
             <el-tag type="success" style="margin-right: 5px">主播</el-tag>
           </template>
           <!-- 用户名 -->
-          <div>{{ props.userName }}</div>
+          <div class="message-title">{{ props.userName }}</div>
           <!-- 发送时间 -->
-          <div style="margin-left: 5px">{{ props.datetime }}</div>
+          <div class="message-title">{{ props.datetime }}</div>
         </div>
         <div class="message-content">
           <!-- 内容 -->
@@ -69,7 +69,11 @@ const props = defineProps({
 
 .user-info {
   display: flex;
-  // justify-content: center; // 水平方向居中
   align-items: center;
+  margin-left: 8px;
+
+  .message-title {
+    margin-left: 8px;
+  }
 }
 </style>

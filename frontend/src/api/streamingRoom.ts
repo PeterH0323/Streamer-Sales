@@ -1,11 +1,30 @@
 import { request_handler, type ResultPackage } from '@/api/base'
-import { type StreamerInfo } from '@/api/product'
+import { type StreamerInfo, type ProductListItem } from '@/api/product'
 
 interface StreamingRoomProductList {
   product_id: number
   start_time: string
   sales_doc: string
   start_video: string
+}
+
+interface messageItem {
+  role: string
+  userId: string
+  userName: string
+  avater: string
+  message: string
+  datetime: string
+}
+
+interface StreamingRoomStatusItem {
+  streamerInfo: StreamerInfo
+  conversation: messageItem[]
+  currentProductInfo: ProductListItem
+  currentStreamerVideo: string
+  currentProductIndex: number
+  startTime: string
+  currentPoductStartTime: string
 }
 
 interface StreamingRoomInfo {
@@ -16,7 +35,9 @@ interface StreamingRoomInfo {
   background_image: string
   prohibited_words_id: string
   product_list: StreamingRoomProductList[]
+  status: StreamingRoomStatusItem
 }
+
 interface RoomProductData {
   currentPage: number
   pageSize: number
@@ -34,9 +55,9 @@ interface ProductItem {
 }
 
 interface RoomDetailItem {
-  currentPage: number
-  pageSize: number
-  totalSize: number
+  currentPage?: number
+  pageSize?: number
+  totalSize?: number
   product: []
   streamerInfo: StreamerInfo
   roomId: number
@@ -82,13 +103,34 @@ const RoomCreadeOrEditRequest = (params: RoomDetailItem) => {
   })
 }
 
+// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+const onAirRoomInfoRequest = (roomId_: number) => {
+  return request_handler<ResultPackage<StreamingRoomStatusItem>>({
+    method: 'POST',
+    url: '/streaming-room/live-info',
+    data: { roomId: roomId_ }
+  })
+}
+
+// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+const onAirRoomChatRequest = async (roomId_: number, userId_: string, message_: string) => {
+  return request_handler<ResultPackage<messageItem>>({
+    method: 'POST',
+    url: '/streaming-room/chat',
+    data: { roomId: roomId_, userId: userId_, message: message_ }
+  })
+}
+
 export {
   type StreamingRoomInfo,
   type ProductItem,
   type RoomProductData,
   type RoomDetailItem,
+  type StreamingRoomStatusItem,
   streamerRoomListRequest,
   roomDetailRequest,
   roomPorductAddListRequest,
-  RoomCreadeOrEditRequest
+  RoomCreadeOrEditRequest,
+  onAirRoomInfoRequest,
+  onAirRoomChatRequest
 }

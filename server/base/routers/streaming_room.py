@@ -5,13 +5,26 @@
 # github: https://github.com/PeterH0323/Streamer-Sales
 # time: 2024/08/18
 """
+from dataclasses import dataclass, asdict
+from datetime import datetime
+import uuid
 import yaml
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
 from ...web_configs import WEB_CONFIGS
-from ..utils import ResultCode, get_all_streamer_info, get_streaming_room_info, make_return_data
+from ..utils import (
+    ResultCode,
+    get_all_streamer_info,
+    get_conversation_list,
+    get_streamer_info_by_id,
+    get_streaming_room_info,
+    get_user_info,
+    make_return_data,
+    update_conversation_message_info,
+    update_streaming_room_info,
+)
 from .products import get_prduct_by_page, get_product_list
 
 router = APIRouter(
@@ -23,8 +36,14 @@ router = APIRouter(
 
 class RoomProductListItem(BaseModel):
     roomId: int
-    currentPage: int
-    pageSize: int
+    currentPage: int = 1
+    pageSize: int = 10
+
+
+class RoomChatItem(BaseModel):
+    roomId: int
+    userId: str
+    message: str
 
 
 class RoomProductEdifItem(BaseModel):
@@ -36,6 +55,17 @@ class RoomProductEdifItem(BaseModel):
     room_poster: str | None
     background_image: str | None
     prohibited_words_id: str | None
+
+
+@dataclass
+class MessageItem:
+    role: str
+    userId: str
+    userName: str
+    message: str
+    avater: str
+    messageIndex: int
+    datetime: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 @router.post("/list")
@@ -234,5 +264,118 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     # 覆盖保存
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
         yaml.dump(streaming_room_info, f, allow_unicode=True)
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
+
+
+@router.post("/live-info")
+async def get_on_air_live_room_api(room_info: RoomProductListItem):
+    """获取正在直播的直播间信息
+
+    1. 主播视频地址
+    2. 商品信息，显示在右下角的商品缩略图
+    3. 对话记录 conversation_list
+
+    Args:
+        romm_info (RoomProductListItem): 直播间 ID
+    """
+
+    streaming_room_info = await get_streaming_room_info(room_info.roomId)
+    logger.info(streaming_room_info)
+
+    # 根据 ID 获取主播信息
+    streamer_info = await get_streamer_info_by_id(streaming_room_info["streamer_id"])
+    streamer_info = streamer_info[0]
+
+    # 商品信息
+    prodcut_index = streaming_room_info["status"]["current_product_index"]
+    product_info = streaming_room_info["product_list"][prodcut_index]
+    product_list, _ = await get_product_list(id=int(product_info["product_id"]))
+
+    # 获取直播间对话
+    conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
+
+    if len(conversation_list) == 0:
+        # 新直播间，新建对话
+        streamer_msg = MessageItem(
+            role="streamer",
+            userId=str(streaming_room_info["streamer_id"]),
+            userName=streamer_info["name"],
+            message=product_info["sales_doc"],
+            avater=streamer_info["avater"],
+            messageIndex=0,
+        )
+        conversation_list.append(asdict(streamer_msg))
+
+        #  基本信息完善
+        streaming_room_info["status"]["conversation_id"] = str(uuid.uuid4().hex)
+        streaming_room_info["status"]["current_product_id"] = product_info["product_id"]
+        streaming_room_info["status"]["streaming_video_path"] = product_info["start_video"]
+        streaming_room_info["status"]["current_product_index"] = 0
+        streaming_room_info["status"]["start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        streaming_room_info["status"]["current_product_start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        streaming_room_info["status"]["live_status"] = 1  # 0 未开播，1 正在直播，2 下播了
+
+    logger.info(streaming_room_info["status"])
+    logger.info(conversation_list)
+    # 保存对话
+    _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
+
+    # 保存直播间信息
+    _ = await update_streaming_room_info(room_info.roomId, streaming_room_info)
+
+    res_data = {
+        "streamerInfo": streamer_info,
+        "conversation": conversation_list,
+        "currentProductInfo": product_list[0],
+        "currentStreamerVideo": streaming_room_info["status"]["streaming_video_path"],
+        "currentProductIndex": streaming_room_info["status"]["current_product_index"],
+        "startTime": streaming_room_info["status"]["start_time"],
+        "currentPoductStartTime": streaming_room_info["status"]["current_product_start_time"],
+    }
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
+
+
+@router.post("/chat")
+async def get_on_air_live_room_api(room_chat: RoomChatItem):
+    streaming_room_info = await get_streaming_room_info(room_chat.roomId)
+
+    # 获取直播间对话
+    conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
+    assert len(conversation_list) > 0
+
+    # 获取用户信息
+    user_info = await get_user_info(room_chat.userId)
+
+    user_msg = MessageItem(
+        role="user",
+        userId=room_chat.userId,
+        userName=user_info["userName"],
+        message=room_chat.message,
+        avater=user_info["avater"],
+        messageIndex=conversation_list[-1]["messageIndex"] + 1,
+    )
+    conversation_list.append(asdict(user_msg))
+
+    # 调取 LLM & 数字人生成视频
+    streamer_res = "你好"  # TODO 改为真实数据
+
+    stream_info = conversation_list[0]
+    streamer_msg = MessageItem(
+        role="streamer",
+        userId=stream_info["userId"],
+        userName=stream_info["userName"],
+        message=streamer_res,
+        avater=stream_info["avater"],
+        messageIndex=conversation_list[-1]["messageIndex"] + 1,
+    )
+    conversation_list.append(asdict(streamer_msg))
+
+    logger.info(streaming_room_info["status"]["conversation_id"])
+    logger.info(conversation_list)
+
+    # 保存对话
+    _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")

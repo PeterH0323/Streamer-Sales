@@ -5,6 +5,7 @@ interface StreamerInfo {
   name: string
   value: string
   character: string
+  avater: string
   tts_weight_path: string
   tts_tag: string
   tts_reference_audio: string

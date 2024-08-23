@@ -24,9 +24,10 @@ class WebConfigs:
     # ==================================================================
     #                             数据配置
     # ==================================================================
-    PRODUCT_INFO_YAML_PATH: str = r"./configs/product_info.yaml"
-    STREAMER_CONFIG_PATH = r"./configs/streamer_cfg.yaml"
-    STREAMING_ROOM_CONFIG_PATH = r"./configs/streaming_room_cfg.yaml"
+    PRODUCT_INFO_YAML_PATH: str = r"./configs/product_info.yaml"  # 商品信息
+    STREAMER_CONFIG_PATH = r"./configs/streamer_cfg.yaml"  # 主播信息
+    STREAMING_ROOM_CONFIG_PATH = r"./configs/streaming_room_cfg.yaml"  # 直播间信息
+    CONVERSATION_MESSAGE_STORE_CONFIG_PATH = r"./configs/conversation_message_store.yaml"  # 对话信息
 
     # ==================================================================
     #                             配置文件路径
