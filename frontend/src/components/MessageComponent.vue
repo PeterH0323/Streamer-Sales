@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { MdPreview } from 'md-editor-v3'
+import 'md-editor-v3/lib/preview.css'
 
 // 定义组件入参
 const props = defineProps({
@@ -48,7 +49,16 @@ const props = defineProps({
         </div>
         <div class="message-content">
           <!-- 内容 -->
-          {{ props.message }}
+          <template v-if="props.role === 'streamer'">
+            <MdPreview
+              style="background-color: aquamarine"
+              editorId="preview-SalesDoc"
+              :modelValue="props.message"
+            />
+          </template>
+          <template v-else>
+            <p>{{ props.message }}</p>
+          </template>
         </div>
       </el-col>
     </el-row>

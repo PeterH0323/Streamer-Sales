@@ -5,9 +5,10 @@
 # github: https://github.com/PeterH0323/Streamer-Sales
 # time: 2024/08/18
 """
-from dataclasses import dataclass, asdict
-from datetime import datetime
 import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime
+
 import yaml
 from fastapi import APIRouter
 from loguru import logger
@@ -24,7 +25,9 @@ from ..utils import (
     make_return_data,
     update_conversation_message_info,
     update_streaming_room_info,
+    combine_history,
 )
+from .llm import gen_poduct_base_prompt, get_llm_res
 from .products import get_prduct_by_page, get_product_list
 
 router = APIRouter(
@@ -290,8 +293,16 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
     )
     conversation_list.append(asdict(user_msg))
 
+    # 根据对话记录生成 prompt
+    prompt = await gen_poduct_base_prompt(
+        streaming_room_info["streamer_id"], streaming_room_info["status"]["current_product_id"]
+    )  # system + 获取商品文案prompt
+    prompt = combine_history(prompt, conversation_list)
+
     # 调取 LLM & 数字人生成视频
-    streamer_res = "你好"  # TODO 改为真实数据
+    streamer_res = await get_llm_res(prompt)
+
+    # 生成数字人视频
 
     stream_info = conversation_list[0]
     streamer_msg = MessageItem(
@@ -322,10 +333,9 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     streamer_info = await get_streamer_info_by_id(streaming_room_info["streamer_id"])
     streamer_info = streamer_info[0]
 
-
     # 商品信息
     prodcut_index = streaming_room_info["status"]["current_product_index"]
-    
+
     if next_product:
         # 如果是介绍下一个商品，则进行递增
         prodcut_index += 1
@@ -333,7 +343,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     assert prodcut_index >= 0
     product_info = streaming_room_info["product_list"][prodcut_index]
     product_list, _ = await get_product_list(id=int(product_info["product_id"]))
-    
+
     # 是否为最后的商品
     if len(streaming_room_info["product_list"]) - 1 == prodcut_index:
         final_procut = True

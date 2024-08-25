@@ -43,12 +43,12 @@ async def get_product_info_api(gen_product_item: GenProductItem):
         res_data += item
 
 
-@router.post("/gen_sales_doc")
-async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
-    """生成口播文案
+async def gen_poduct_base_prompt(streamer_id, product_id):
+    """生成商品介绍的 prompt
 
     Args:
-        gen_sales_doc_item (GenSalesDocItem): _description_
+        streamer_id (_type_): _description_
+        product_id (_type_): _description_
 
     Returns:
         _type_: _description_
@@ -66,14 +66,14 @@ async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
     product_info_struct_template = dataset_yaml["product_info_struct"]
 
     # 根据 ID 获取主播信息
-    streamer_info = await get_streamer_info_by_id(gen_sales_doc_item.streamerId)
+    streamer_info = await get_streamer_info_by_id(streamer_id)
     streamer_info = streamer_info[0]
 
     # 将销售角色名和角色信息插入到 system prompt
     system_str = system.replace("{role_type}", streamer_info["name"]).replace("{character}", streamer_info["character"])
 
     # 根据 ID 获取商品信息
-    product_list, _ = await get_product_list(id=gen_sales_doc_item.productId)
+    product_list, _ = await get_product_list(id=product_id)
     product_info = product_list[0]
 
     product_info_str = product_info_struct_template[0].replace("{name}", product_info["product_name"])
@@ -82,13 +82,35 @@ async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
     # 生成商品文案 prompt
     first_input = first_input_template.replace("{product_info}", product_info_str)
 
-    res_data = ""
-    model_name = LLM_MODEL_HANDLER.available_models[0]
-
     prompt = [{"role": "system", "content": system_str}, {"role": "user", "content": first_input}]
     logger.info(prompt)
 
+    return prompt
+
+async def get_llm_res(prompt):
+    
+    logger.info(prompt)
+    model_name = LLM_MODEL_HANDLER.available_models[0]
+
+    res_data = ""
     for item in LLM_MODEL_HANDLER.chat_completions_v1(model=model_name, messages=prompt):
         res_data = item["choices"][0]["message"]["content"]
 
+    return res_data
+
+@router.post("/gen_sales_doc")
+async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
+    """生成口播文案
+
+    Args:
+        gen_sales_doc_item (GenSalesDocItem): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    prompt = await gen_poduct_base_prompt(gen_sales_doc_item.streamerId, gen_sales_doc_item.productId)
+
+    res_data = await get_llm_res(prompt)
+    
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)

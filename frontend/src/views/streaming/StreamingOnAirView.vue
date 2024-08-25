@@ -218,6 +218,7 @@ onMounted(() => {
 }
 
 .bottom-button {
+  display: flex;
   margin-top: 10px;
   float: right;
 }
