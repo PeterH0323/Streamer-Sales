@@ -13,7 +13,7 @@ import {
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import VideoComponent from '@/components/VideoComponent.vue'
-import ProductInfoDialogView from '@/views/product/ProductInfoDialogView.vue'
+import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 import { streamerInfoListRequest } from '@/api/streamerInfo'
 
 const router = useRouter()

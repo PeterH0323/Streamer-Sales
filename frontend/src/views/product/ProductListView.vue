@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import ProductInfoDialogView from '@/views/product/ProductInfoDialogView.vue'
+import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 
 import { queryCondition, queriedResult, getProductList } from '@/api/product'
 
@@ -98,7 +98,7 @@ onMounted(() => {
       </el-table>
 
       <!-- 信息弹窗 -->
-      <ProductInfoDialogView ref="ShowItemInfo" />
+      <InfoDialogComponents ref="ShowItemInfo" />
 
       <!-- 分页栏 -->
       <template #footer>
