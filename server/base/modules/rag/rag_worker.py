@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 
+from loguru import logger
 import torch
 import yaml
 
@@ -18,22 +19,22 @@ def build_rag_prompt(rag_retriever: CacheRetriever, product_name, prompt):
     real_retriever = rag_retriever.get(fs_id="default")
 
     if isinstance(real_retriever, tuple):
-        print(f" @@@ GOT real_retriever == tuple : {real_retriever}")
+        logger.info(f" @@@ GOT real_retriever == tuple : {real_retriever}")
         return ""
 
     chunk, db_context, references = real_retriever.query(
         f"商品名：{product_name}。{prompt}", context_max_length=CONTEXT_MAX_LENGTH - 2 * len(GENERATE_TEMPLATE)
     )
-    print(f"db_context = {db_context}")
+    logger.info(f"db_context = {db_context}")
 
     if db_context is not None and len(db_context) > 1:
         prompt_rag = GENERATE_TEMPLATE.format(db_context, prompt)
     else:
-        print("db_context get error")
+        logger.info("db_context get error")
         prompt_rag = prompt
 
-    print(f"RAG reference = {references}")
-    print("=" * 20)
+    logger.info(f"RAG reference = {references}")
+    logger.info("=" * 20)
 
     return prompt_rag
 
@@ -74,7 +75,13 @@ def gen_rag_db(force_gen=False):
         product_info_dict = yaml.safe_load(f)
     for _, info in product_info_dict.items():
         shutil.copyfile(
-            info["instruction"], Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name)
+            Path(
+                WEB_CONFIGS.SERVER_FILE_ROOT,
+                WEB_CONFIGS.PRODUCT_FILE_DIR,
+                WEB_CONFIGS.INSTRUCTIONS_DIR,
+                Path(info["instruction"]).name,
+            ),
+            Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name),
         )
 
     print("Generating rag database, pls wait ...")

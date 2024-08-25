@@ -14,8 +14,13 @@ from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
+from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
+from ..modules.agent.agent_worker import get_agent_result
+from ..server_info import SERVER_PLUGINS_INFO
+
 from ...web_configs import WEB_CONFIGS
 from ..utils import (
+    LLM_MODEL_HANDLER,
     ResultCode,
     get_all_streamer_info,
     get_conversation_list,
@@ -58,6 +63,7 @@ class RoomProductEdifItem(BaseModel):
     room_poster: str | None
     background_image: str | None
     prohibited_words_id: str | None
+    status: dict | None
 
 
 @dataclass
@@ -223,6 +229,8 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     new_info.update({"room_poster": edit_item.room_poster})  # 直播间名字
     new_info.update({"background_image": edit_item.background_image})  # 直播间名字
     new_info.update({"prohibited_words_id": edit_item.prohibited_words_id})  # 直播间名字
+    
+    new_info.update({"status": edit_item.status})  # 直播间状态
 
     # 主播 ID
     new_info.update({"streamer_id": edit_item.streamer_id})
@@ -272,6 +280,26 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
+async def get_agent_res(prompt, departure_place, delivery_company):
+    """调用 Agent 能力"""
+    agent_response = ""
+
+    if not SERVER_PLUGINS_INFO.agent_enabled:
+        # 如果不开启则直接返回空
+        return ""
+
+    GENERATE_AGENT_TEMPLATE = (
+        "这是网上获取到的信息：“{}”\n 客户的问题：“{}” \n 请认真阅读信息并运用你的性格进行解答。"  # Agent prompt 模板
+    )
+    input_prompt = prompt[-1]["content"]
+    agent_response = get_agent_result(LLM_MODEL_HANDLER, input_prompt, departure_place, delivery_company)
+    if agent_response != "":
+        agent_response = GENERATE_AGENT_TEMPLATE.format(agent_response, input_prompt)
+        logger.info(f"Agent response: {agent_response}")
+
+    return agent_response
+
+
 @router.post("/chat")
 async def get_on_air_live_room_api(room_chat: RoomChatItem):
     streaming_room_info = await get_streaming_room_info(room_chat.roomId)
@@ -293,11 +321,33 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
     )
     conversation_list.append(asdict(user_msg))
 
+    # 获取商品信息
+    prodcut_index = streaming_room_info["status"]["current_product_index"]
+    product_info = streaming_room_info["product_list"][prodcut_index]
+    product_list, _ = await get_product_list(id=int(product_info["product_id"]))
+    product_detail = product_list[0]
+
     # 根据对话记录生成 prompt
     prompt = await gen_poduct_base_prompt(
         streaming_room_info["streamer_id"], streaming_room_info["status"]["current_product_id"]
     )  # system + 获取商品文案prompt
     prompt = combine_history(prompt, conversation_list)
+
+    # ====================== Agent ======================
+    # 调取 Agent
+    agent_response = await get_agent_res(prompt, product_detail["departure_place"], product_detail["delivery_company"])
+    if agent_response != "":
+        logger.info("Agent 执行成功，不执行 RAG")
+        prompt[-1]["content"] = agent_response
+
+    # ====================== RAG ======================
+    # 调取 rag
+    else:
+        logger.info("Agent 未执行 or 未开启")
+        # agent 失败，调取 rag, chat_item.plugins.rag 为 True，则使用 RAG 查询数据库
+        rag_res = build_rag_prompt(RAG_RETRIEVER, product_detail["product_name"], prompt[-1]["content"])
+        if rag_res != "":
+            prompt[-1]["content"] = rag_res
 
     # 调取 LLM & 数字人生成视频
     streamer_res = await get_llm_res(prompt)
