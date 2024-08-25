@@ -22,27 +22,31 @@ onMounted(() => {
       <template #header>
         <!-- 头部 -->
         <div class="card-header">
-          <el-form :inline="true" :model="queriedResult.product">
-            <el-form-item label="商品名称">
-              <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
-            </el-form-item>
-            <!-- <el-form-item label="分类">
-            <el-select v-model="queriedResult.class" placeholder="">
-              <el-option label="全部" value="" />
-              <el-option label="电子" value="电子" />
-            </el-select>
-          </el-form-item> -->
-            <el-form-item>
-              <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
-                >查询</el-button
-              >
-            </el-form-item>
-          </el-form>
-          <!-- 添加商品 -->
-          <!-- TODO 按钮放到最右边 -->
-          <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
-            添加商品
-          </el-button>
+          <div>
+            <el-form :inline="true" :model="queriedResult.product">
+              <el-form-item label="商品名称">
+                <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
+              </el-form-item>
+              <!-- <el-form-item label="分类">
+                <el-select v-model="queriedResult.class" placeholder="">
+                  <el-option label="全部" value="" />
+                  <el-option label="电子" value="电子" />
+                </el-select>
+              </el-form-item> -->
+              <el-form-item>
+                <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
+                  >查询</el-button
+                >
+              </el-form-item>
+            </el-form>
+          </div>
+          <div>
+            <!-- 添加商品 -->
+            <!-- TODO 按钮放到最右边 -->
+            <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
+              添加商品
+            </el-button>
+          </div>
         </div>
       </template>
 
@@ -67,10 +71,9 @@ onMounted(() => {
         <el-table-column prop="departure_place" label="发货地" align="center" />
         <el-table-column prop="delivery_company" label="快递公司" align="center" />
         <el-table-column prop="upload_date" label="上传时间" align="center" />
-        <el-table-column label="操作" v-slot="{ row }" align="center" width="600px">
+        <el-table-column label="操作" v-slot="{ row }" align="center" width="250px">
           <div class="control-item">
             <el-button
-              size="small"
               @click="
                 ShowItemInfo.showItemInfoDialog(
                   row.product_name,
@@ -83,20 +86,19 @@ onMounted(() => {
               说明书
             </el-button>
 
-            <!-- 信息弹窗 -->
-            <ProductInfoDialogView ref="ShowItemInfo" />
-
             <el-button
-              size="small"
               @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
             >
               编辑
             </el-button>
-            <el-button size="small" type="danger">归档</el-button>
-            <el-button size="small">分配直播间</el-button>
+            <el-button type="danger">下架</el-button>
+            <!-- <el-button size="small">分配直播间</el-button> -->
           </div>
         </el-table-column>
       </el-table>
+
+      <!-- 信息弹窗 -->
+      <ProductInfoDialogView ref="ShowItemInfo" />
 
       <!-- 分页栏 -->
       <template #footer>
@@ -122,8 +124,13 @@ onMounted(() => {
 }
 
 // 查询栏
-.el-form-item {
-  margin-bottom: 0px; // 查询框和下面的组件间隔大小
+.card-header {
+  display: flex;
+  justify-content: space-between; // 将两个 div 放置在页面的两侧
+  align-items: center;
+  .el-form-item {
+    margin-bottom: 0px; // 查询框和下面的组件间隔大小
+  }
 }
 
 // 分页框
@@ -134,35 +141,14 @@ onMounted(() => {
   align-items: center;
 }
 
-.card-header {
-  display: flex;
-}
-
+// 操作栏
 .control-item {
   display: flex;
   align-items: center;
 }
 
-// // 去掉表格右边框线
-// .el-table--border::after {
-//   width: 0;
-// }
-
-// // 去掉表格上边框线
-// :deep(.el-table__inner-wrapper::after) {
-//   height: 0;
-// }
-
 // 去掉表格下边框线
 :deep(.el-table__inner-wrapper::before) {
   height: 0;
 }
-
-// // 去掉表格左边框线
-// .el-table::before {
-//   width: 0;
-// }
-// :deep(.el-table__border-left-patch) {
-//   width: 0;
-// }
 </style>
