@@ -64,7 +64,7 @@ const props = defineProps({
   background-color: aquamarine;
   border-radius: 20px;
   padding: 15px;
-  width: 400px;
+  width: 600px; // 聊天信息的宽度
 }
 
 .user-info {

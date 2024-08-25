@@ -7,6 +7,7 @@ import MessageComponent from '@/components/MessageComponent.vue'
 import {
   onAirRoomChatRequest,
   onAirRoomInfoRequest,
+  onAirRoomNextProductRequest,
   type StreamingRoomStatusItem
 } from '@/api/streamingRoom'
 import type { ProductListItem, StreamerInfo } from '@/api/product'
@@ -96,12 +97,22 @@ const scrollToBottom = async () => {
   scrollbarRef.value.setScrollTop(10000) // TODO 先设置一个比较大的值，后续需要获取控件的高度进行赋值
 }
 
+// 下一个商品
+const handleNextProductClick = async () => {
+  const { data } = await onAirRoomNextProductRequest(Number(props.roomId))
+  if (data.code === 0) {
+    console.info('Next Product')
+    currentStatus.value = data.data
+    console.info(currentStatus.value)
+  }
+}
+
+// 结束直播按钮
+const handleOffLineClick = () => {}
+
 onMounted(() => {
   // 获取直播间实时信息格信息
   getRoomInfo()
-
-  // 在 DOM 更新后滚动到底部
-  nextTick(scrollToBottom)
 })
 </script>
 
@@ -164,8 +175,8 @@ onMounted(() => {
                 :src="currentStatus.currentProductInfo.image_path"
                 fit="contain"
               />
-              <el-button>下一个商品</el-button>
-              <el-button>下播</el-button>
+              <el-button @click="handleNextProductClick">下一个商品</el-button>
+              <el-button @click="handleOffLineClick">下播</el-button>
             </el-card>
           </div>
         </div>

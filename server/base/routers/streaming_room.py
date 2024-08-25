@@ -138,6 +138,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
         "streamer_id": streaming_room_info["streamer_id"],
         "background_image": streaming_room_info["background_image"],
         "prohibited_words_id": streaming_room_info["prohibited_words_id"],
+        "liveStatus": streaming_room_info["status"]["live_status"],
     }
 
     logger.info(res_data)
@@ -268,75 +269,6 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.post("/live-info")
-async def get_on_air_live_room_api(room_info: RoomProductListItem):
-    """获取正在直播的直播间信息
-
-    1. 主播视频地址
-    2. 商品信息，显示在右下角的商品缩略图
-    3. 对话记录 conversation_list
-
-    Args:
-        romm_info (RoomProductListItem): 直播间 ID
-    """
-
-    streaming_room_info = await get_streaming_room_info(room_info.roomId)
-    logger.info(streaming_room_info)
-
-    # 根据 ID 获取主播信息
-    streamer_info = await get_streamer_info_by_id(streaming_room_info["streamer_id"])
-    streamer_info = streamer_info[0]
-
-    # 商品信息
-    prodcut_index = streaming_room_info["status"]["current_product_index"]
-    product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_product_list(id=int(product_info["product_id"]))
-
-    # 获取直播间对话
-    conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
-
-    if len(conversation_list) == 0:
-        # 新直播间，新建对话
-        streamer_msg = MessageItem(
-            role="streamer",
-            userId=str(streaming_room_info["streamer_id"]),
-            userName=streamer_info["name"],
-            message=product_info["sales_doc"],
-            avater=streamer_info["avater"],
-            messageIndex=0,
-        )
-        conversation_list.append(asdict(streamer_msg))
-
-        #  基本信息完善
-        streaming_room_info["status"]["conversation_id"] = str(uuid.uuid4().hex)
-        streaming_room_info["status"]["current_product_id"] = product_info["product_id"]
-        streaming_room_info["status"]["streaming_video_path"] = product_info["start_video"]
-        streaming_room_info["status"]["current_product_index"] = 0
-        streaming_room_info["status"]["start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        streaming_room_info["status"]["current_product_start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        streaming_room_info["status"]["live_status"] = 1  # 0 未开播，1 正在直播，2 下播了
-
-    logger.info(streaming_room_info["status"])
-    logger.info(conversation_list)
-    # 保存对话
-    _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
-
-    # 保存直播间信息
-    _ = await update_streaming_room_info(room_info.roomId, streaming_room_info)
-
-    res_data = {
-        "streamerInfo": streamer_info,
-        "conversation": conversation_list,
-        "currentProductInfo": product_list[0],
-        "currentStreamerVideo": streaming_room_info["status"]["streaming_video_path"],
-        "currentProductIndex": streaming_room_info["status"]["current_product_index"],
-        "startTime": streaming_room_info["status"]["start_time"],
-        "currentPoductStartTime": streaming_room_info["status"]["current_product_start_time"],
-    }
-
-    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
-
-
 @router.post("/chat")
 async def get_on_air_live_room_api(room_chat: RoomChatItem):
     streaming_room_info = await get_streaming_room_info(room_chat.roomId)
@@ -379,3 +311,109 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
     _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
+
+
+async def get_or_init_conversation(room_id: int, next_product=False):
+    # 根据直播间 ID 获取信息
+    streaming_room_info = await get_streaming_room_info(room_id)
+    logger.info(streaming_room_info)
+
+    # 根据 ID 获取主播信息
+    streamer_info = await get_streamer_info_by_id(streaming_room_info["streamer_id"])
+    streamer_info = streamer_info[0]
+
+    # 商品信息
+    prodcut_index = streaming_room_info["status"]["current_product_index"]
+
+    if next_product:
+        # 如果是介绍下一个商品，则进行递增
+        prodcut_index += 1
+
+    assert prodcut_index >= 0
+    product_info = streaming_room_info["product_list"][prodcut_index]
+    product_list, _ = await get_product_list(id=int(product_info["product_id"]))
+
+    # 获取直播间对话
+    if next_product:
+        conversation_list = []
+    else:
+        conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
+
+    if len(conversation_list) == 0:
+        # 新直播间 or 新产品，需要新建对话
+        streamer_msg = MessageItem(
+            role="streamer",
+            userId=str(streaming_room_info["streamer_id"]),
+            userName=streamer_info["name"],
+            message=product_info["sales_doc"],
+            avater=streamer_info["avater"],
+            messageIndex=0,
+        )
+        conversation_list.append(asdict(streamer_msg))
+
+        #  基本信息完善
+        streaming_room_info["status"]["conversation_id"] = str(uuid.uuid4().hex)
+        streaming_room_info["status"]["current_product_id"] = product_info["product_id"]
+        streaming_room_info["status"]["streaming_video_path"] = product_info["start_video"]
+        streaming_room_info["status"]["current_product_index"] = prodcut_index
+        streaming_room_info["status"]["start_time"] = (
+            streaming_room_info["status"]["start_time"]
+            if streaming_room_info["status"]["start_time"] != ""
+            else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        streaming_room_info["status"]["current_product_start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        streaming_room_info["status"]["live_status"] = 1  # 0 未开播，1 正在直播，2 下播了
+
+        # 更新商品开始信息
+        if streaming_room_info["product_list"][prodcut_index]["start_time"] == "":
+            streaming_room_info["product_list"][prodcut_index]["start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    logger.info(streaming_room_info["status"])
+    logger.info(conversation_list)
+    # 保存对话
+    _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
+
+    # 保存直播间信息
+    _ = await update_streaming_room_info(room_id, streaming_room_info)
+
+    res_data = {
+        "streamerInfo": streamer_info,
+        "conversation": conversation_list,
+        "currentProductInfo": product_list[0],
+        "currentStreamerVideo": streaming_room_info["status"]["streaming_video_path"],
+        "currentProductIndex": streaming_room_info["status"]["current_product_index"],
+        "startTime": streaming_room_info["status"]["start_time"],
+        "currentPoductStartTime": streaming_room_info["status"]["current_product_start_time"],
+    }
+
+    return res_data
+
+
+@router.post("/live-info")
+async def get_on_air_live_room_api(room_info: RoomProductListItem):
+    """获取正在直播的直播间信息
+
+    1. 主播视频地址
+    2. 商品信息，显示在右下角的商品缩略图
+    3. 对话记录 conversation_list
+
+    Args:
+        romm_info (RoomProductListItem): 直播间 ID
+    """
+
+    res_data = await get_or_init_conversation(room_info.roomId, next_product=False)
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
+
+
+@router.post("/next-product")
+async def on_air_live_room_next_product_api(room_info: RoomProductListItem):
+    """直播间进行下一个商品讲解
+
+    Args:
+        room_info (RoomProductListItem): 直播间 ID
+    """
+
+    res_data = await get_or_init_conversation(room_info.roomId, next_product=True)
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
