@@ -19,25 +19,18 @@ class GenDigitalHumanVideoItem(BaseModel):
     salesDoc: str
 
 
-@router.post("/gen")
-async def get_digital_human_according_doc_api(gen_item: GenDigitalHumanVideoItem):
-    """根据口播文案生成数字人介绍视频
-
-    Args:
-        gen_item (GenDigitalHumanVideoItem): _description_
-
-    """
-    logger.info(gen_item.salesDoc)
+async def gen_tts_and_digital_human_video_app(sales_doc: str):
+    logger.info(sales_doc)
 
     request_id = str(uuid.uuid1())
-    sentence_id = 1 # 直接推理，所以设置成 1
+    sentence_id = 1  # 直接推理，所以设置成 1
     user_id = "123"
 
     # 生成 TTS wav
     tts_json = {
         "user_id": user_id,
         "request_id": request_id,
-        "sentence": gen_item.salesDoc,
+        "sentence": sales_doc,
         "chunk_id": sentence_id,
         # "wav_save_name": chat_item.request_id + f"{str(sentence_id).zfill(8)}.wav",
     }
@@ -58,7 +51,21 @@ async def get_digital_human_according_doc_api(gen_item: GenDigitalHumanVideoItem
 
     # 删除过程文件
     tts_save_path.unlink()
-    
+
     server_video_path = f"{API_CONFIG.REQUEST_FILES_URL}/{WEB_CONFIGS.STREAMER_FILE_DIR}/vid_output/{request_id}.mp4"
     logger.info(server_video_path)
+
+    return server_video_path
+
+
+@router.post("/gen")
+async def get_digital_human_according_doc_api(gen_item: GenDigitalHumanVideoItem):
+    """根据口播文案生成数字人介绍视频
+
+    Args:
+        gen_item (GenDigitalHumanVideoItem): _description_
+
+    """
+    server_video_path = await gen_tts_and_digital_human_video_app(gen_item.salesDoc)
+
     return make_return_data(True, ResultCode.SUCCESS, "成功", server_video_path)

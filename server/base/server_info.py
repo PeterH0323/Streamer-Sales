@@ -16,8 +16,11 @@ class ServerPluginsInfo:
         else:
             self.agent_enabled = True
 
+        self.rag_enabled = WEB_CONFIGS.ENABLE_RAG
+            
         logger.info(
             "self check plugins info : \n"
+            f"rag {self.rag_enabled}\n"
             f"tts {self.tts_server_enabled}\n"
             f"digital hunam {self.digital_human_server_enabled}\n"
             f"asr {self.asr_server_enabled}\n"

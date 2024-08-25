@@ -239,7 +239,7 @@ async def streamer_sales_process(chat_item: ChatItem):
     )
 
 
-def combine_history(prompt: list, history_msg):
+def combine_history(prompt: list, history_msg: list):
     """生成对话历史 prompt
 
     Args:
@@ -254,7 +254,7 @@ def combine_history(prompt: list, history_msg):
 
     # 生成历史对话信息
     for message in history_msg:
-        prompt.append({"role": role_map[message['role']], "content": message["message"]})
+        prompt.append({"role": role_map[message["role"]], "content": message["message"]})
 
     return prompt
 

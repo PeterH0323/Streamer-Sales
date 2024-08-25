@@ -14,14 +14,14 @@ from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
-from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
-from ..modules.agent.agent_worker import get_agent_result
-from ..server_info import SERVER_PLUGINS_INFO
-
 from ...web_configs import WEB_CONFIGS
+from ..modules.agent.agent_worker import get_agent_result
+from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
+from ..server_info import SERVER_PLUGINS_INFO
 from ..utils import (
     LLM_MODEL_HANDLER,
     ResultCode,
+    combine_history,
     get_all_streamer_info,
     get_conversation_list,
     get_streamer_info_by_id,
@@ -30,8 +30,8 @@ from ..utils import (
     make_return_data,
     update_conversation_message_info,
     update_streaming_room_info,
-    combine_history,
 )
+from .digital_human import gen_tts_and_digital_human_video_app
 from .llm import gen_poduct_base_prompt, get_llm_res
 from .products import get_prduct_by_page, get_product_list
 
@@ -229,7 +229,7 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     new_info.update({"room_poster": edit_item.room_poster})  # 直播间名字
     new_info.update({"background_image": edit_item.background_image})  # 直播间名字
     new_info.update({"prohibited_words_id": edit_item.prohibited_words_id})  # 直播间名字
-    
+
     new_info.update({"status": edit_item.status})  # 直播间状态
 
     # 主播 ID
@@ -342,7 +342,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
 
     # ====================== RAG ======================
     # 调取 rag
-    else:
+    elif SERVER_PLUGINS_INFO.rag_enabled:
         logger.info("Agent 未执行 or 未开启")
         # agent 失败，调取 rag, chat_item.plugins.rag 为 True，则使用 RAG 查询数据库
         rag_res = build_rag_prompt(RAG_RETRIEVER, product_detail["product_name"], prompt[-1]["content"])
@@ -352,7 +352,9 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
     # 调取 LLM & 数字人生成视频
     streamer_res = await get_llm_res(prompt)
 
-    # 生成数字人视频
+    # 生成数字人视频，并更新直播间数字人视频信息
+    server_video_path = await gen_tts_and_digital_human_video_app(streamer_res)
+    streaming_room_info["status"]["streaming_video_path"] = server_video_path
 
     stream_info = conversation_list[0]
     streamer_msg = MessageItem(
@@ -365,11 +367,14 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
     )
     conversation_list.append(asdict(streamer_msg))
 
-    logger.info(streaming_room_info["status"]["conversation_id"])
-    logger.info(conversation_list)
-
     # 保存对话
     _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
+
+    # 保存直播间信息
+    _ = await update_streaming_room_info(room_chat.roomId, streaming_room_info)
+
+    logger.info(streaming_room_info["status"]["conversation_id"])
+    logger.info(conversation_list)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
