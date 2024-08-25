@@ -9,6 +9,7 @@ import {
   onAirRoomInfoRequest,
   type StreamingRoomStatusItem
 } from '@/api/streamingRoom'
+import type { ProductListItem, StreamerInfo } from '@/api/product'
 
 // 定义传参
 const props = defineProps({
@@ -22,6 +23,8 @@ const props = defineProps({
 const inputValue = ref('')
 
 const currentStatus = ref({} as StreamingRoomStatusItem)
+currentStatus.value.currentProductInfo = {} as ProductListItem
+currentStatus.value.streamerInfo = {} as StreamerInfo
 
 const getRoomInfo = async () => {
   // 获取主播视频地址
@@ -96,23 +99,28 @@ const scrollToBottom = async () => {
 onMounted(() => {
   // 获取直播间实时信息格信息
   getRoomInfo()
+
+  // 在 DOM 更新后滚动到底部
+  nextTick(scrollToBottom)
 })
 </script>
 
 <template>
   <div>
     <el-row :gutter="1">
-      <el-col :span="16">
+      <el-col :span="14">
         <!-- 主播视频 -->
         <VideoComponent
           :src="currentStatus.currentStreamerVideo"
           :key="currentStatus.currentStreamerVideo"
           :autoplay="true"
-          :width="50"
-          :height="50"
+          :width="1300"
+          :height="1300"
+          :videoAfterEnd="currentStatus.streamerInfo.base_mp4_path"
+          style="display: flex; justify-content: center; align-items: center"
         />
       </el-col>
-      <el-col :span="8">
+      <el-col :span="10">
         <div>
           <el-scrollbar height="1000px" ref="scrollbarRef" id="scrollbarRef">
             <!-- 对话记录显示在右上角 -->
@@ -130,6 +138,7 @@ onMounted(() => {
             <!-- <el-button :loading="loadingStreamRes" v-show="loadingStreamRes" /> -->
           </el-scrollbar>
 
+          <!-- 对话框 -->
           <div class="bottom-items">
             <el-button circle>
               <el-icon><Mic /></el-icon>
@@ -146,13 +155,18 @@ onMounted(() => {
               <el-icon><ChatDotRound /></el-icon>
             </el-button>
           </div>
+
+          <!-- 商品展示 -->
           <div class="bottom-items">
-            显示商品信息和缩略图
-            <el-button>商品详情</el-button>
-          </div>
-          <div class="bottom-items">
-            <el-button>下一个商品</el-button>
-            <el-button>下播</el-button>
+            <el-card style="border-radius: 5px">
+              <el-image
+                style="width: 100px; height: 100px"
+                :src="currentStatus.currentProductInfo.image_path"
+                fit="contain"
+              />
+              <el-button>下一个商品</el-button>
+              <el-button>下播</el-button>
+            </el-card>
           </div>
         </div>
       </el-col>
@@ -166,5 +180,6 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: auto;
 }
 </style>
