@@ -29,23 +29,15 @@ const route = useRoute()
         </template>
         <el-menu-item index="/product/list"><span>商品列表</span></el-menu-item>
       </el-sub-menu>
-      <el-sub-menu index="/system">
-        <template #title>
-          <el-icon> <setting /> </el-icon><span>系统配置</span>
-        </template>
-        <el-menu-item index="/system/model"><span>模型配置</span></el-menu-item>
-        <el-menu-item index="/system/word"><span>敏感词配置</span></el-menu-item>
-        <el-menu-item index="/system/blacklist-question"><span>疑问黑名单</span></el-menu-item>
-      </el-sub-menu>
       <el-sub-menu index="/digital-human">
         <template #title>
-          <el-icon> <User /> </el-icon><span>数字人配置</span>
+          <el-icon> <User /> </el-icon><span>数字人管理</span>
         </template>
         <el-menu-item index="/digital-human/list"><span>角色管理</span></el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="/streaming">
         <template #title>
-          <el-icon> <Mic /> </el-icon><span>直播配置</span>
+          <el-icon> <Mic /> </el-icon><span>直播管理</span>
         </template>
         <el-menu-item index="/streaming/overview">直播间管理<span></span></el-menu-item>
       </el-sub-menu>
@@ -54,6 +46,14 @@ const route = useRoute()
           <el-icon> <ShoppingCart /> </el-icon><span>订单管理</span>
         </template>
         <el-menu-item index="/order/overview"><span>订单总览</span></el-menu-item>
+      </el-sub-menu>
+      <el-sub-menu index="/system">
+        <template #title>
+          <el-icon> <setting /> </el-icon><span>系统配置</span>
+        </template>
+        <el-menu-item index="/system/model"><span>模型配置</span></el-menu-item>
+        <el-menu-item index="/system/word"><span>敏感词配置</span></el-menu-item>
+        <el-menu-item index="/system/blacklist-question"><span>疑问黑名单</span></el-menu-item>
       </el-sub-menu>
     </el-menu>
   </el-aside>

@@ -56,42 +56,13 @@ const router = createRouter({
           ]
         },
         // ---------------------
-        //       系统配置
-        // ---------------------
-        {
-          path: '/system',
-          name: 'System',
-          redirect: { name: 'SystemModel' },
-          meta: { title: '系统配置' },
-          children: [
-            {
-              path: '/system/model',
-              name: 'SystemModel',
-              component: () => import('@/views/system/SystemView.vue'),
-              meta: { title: '模型配置' }
-            },
-            {
-              path: '/system/word',
-              name: 'SystemWord',
-              component: () => import('@/views/system/SystemView.vue'),
-              meta: { title: '敏感词配置' }
-            },
-            {
-              path: '/system/blacklist-question',
-              name: 'SystemBlacklistQuestion',
-              component: () => import('@/views/system/SystemView.vue'),
-              meta: { title: '疑问黑名单' }
-            }
-          ]
-        },
-        // ---------------------
-        //       数字人配置
+        //       数字人管理
         // ---------------------
         {
           path: '/digital-human',
           name: 'DigitalHuman',
           redirect: { name: 'DigitalHumanList' },
-          meta: { title: '数字人配置' },
+          meta: { title: '数字人管理' },
           children: [
             {
               path: '/digital-human/list',
@@ -102,14 +73,14 @@ const router = createRouter({
           ]
         },
         // ---------------------
-        //       直播配置
+        //       直播管理
         // ---------------------
 
         {
           path: '/streaming',
           name: 'Streaming',
           redirect: { name: 'StreamingOverview' },
-          meta: { title: '直播配置' },
+          meta: { title: '直播管理' },
           children: [
             {
               path: '/streaming/overview',
@@ -119,7 +90,7 @@ const router = createRouter({
             },
             {
               path: '/streaming/create',
-              name: 'StreamingCreated',
+              name: 'StreamingCreate',
               component: () => import('@/views/streaming/StreamingRoomeEditView.vue'),
               meta: { title: '新建直播间' }
             },
@@ -153,6 +124,35 @@ const router = createRouter({
               name: 'OrderOverview',
               component: () => import('@/views/order/OrderView.vue'),
               meta: { title: '订单管理' }
+            }
+          ]
+        },
+        // ---------------------
+        //       系统配置
+        // ---------------------
+        {
+          path: '/system',
+          name: 'System',
+          redirect: { name: 'SystemModel' },
+          meta: { title: '系统配置' },
+          children: [
+            {
+              path: '/system/model',
+              name: 'SystemModel',
+              component: () => import('@/views/system/SystemView.vue'),
+              meta: { title: '模型配置' }
+            },
+            {
+              path: '/system/word',
+              name: 'SystemWord',
+              component: () => import('@/views/system/SystemView.vue'),
+              meta: { title: '敏感词配置' }
+            },
+            {
+              path: '/system/blacklist-question',
+              name: 'SystemBlacklistQuestion',
+              component: () => import('@/views/system/SystemView.vue'),
+              meta: { title: '疑问黑名单' }
             }
           ]
         }
