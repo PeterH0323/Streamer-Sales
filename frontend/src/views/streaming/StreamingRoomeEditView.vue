@@ -68,6 +68,7 @@ const getProductInfo = async () => {
 const RoomProductList = ref({} as RoomDetailItem)
 RoomProductList.value.streamerInfo = {} as StreamerInfo
 RoomProductList.value.streamerInfo.id = 0
+RoomProductList.value.pageSize = 10
 
 const EditProductList = ref({} as RoomDetailItem)
 
@@ -261,7 +262,9 @@ const handelControlClick = (
     </el-card>
 
     <el-card>
-      <el-button type="primary" class="ml-2" @click="handelAddProductClick">增删商品</el-button>
+      <el-button type="primary" style="margin-bottom: 10px" @click="handelAddProductClick"
+        >增删商品</el-button
+      >
 
       <!-- TODO 商品表格可以做成 component 组件 -->
       <el-table :data="RoomProductList.product" max-height="1000" border>
@@ -356,25 +359,34 @@ const handelControlClick = (
       <ProductInfoDialogView ref="ShowItemInfo" v-model="RoomProductList.product" />
 
       <template #footer>
-        <el-pagination
-          v-model:current-page="RoomProductList.currentPage"
-          v-model:page-size="RoomProductList.pageSize"
-          :page-sizes="[5, 10, 15, 20]"
-          :background="true"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="RoomProductList.totalSize || 0"
-          @size-change="(pageSize: number) => getProductListInfo(1, pageSize)"
-          @current-change="
-            (currentPage: number) => getProductListInfo(currentPage, RoomProductList.pageSize)
-          "
-        />
-        <div class="form-bottom-btn">
-          <el-button type="primary" class="ml-2" @click="handelOnAirClick">开始直播</el-button>
-          <el-button type="primary" class="ml-2" @click="onSubmit">保存</el-button>
+        <div class="bottom-item">
+          <div>
+            <el-button type="primary" @click="handelOnAirClick">开始直播</el-button>
+            <el-button type="primary" @click="onSubmit">保存</el-button>
+          </div>
+          <el-pagination
+            v-model:current-page="RoomProductList.currentPage"
+            v-model:page-size="RoomProductList.pageSize"
+            :page-sizes="[5, 10, 15, 20]"
+            :background="true"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="RoomProductList.totalSize || 0"
+            @size-change="(pageSize: number) => getProductListInfo(1, pageSize)"
+            @current-change="
+              (currentPage: number) => getProductListInfo(currentPage, RoomProductList.pageSize)
+            "
+          />
         </div>
       </template>
     </el-card>
   </div>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.bottom-item {
+  margin-top: 10px; // 距离上面的控件有一定的距离
+  display: flex;
+  justify-content: space-between; // 将两个 div 放置在页面的两侧
+  align-items: center;
+}
+</style>
