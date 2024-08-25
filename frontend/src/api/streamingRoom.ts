@@ -25,6 +25,7 @@ interface StreamingRoomStatusItem {
   currentProductIndex: number
   startTime: string
   currentPoductStartTime: string
+  finalProduct: boolean
 }
 
 interface StreamingRoomInfo {
@@ -66,6 +67,7 @@ interface RoomDetailItem {
   streamer_id: string
   background_image: string
   prohibited_words_id: string
+  liveStatus: number
 }
 
 // 获取后端主播信息
@@ -112,12 +114,21 @@ const onAirRoomInfoRequest = (roomId_: number) => {
   })
 }
 
-// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+// 用户发起对话
 const onAirRoomChatRequest = async (roomId_: number, userId_: string, message_: string) => {
   return request_handler<ResultPackage<messageItem>>({
     method: 'POST',
     url: '/streaming-room/chat',
     data: { roomId: roomId_, userId: userId_, message: message_ }
+  })
+}
+
+// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+const onAirRoomNextProductRequest = async (roomId_: number) => {
+  return request_handler<ResultPackage<messageItem>>({
+    method: 'POST',
+    url: '/streaming-room/next-product',
+    data: { roomId: roomId_ }
   })
 }
 
@@ -132,5 +143,6 @@ export {
   roomPorductAddListRequest,
   RoomCreadeOrEditRequest,
   onAirRoomInfoRequest,
-  onAirRoomChatRequest
+  onAirRoomChatRequest,
+  onAirRoomNextProductRequest
 }

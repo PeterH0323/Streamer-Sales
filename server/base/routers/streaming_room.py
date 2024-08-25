@@ -322,9 +322,10 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     streamer_info = await get_streamer_info_by_id(streaming_room_info["streamer_id"])
     streamer_info = streamer_info[0]
 
+
     # 商品信息
     prodcut_index = streaming_room_info["status"]["current_product_index"]
-
+    
     if next_product:
         # 如果是介绍下一个商品，则进行递增
         prodcut_index += 1
@@ -332,6 +333,12 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     assert prodcut_index >= 0
     product_info = streaming_room_info["product_list"][prodcut_index]
     product_list, _ = await get_product_list(id=int(product_info["product_id"]))
+    
+    # 是否为最后的商品
+    if len(streaming_room_info["product_list"]) - 1 == prodcut_index:
+        final_procut = True
+    else:
+        final_procut = False
 
     # 获取直播间对话
     if next_product:
@@ -384,6 +391,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
         "currentProductIndex": streaming_room_info["status"]["current_product_index"],
         "startTime": streaming_room_info["status"]["start_time"],
         "currentPoductStartTime": streaming_room_info["status"]["current_product_start_time"],
+        "finalProduct": final_procut,
     }
 
     return res_data

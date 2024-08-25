@@ -168,16 +168,36 @@ onMounted(() => {
           </div>
 
           <!-- 商品展示 -->
-          <div class="bottom-items">
+          <div style="margin-top: 10px">
             <el-card style="border-radius: 5px">
-              <el-image
-                style="width: 100px; height: 100px"
-                :src="currentStatus.currentProductInfo.image_path"
-                fit="contain"
-              />
-              <el-button @click="handleNextProductClick">下一个商品</el-button>
-              <el-button @click="handleOffLineClick">下播</el-button>
+              <div class="bottom-items">
+                <div>
+                  <el-image
+                    style="width: 100px; height: 100px"
+                    :src="currentStatus.currentProductInfo.image_path"
+                    fit="contain"
+                  />
+                </div>
+
+                <div class="product-info">
+                  <h4>商品信息</h4>
+                  <div>商品名称：{{ currentStatus.currentProductInfo.product_name }}</div>
+                  <div>商品亮点：{{ currentStatus.currentProductInfo.heighlights }}</div>
+                  <div>价格：{{ currentStatus.currentProductInfo.selling_price }}</div>
+                </div>
+              </div>
             </el-card>
+
+            <div class="bottom-button">
+              <el-button
+                type="primary"
+                @click="handleNextProductClick"
+                v-show="!currentStatus.finalProduct"
+              >
+                下一个商品
+              </el-button>
+              <el-button type="danger" @click="handleOffLineClick">下播</el-button>
+            </div>
           </div>
         </div>
       </el-col>
@@ -189,8 +209,16 @@ onMounted(() => {
 .bottom-items {
   margin-top: 10px; // 距离上面的控件有一定的距离
   display: flex;
-  justify-content: center;
   align-items: center;
   width: auto;
+
+  .product-info {
+    margin-left: 20px;
+  }
+}
+
+.bottom-button {
+  margin-top: 10px;
+  float: right;
 }
 </style>
