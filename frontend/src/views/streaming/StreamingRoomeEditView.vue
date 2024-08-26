@@ -191,18 +191,25 @@ const handelControlClick = (
       </template>
       <template #default>
         <div>
-          <ul>
+          <ul class="product-list">
             <li v-for="item in DrawerProductList.product" :key="item.id" class="list-item">
-              <el-image style="width: 100px; height: 100px" :src="item.image" fit="contain" />
-              <el-checkbox v-model="item.selected" :label="item.name" size="large" border />
+              <el-checkbox-button
+                v-model="item.selected"
+                size="large"
+                style="width: 160px; height: 160px; padding: 20px"
+                border
+              >
+                <el-image style="width: 100px; height: 100px" :src="item.image" fit="contain" />
+                <p>{{ item.name }}</p>
+              </el-checkbox-button>
             </li>
           </ul>
         </div>
       </template>
       <template #footer>
         <div style="flex: auto">
-          <el-button @click="cancelClick">cancel</el-button>
-          <el-button type="primary" @click="confirmClick">confirm</el-button>
+          <el-button @click="cancelClick">取消</el-button>
+          <el-button type="primary" @click="confirmClick">确认</el-button>
         </div>
       </template>
     </el-drawer>
@@ -415,5 +422,30 @@ const handelControlClick = (
   display: flex;
   justify-content: space-between; // 将两个 div 放置在页面的两侧
   align-items: center;
+}
+
+.list-item {
+  width: 50%; /* 每行两个元素 */
+  box-sizing: border-box; /* 确保 padding 不影响宽度计算 */
+  padding: 10px; /* 调整间距 */
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap; /* 允许换行 */
+  padding-left: 0; /* 去掉默认的缩进 */
+  margin: 0; /* 去掉默认的外边距 */
+  list-style-type: none; /* 去掉列表项前的默认圆点 */
+
+  .ul {
+    list-style-type: none;
+    padding-left: 0; /* 去掉默认的缩进 */
+    margin: 0; /* 根据需要调整外边距 */
+  }
+
+  .li {
+    margin: 0; /* 根据需要调整 */
+    padding: 0; /* 根据需要调整 */
+  }
 }
 </style>
