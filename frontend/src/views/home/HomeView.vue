@@ -147,7 +147,7 @@ onMounted(async () => {
 
 .el-card {
   margin: 12px 12px 12px 12px;
-  border-radius: 15px;
+  border-radius: 22px;
 
   .info-item {
     margin: 12px 12px 12px 12px;

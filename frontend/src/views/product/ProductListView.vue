@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { Plus } from '@element-plus/icons-vue'
+
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 
 import { queryCondition, queriedResult, getProductList } from '@/api/product'
@@ -18,14 +20,19 @@ onMounted(() => {
 
 <template>
   <div>
-    <el-card>
+    <el-card shadow="never">
       <template #header>
         <!-- 头部 -->
         <div class="card-header">
           <div>
             <el-form :inline="true" :model="queriedResult.product">
-              <el-form-item label="商品名称">
-                <el-input v-model="queryCondition.productName" placeholder="商品名称" clearable />
+              <el-form-item label="搜索">
+                <el-input
+                  style="width: 240px"
+                  v-model="queryCondition.productName"
+                  placeholder="商品名称"
+                  clearable
+                />
               </el-form-item>
               <!-- <el-form-item label="分类">
                 <el-select v-model="queriedResult.class" placeholder="">
@@ -34,24 +41,24 @@ onMounted(() => {
                 </el-select>
               </el-form-item> -->
               <el-form-item>
-                <el-button type="primary" @click="() => getProductList({ currentPage: 1 })"
-                  >查询</el-button
-                >
+                <el-button type="primary" @click="() => getProductList({ currentPage: 1 })">
+                  查询
+                </el-button>
               </el-form-item>
             </el-form>
           </div>
           <div>
             <!-- 添加商品 -->
-            <!-- TODO 按钮放到最右边 -->
             <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
+              <el-icon style="margin-right: 5px"><Plus /></el-icon>
               添加商品
             </el-button>
           </div>
         </div>
       </template>
 
-      <!-- 中部表格信息 border-->
-      <el-table :data="queriedResult.product" max-height="1000" border>
+      <!-- 中部表格信息-->
+      <el-table :data="queriedResult.product" max-height="1000">
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
         <el-table-column prop="image_path" label="图片" align="center">
@@ -119,6 +126,10 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.el-card {
+  border-radius: 12px;
+}
+
 .box-card {
   width: auto; // 卡片宽度
 }
