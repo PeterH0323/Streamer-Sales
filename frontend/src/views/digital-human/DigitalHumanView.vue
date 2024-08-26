@@ -44,8 +44,8 @@ const ShowItemInfo = ref()
           <el-card style="max-width: 500px">
             <img :src="item.poster_image" style="width: 100%" />
             <div class="streamer-info">
-              <p>{{ item.name }}</p>
-              <p style="font-size: 13px; color: #c8c9cc">
+              <p class="title">{{ item.name }}</p>
+              <p class="content">
                 {{ item.character }}
               </p>
             </div>
@@ -85,5 +85,16 @@ const ShowItemInfo = ref()
   flex-direction: column; /* 将子元素垂直排列 */
   justify-content: center; /* 垂直居中 */
   align-items: center; /* 水平居中 */
+
+  .title {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .content {
+    font-size: 15px;
+    color: #b1b3b8;
+    margin: 15px;
+  }
 }
 </style>
