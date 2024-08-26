@@ -34,4 +34,8 @@ import { RouterView } from 'vue-router'
 .header-and-context-container {
   flex-direction: column;
 }
+
+.el-main {
+  background-color: #f6f8fe;
+}
 </style>

@@ -95,12 +95,22 @@ const route = useRoute()
 
 /* 设置选中菜单项的背景色 */
 .el-menu-item.is-active {
-  background-color: #9997ee !important;
+  background-color: #337ecc !important;
   color: #ffffff;
   /* 圆角的半径 */
   border-radius: 10px;
-  /* 内边距 */
-  padding: -10px;
+}
+
+/* 修改菜单项的形状 */
+.el-menu-item {
+  border-radius: 10px; /* 例如，增加圆角 */
+  background-color: #ffffff;
+}
+
+/* 在 hover 状态下应用 */
+.el-menu-item:hover {
+  border-radius: 10px; /* 保持一致的圆角 */
+  background-color: #dedfe0;
 }
 
 /* 侧边栏样式配置 */
