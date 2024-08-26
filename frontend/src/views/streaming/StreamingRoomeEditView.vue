@@ -69,11 +69,19 @@ const RoomProductList = ref({} as RoomDetailItem)
 RoomProductList.value.streamerInfo = {} as StreamerInfo
 RoomProductList.value.streamerInfo.id = 0
 RoomProductList.value.pageSize = 10
-
+RoomProductList.value.roomId = 0
+RoomProductList.value.product = []
 const EditProductList = ref({} as RoomDetailItem)
 
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
-  const { data } = await roomDetailRequest(props.roomId, currentPage, pageSize)
+  let currentRoomId = props.roomId
+  if (currentRoomId === '0') {
+    currentRoomId = String(RoomProductList.value.roomId)
+  }
+
+  console.info('currentRoomId = ', currentRoomId)
+
+  const { data } = await roomDetailRequest(currentRoomId, currentPage, pageSize)
   if (data.code === 0) {
     console.info(data.data)
     RoomProductList.value = data.data
@@ -111,11 +119,17 @@ function cancelClick() {
   drawerShow.value = false
 }
 
-function confirmClick() {
+async function confirmClick() {
   EditProductList.value = RoomProductList.value
   EditProductList.value.product = DrawerProductList.value.product
+  EditProductList.value.streamer_id = RoomProductList.value.streamerInfo.id
+
   // 调用接口更新选择的商品
-  RoomCreadeOrEditRequest(EditProductList.value)
+  const { data } = await RoomCreadeOrEditRequest(EditProductList.value)
+  if (data.code === 0) {
+    // 新建会返回直播间后台保存 ID
+    RoomProductList.value.roomId = data.data
+  }
   ElMessage.success('操作成功')
   drawerShow.value = false
 
@@ -194,6 +208,12 @@ const handelControlClick = (
     </el-drawer>
 
     <el-card>
+      <el-form-item label="直播间名称">
+        <el-input v-model="RoomProductList.name" />
+      </el-form-item>
+    </el-card>
+
+    <el-card>
       <!-- TODO 后续主播信息做成 component -->
       <el-row :gutter="20">
         <el-col :span="16">
@@ -245,7 +265,7 @@ const handelControlClick = (
             <el-input v-model="RoomProductList.streamerInfo.tts_reference_sentence" />
           </el-form-item>
           <el-form-item label="TTS 权重">
-            <el-input v-model="RoomProductList.streamerInfo.tts_weight_path" />
+            <el-input v-model="RoomProductList.streamerInfo.tts_weight_tag" />
           </el-form-item>
         </el-col>
 
@@ -356,13 +376,20 @@ const handelControlClick = (
       </el-table>
 
       <!-- 信息弹窗 -->
-      <ProductInfoDialogView ref="ShowItemInfo" v-model="RoomProductList.product" />
+      <InfoDialogComponents ref="ShowItemInfo" v-model="RoomProductList.product" />
 
       <template #footer>
         <div class="bottom-item">
           <div>
-            <el-button type="primary" @click="handelOnAirClick">开始直播</el-button>
-            <el-button type="primary" @click="onSubmit">保存</el-button>
+            <el-button type="success" @click="handelOnAirClick">
+              {{ RoomProductList.liveStatus === 1 ? '进入' : '开始' }}直播</el-button
+            >
+            <el-button
+              type="primary"
+              @click="onSubmit"
+              :disabled="RoomProductList.product.length === 0"
+              >保存</el-button
+            >
           </div>
           <el-pagination
             v-model:current-page="RoomProductList.currentPage"

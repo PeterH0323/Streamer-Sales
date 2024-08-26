@@ -68,6 +68,7 @@ interface RoomDetailItem {
   background_image: string
   prohibited_words_id: string
   liveStatus: number
+  status: StreamingRoomStatusItem
 }
 
 // 获取后端主播信息
@@ -97,8 +98,8 @@ const roomPorductAddListRequest = (roomId_: number, currentPage_: number, pageSi
 }
 
 // 添加或者更新直播间接口
-const RoomCreadeOrEditRequest = (params: RoomDetailItem) => {
-  return request_handler<ResultPackage<string>>({
+const RoomCreadeOrEditRequest = async (params: RoomDetailItem) => {
+  return request_handler<ResultPackage<number>>({
     method: 'POST',
     url: '/streaming-room/edit/form',
     data: params

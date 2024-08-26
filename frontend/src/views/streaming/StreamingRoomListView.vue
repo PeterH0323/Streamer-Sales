@@ -32,6 +32,9 @@ const chunkedArray = computed(() => chunkArray(streamingList.value, 4))
 
 <template>
   <div>
+    <div>
+      <el-button @click="router.push({ name: 'StreamingCreate' })">新建直播间</el-button>
+    </div>
     <div v-for="(row, rowIndex) in chunkedArray" :key="rowIndex" class="row">
       <el-row :gutter="20">
         <el-col v-for="(item, index) in row" :key="index" :span="8">
@@ -39,15 +42,24 @@ const chunkedArray = computed(() => chunkArray(streamingList.value, 4))
             <img :src="item.room_poster" style="width: 100%" />
             <div>{{ item.name }}</div>
             <div>商品数：{{ item.product_list.length }}</div>
+            <div>
+              开播时间: {{ item.status.live_status === 1 ? item.status.start_time : '未开播' }}
+            </div>
             <div class="bottom-button">
               <el-button
                 type="primary"
-                plain
                 @click="router.push({ name: 'StreamingEdit', params: { roomId: item.room_id } })"
               >
-                详情
+                编辑直播间
               </el-button>
-              <el-button type="danger" plain> 删除 </el-button>
+              <el-button
+                type="primary"
+                :disabled="item.status.live_status !== 1"
+                @click="router.push({ name: 'StreamingOnAir', params: { roomId: item.room_id } })"
+              >
+                进入直播间
+              </el-button>
+              <el-button type="danger" :disabled="item.status.live_status === 1"> 删除 </el-button>
             </div>
           </el-card>
         </el-col>

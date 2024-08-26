@@ -4,7 +4,7 @@ import wave
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import yaml
 from lmdeploy.serve.openai.api_client import APIClient
@@ -282,9 +282,29 @@ async def get_streamer_info_by_id(id: int):
 
     return pick_info
 
+@dataclass
+class OnAirRoomStatusItem:
+    conversation_id: str = ""
+    current_product_id: int = 1
+    current_product_index: int = 0
+    current_product_start_time: str = ""
+    live_status: int = 0
+    start_time: str = ""
+    streaming_video_path: str = ''
+
+@dataclass
+class StreamRoomInfoItem:
+    background_image: str = ""
+    name: str = ""
+    product_list: Optional[List] = None
+    prohibited_words_id: str = ""
+    room_id: int = 0
+    room_poster: str = ""
+    status: OnAirRoomStatusItem = OnAirRoomStatusItem
+    streamer_id: int = 0
 
 async def get_streaming_room_info(id=-1):
-    # 加载对话配置文件
+    # 加载直播间数据
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
         streaming_room_info = yaml.safe_load(f)
 
@@ -297,7 +317,7 @@ async def get_streaming_room_info(id=-1):
         if room_info["room_id"] == id:
             return room_info
 
-    return None
+    return []
 
 
 async def update_streaming_room_info(id, new_info):

@@ -20,7 +20,9 @@ from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..server_info import SERVER_PLUGINS_INFO
 from ..utils import (
     LLM_MODEL_HANDLER,
+    OnAirRoomStatusItem,
     ResultCode,
+    StreamRoomInfoItem,
     combine_history,
     get_all_streamer_info,
     get_conversation_list,
@@ -60,10 +62,10 @@ class RoomProductEdifItem(BaseModel):
     streamer_id: int
     product: list
     streamerInfo: dict
-    room_poster: str | None
-    background_image: str | None
-    prohibited_words_id: str | None
-    status: dict | None
+    status: dict | None = None
+    room_poster: str = ""
+    background_image: str = ""
+    prohibited_words_id: str = ""
 
 
 @dataclass
@@ -148,6 +150,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
         "background_image": streaming_room_info["background_image"],
         "prohibited_words_id": streaming_room_info["prohibited_words_id"],
         "liveStatus": streaming_room_info["status"]["live_status"],
+        "status": streaming_room_info["status"],
     }
 
     logger.info(res_data)
@@ -155,20 +158,26 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
 
 
 @router.post("/product-add")
-async def get_streaming_room_api(romm_info: RoomProductListItem):
+async def get_streaming_room_api(room_info: RoomProductListItem):
     """直播间编辑中添加商品"""
     # 加载对话配置文件
-    streaming_room_info = await get_streaming_room_info(romm_info.roomId)
+    if room_info.roomId == 0:
+        # 新的直播间
+        streaming_room_info = StreamRoomInfoItem()
+        streaming_room_info.product_list = []
+        streaming_room_info = asdict(streaming_room_info)
+    else:
+        streaming_room_info = await get_streaming_room_info(room_info.roomId)
 
-    if romm_info.pageSize > 0:
+    if room_info.pageSize > 0:
         # 按页返回
-        page_info = await get_prduct_by_page(romm_info.currentPage, romm_info.pageSize)
+        page_info = await get_prduct_by_page(room_info.currentPage, room_info.pageSize)
     else:
         # 全部返回
         product_list, db_product_size = await get_product_list()
         page_info = {
             "product": product_list,
-            "current": romm_info.currentPage,
+            "current": room_info.currentPage,
             "pageSize": db_product_size,
             "totalSize": db_product_size,
         }
@@ -230,8 +239,6 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     new_info.update({"background_image": edit_item.background_image})  # 直播间名字
     new_info.update({"prohibited_words_id": edit_item.prohibited_words_id})  # 直播间名字
 
-    new_info.update({"status": edit_item.status})  # 直播间状态
-
     # 主播 ID
     new_info.update({"streamer_id": edit_item.streamer_id})
 
@@ -251,6 +258,12 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
         )
     new_info.update({"product_list": save_product_list})  # 直播间名字
 
+    if edit_item.status is None:
+        new_status = OnAirRoomStatusItem(current_product_id=save_product_list[0]["product_id"])
+        new_info.update({"status": asdict(new_status)})  # 直播间状态
+    else:
+        new_info.update({"status": edit_item.status})  # 直播间状态
+
     # 新建
     streaming_room_info = await get_streaming_room_info()
     max_room_id = -1
@@ -265,9 +278,11 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
 
     if update_index >= 0:
         # 修改
+        logger.info("已有 ID，编辑模式，修改对应配置")
         new_info.update({"room_id": streaming_room_info[update_index]["room_id"]})
         streaming_room_info[update_index] = new_info
     else:
+        logger.info("新 ID，新增模式，新增对应配置")
         new_info.update({"room_id": max_room_id + 1})  # 直播间 ID
         streaming_room_info.append(new_info)
 
@@ -277,7 +292,7 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
         yaml.dump(streaming_room_info, f, allow_unicode=True)
 
-    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
+    return make_return_data(True, ResultCode.SUCCESS, "成功", new_info["room_id"])
 
 
 async def get_agent_res(prompt, departure_place, delivery_company):
@@ -471,7 +486,7 @@ async def get_on_air_live_room_api(room_info: RoomProductListItem):
     3. 对话记录 conversation_list
 
     Args:
-        romm_info (RoomProductListItem): 直播间 ID
+        room_info (RoomProductListItem): 直播间 ID
     """
 
     res_data = await get_or_init_conversation(room_info.roomId, next_product=False)
