@@ -59,13 +59,13 @@ const router = createRouter({
         //       数字人管理
         // ---------------------
         {
-          path: '/digital-human',
+          path: '/digital_human',
           name: 'DigitalHuman',
           redirect: { name: 'DigitalHumanList' },
           meta: { title: '数字人管理' },
           children: [
             {
-              path: '/digital-human/list',
+              path: '/digital_human/list',
               name: 'DigitalHumanList',
               component: () => import('@/views/digital-human/DigitalHumanView.vue'),
               meta: { title: '角色管理' }

@@ -29,11 +29,11 @@ const route = useRoute()
         </template>
         <el-menu-item index="/product/list"><span>商品列表</span></el-menu-item>
       </el-sub-menu>
-      <el-sub-menu index="/digital-human">
+      <el-sub-menu index="/digital_human">
         <template #title>
           <el-icon> <User /> </el-icon><span>数字人管理</span>
         </template>
-        <el-menu-item index="/digital-human/list"><span>角色管理</span></el-menu-item>
+        <el-menu-item index="/digital_human/list"><span>角色管理</span></el-menu-item>
       </el-sub-menu>
       <el-sub-menu index="/streaming">
         <template #title>
