@@ -27,7 +27,7 @@ const chunkArray = (array: StreamerInfo[], chunkSize: number) => {
   return result
 }
 
-const chunkedArray = computed(() => chunkArray(streamerNameOptions.value, 2))
+const chunkedArray = computed(() => chunkArray(streamerNameOptions.value, 4))
 
 // 信息弹窗显示标识
 const ShowItemInfo = ref()
@@ -35,18 +35,25 @@ const ShowItemInfo = ref()
 
 <template>
   <div>
+    <div>
+      <el-button type="primary" style="margin-bottom: 10px" size="large"> 新增主播 </el-button>
+    </div>
     <div v-for="(row, rowIndex) in chunkedArray" :key="rowIndex" class="row">
       <el-row :gutter="20">
-        <el-col v-for="(item, index) in row" :key="index" :span="8">
-          <el-card style="max-width: 480px">
+        <el-col v-for="(item, index) in row" :key="index" :span="6">
+          <el-card style="max-width: 500px">
             <img :src="item.poster_image" style="width: 100%" />
-            <div>名称：{{ item.name }}</div>
-            <div>性格：{{ item.character }}</div>
+            <div class="streamer-info">
+              <p>{{ item.name }}</p>
+              <p style="font-size: 13px; color: #c8c9cc">
+                {{ item.character }}
+              </p>
+            </div>
             <div class="bottom-button">
-              <el-button type="primary" plain @click="ShowItemInfo.showItemInfoDialog(item.id)">
+              <el-button type="primary" @click="ShowItemInfo.showItemInfoDialog(item.id)">
                 详情
               </el-button>
-              <el-button type="danger" plain> 删除 </el-button>
+              <el-button type="danger"> 删除 </el-button>
             </div>
           </el-card>
         </el-col>
@@ -67,5 +74,16 @@ const ShowItemInfo = ref()
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.el-card {
+  border-radius: 20px;
+}
+
+.streamer-info {
+  display: flex;
+  flex-direction: column; /* 将子元素垂直排列 */
+  justify-content: center; /* 垂直居中 */
+  align-items: center; /* 水平居中 */
 }
 </style>

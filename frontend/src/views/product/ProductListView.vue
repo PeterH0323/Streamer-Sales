@@ -99,7 +99,6 @@ onMounted(() => {
               编辑
             </el-button>
             <el-button type="danger">下架</el-button>
-            <!-- <el-button size="small">分配直播间</el-button> -->
           </div>
         </el-table-column>
       </el-table>
