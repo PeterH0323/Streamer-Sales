@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage, type UploadProps, type UploadProgressEvent } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Document } from '@element-plus/icons-vue'
 import { ref, watchEffect } from 'vue'
 
 // 定义组件入参
@@ -81,7 +81,18 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
     :on-progress="handleUploadProgress"
     :on-error="handleFileUploadFail"
   >
-    <img v-if="imageUrl" :src="imageUrl" class="avatar" @load="isShowProgress = false" />
+    <img
+      v-if="imageUrl && props.fileType === 'image'"
+      :src="imageUrl"
+      class="avatar"
+      @load="isShowProgress = false"
+    />
+    <el-icon
+      v-else-if="imageUrl && props.fileType !== 'image'"
+      :size="50"
+      class="avatar-uploader-icon"
+      ><Document
+    /></el-icon>
     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
   </el-upload>
 </template>

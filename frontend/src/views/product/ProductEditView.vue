@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Picture } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus/es'
 
 import FileUpload from '@/components/FileUpload.vue'
@@ -48,7 +47,7 @@ onMounted(async () => {
     const { data } = await getProductByIdRequest(props.productId)
     if (data.code === 0) {
       productInfo.value = data.data
-      ElMessage.infor('获取商品信息成功')
+      ElMessage.success('获取商品信息成功')
     } else {
       ElMessage.error(data.message)
     }
@@ -73,14 +72,12 @@ onMounted(async () => {
         </div>
       </template>
     </el-page-header>
-
     <el-card>
       <template #header>
         <!-- 步骤条 -->
-        <!-- TODO 完善图标 -->
-        <el-steps class="mb-4" :space="200" :active="currentStep" simple>
-          <el-step title="头图 & 说明书" :icon="Picture" @click="currentStep = 0" />
-          <el-step title="商品信息" :icon="Picture" @click="currentStep = 1" />
+        <el-steps :active="currentStep" finish-status="success" align-center>
+          <el-step title="头图 & 说明书" @click="currentStep = 0" />
+          <el-step title="商品信息" @click="currentStep = 1" />
         </el-steps>
       </template>
       <!-- 表单 -->
