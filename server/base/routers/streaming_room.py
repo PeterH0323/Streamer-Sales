@@ -85,6 +85,10 @@ async def get_streaming_room_api():
     # 加载直播间配置文件
     streaming_room_list = await get_streaming_room_info()
 
+    for room in streaming_room_list:
+        streamer_info = await get_streamer_info_by_id(room["streamer_id"])
+        room.update({"streamer_info": streamer_info[0]})
+
     logger.info(streaming_room_list)
     return make_return_data(True, ResultCode.SUCCESS, "成功", streaming_room_list)
 

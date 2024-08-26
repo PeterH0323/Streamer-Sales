@@ -36,6 +36,7 @@ interface StreamingRoomInfo {
   background_image: string
   prohibited_words_id: string
   product_list: StreamingRoomProductList[]
+  streamer_info: StreamerInfo
   status: StreamingRoomStatusItem
 }
 
