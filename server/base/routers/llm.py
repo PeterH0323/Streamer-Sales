@@ -87,8 +87,9 @@ async def gen_poduct_base_prompt(streamer_id, product_id):
 
     return prompt
 
+
 async def get_llm_res(prompt):
-    
+
     logger.info(prompt)
     model_name = LLM_MODEL_HANDLER.available_models[0]
 
@@ -97,6 +98,7 @@ async def get_llm_res(prompt):
         res_data = item["choices"][0]["message"]["content"]
 
     return res_data
+
 
 @router.post("/gen_sales_doc")
 async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
@@ -112,5 +114,5 @@ async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
     prompt = await gen_poduct_base_prompt(gen_sales_doc_item.streamerId, gen_sales_doc_item.productId)
 
     res_data = await get_llm_res(prompt)
-    
+
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)

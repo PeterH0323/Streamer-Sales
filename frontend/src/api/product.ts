@@ -72,7 +72,7 @@ const productListRequest = (params: ProductListType) => {
 }
 
 // 查询制定商品的信息接口
-const getProductByIdRequest = (productId: string) => {
+const getProductByIdRequest = async (productId: string) => {
   return request_handler<ResultPackage<ProductListItem>>({
     method: 'GET',
     url: '/products/info/',

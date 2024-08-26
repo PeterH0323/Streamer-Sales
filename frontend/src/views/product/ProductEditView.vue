@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ref } from 'vue'
 import { Picture } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus/es'
 
 import FileUpload from '@/components/FileUpload.vue'
 
-import { type ProductListItem, productCreadeOrEditRequest } from '@/api/product'
+import {
+  type ProductListItem,
+  getProductByIdRequest,
+  productCreadeOrEditRequest
+} from '@/api/product'
 
 const router = useRouter()
 
@@ -37,6 +41,19 @@ const onSubmit = async () => {
     throw new Error(`${statusInof}失败, ${data.message}`)
   }
 }
+
+onMounted(async () => {
+  // 获取商品信息
+  if (props.productId) {
+    const { data } = await getProductByIdRequest(props.productId)
+    if (data.code === 0) {
+      productInfo.value = data.data
+      ElMessage.infor('获取商品信息成功')
+    } else {
+      ElMessage.error(data.message)
+    }
+  }
+})
 </script>
 
 <template>

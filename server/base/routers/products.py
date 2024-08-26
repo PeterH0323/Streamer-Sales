@@ -231,6 +231,12 @@ async def upload_product_api(upload_product_item: UploadProductItem):
 
 @router.post("/instruction")
 async def get_product_info_api(instruction_path: ProductInstructionItem):
+    """获取对应商品的说明书
+
+    Args:
+        instruction_path (ProductInstructionItem): _description_
+
+    """
 
     loacl_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(
         WEB_CONFIGS.PRODUCT_FILE_DIR, WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name
