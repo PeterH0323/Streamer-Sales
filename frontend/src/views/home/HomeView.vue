@@ -6,6 +6,14 @@ import { getDashboardInfoRequest, type DashboardItem } from '@/api/dashboard'
 import BarChartComponent from '@/components/BarChartComponent.vue'
 import LineChartComponent from '@/components/LineChartComponent.vue'
 
+import {
+  OfficeBuilding,
+  Present,
+  View,
+  DataAnalysis,
+  CreditCard,
+  ShoppingCartFull
+} from '@element-plus/icons-vue'
 const systemInfo = ref({} as DashboardItem)
 
 const registeredBrandNum = ref(0) //入驻品牌方
@@ -35,6 +43,8 @@ const conversionRateTrans = useTransition(conversionRate, {
   duration: 1500
 })
 
+const iconSize = ref(50)
+
 onMounted(async () => {
   const { data } = await getDashboardInfoRequest()
   if (data.code === 0) {
@@ -57,22 +67,19 @@ onMounted(async () => {
     <el-row>
       <el-col :span="8">
         <el-card shadow="never">
-          <!-- <div class="info-item title">入驻品牌方数量</div> -->
-          <!-- <div class="info-item number">{{ systemInfo.registeredBrandNum }}</div> -->
+          <el-icon :size="iconSize" color="#006382"><OfficeBuilding /></el-icon>
           <el-statistic title="入驻品牌方数量" :value="registeredBrandNumTrans" />
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card shadow="never">
-          <!-- <div class="info-item title">商品数</div> -->
-          <!-- <div class="info-item number">{{ systemInfo.productNum }}</div> -->
+          <el-icon :size="iconSize" color="#f0bb1f"><Present /></el-icon>
           <el-statistic title="商品数" :value="productNumTrans" />
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card shadow="never">
-          <!-- <div class="info-item title">日活</div>
-          <div class="info-item number">{{ systemInfo.dailyActivity }}</div> -->
+          <el-icon :size="iconSize" color="#f25a2b"><View /></el-icon>
           <el-statistic title="日活" :value="dailyActivityTrans" />
         </el-card>
       </el-col>
@@ -81,29 +88,26 @@ onMounted(async () => {
     <el-row>
       <el-col :span="8">
         <el-card shadow="never">
-          <!-- <div class="info-item title">今日订单数</div>
-          <div class="info-item number">{{ systemInfo.todayOrder }}</div> -->
+          <el-icon :size="iconSize" color="#97d1c8"><ShoppingCartFull /></el-icon>
           <el-statistic title="今日订单数" :value="todayOrderTrans" />
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card shadow="never">
-          <!-- <div class="info-item title">销售额</div>
-          <div class="info-item number">{{ systemInfo.totalSales }}</div> -->
+          <el-icon :size="iconSize" color="#756bf2"><CreditCard /></el-icon>
           <el-statistic title="销售额" :value="totalSalesTrans" />
         </el-card>
       </el-col>
       <el-col :span="8">
         <el-card shadow="never">
-          <!-- <div class="info-item title">转化率</div>
-          <div class="info-item number">{{ systemInfo.conversionRate }} %</div> -->
-          <el-statistic title="转化率" :value="conversionRateTrans" />
+          <el-icon :size="iconSize" color="#22c45d"><DataAnalysis /></el-icon>
+          <el-statistic title="转化率(%)" :value="conversionRateTrans" />
         </el-card>
       </el-col>
     </el-row>
 
     <el-row>
-      <el-col :span="14">
+      <el-col :span="16">
         <el-card shadow="never">
           <LineChartComponent
             :orderNumList="systemInfo.orderNumList"
@@ -114,7 +118,7 @@ onMounted(async () => {
           />
         </el-card>
       </el-col>
-      <el-col :span="10">
+      <el-col :span="8">
         <el-card shadow="never">
           <BarChartComponent
             :knowledgeBasesNum="systemInfo.knowledgeBasesNum"
@@ -129,6 +133,18 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+.el-col {
+  text-align: center;
+}
+
+.el-statistic {
+  --el-statistic-title-font-size: 16px;
+  --el-statistic-title-font-weight: 400;
+
+  --el-statistic-content-font-size: 28px;
+  --el-statistic-content-font-weight: 800;
+}
+
 .el-card {
   margin: 12px 12px 12px 12px;
   border-radius: 15px;
@@ -139,15 +155,6 @@ onMounted(async () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
-
-  .title {
-    font-weight: 600;
-    font-size: 25px;
-  }
-
-  .number {
-    font-size: 18px;
   }
 }
 </style>
