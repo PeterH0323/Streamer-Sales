@@ -61,7 +61,7 @@ defineExpose({ showItemInfoDialog })
             <el-input v-model="steamerInfo.tts_reference_sentence" />
           </el-form-item>
           <el-form-item label="TTS 权重">
-            <el-input v-model="steamerInfo.tts_weight_path" />
+            <el-input v-model="steamerInfo.tts_weight_tag" />
           </el-form-item>
         </el-col>
 
