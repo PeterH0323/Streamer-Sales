@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { nextTick, ref } from 'vue'
-import { ElInput } from 'element-plus'
+import { ElInput, ElMessage } from 'element-plus'
 import type { InputInstance } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 
 import VideoComponent from '@/components/VideoComponent.vue'
-import { streamerDetailInfoRequest, type StreamerInfo } from '@/api/streamerInfo'
+import {
+  streamerDetailInfoRequest,
+  streamerEditDetailRequest,
+  type StreamerInfo
+} from '@/api/streamerInfo'
 import FileUpload from '@/components/FileUpload.vue'
 
 const dialogInfoVisible = ref(false)
@@ -66,7 +70,17 @@ const handleCharacterInputConfirm = () => {
 const formLabelWidth = ref(120)
 const labelPosition = ref('top')
 
-const handelSaveClick = () => {}
+const handelSaveClick = async () => {
+  const { data } = await streamerEditDetailRequest(steamerInfo.value)
+
+  if (data.code === 0) {
+    steamerInfo.value.id = data.data
+    ElMessage.success('保存成功')
+  }
+  else {
+    ElMessage.error(data.message)
+  }
+}
 
 defineExpose({ showItemInfoDialog })
 </script>

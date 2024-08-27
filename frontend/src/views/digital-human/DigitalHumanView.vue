@@ -36,7 +36,14 @@ const ShowItemInfo = ref()
 <template>
   <div>
     <div>
-      <el-button type="primary" style="margin-bottom: 10px" size="large"> 新增主播 </el-button>
+      <el-button
+        type="primary"
+        style="margin-bottom: 10px"
+        size="large"
+        @click="ShowItemInfo.showItemInfoDialog(0)"
+      >
+        新增主播
+      </el-button>
     </div>
     <div v-for="(row, rowIndex) in chunkedArray" :key="rowIndex" class="row">
       <el-row :gutter="20">

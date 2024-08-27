@@ -31,4 +31,18 @@ const streamerDetailInfoRequest = (streamerId_: number) => {
   })
 }
 
-export { type StreamerInfo, streamerInfoListRequest, streamerDetailInfoRequest }
+// 更新特定主播信息
+const streamerEditDetailRequest = async (streamerItem: StreamerInfo) => {
+  return request_handler<ResultPackage<number>>({
+    method: 'POST',
+    url: '/streamer/edit',
+    data: streamerItem
+  })
+}
+
+export {
+  type StreamerInfo,
+  streamerInfoListRequest,
+  streamerDetailInfoRequest,
+  streamerEditDetailRequest
+}

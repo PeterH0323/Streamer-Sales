@@ -180,8 +180,8 @@ async def upload_product_api(file: UploadFile = File(...)):
             buffer.write(chunk)
 
     # TODO 如果上传 mp4 则自动生成缩略图作为主播 poster
-    
-    split_dir_name = Path(WEB_CONFIGS.SERVER_FILE_ROOT).name # 保存文件夹根目录名字
+
+    split_dir_name = Path(WEB_CONFIGS.SERVER_FILE_ROOT).name  # 保存文件夹根目录名字
     file_url = f"{API_CONFIG.REQUEST_FILES_URL}{str(save_path).split(split_dir_name)[-1]}"
     return make_return_data(True, ResultCode.SUCCESS, "成功", file_url)
 
