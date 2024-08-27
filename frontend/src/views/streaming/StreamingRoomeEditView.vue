@@ -222,26 +222,11 @@ const handelControlClick = (
     </el-card>
 
     <el-card shadow="never">
-      <el-card shadow="never">
-        <h2>选择主播</h2>
-        <el-divider />
-        <!-- @change="productInfo.streamer_id = streamInfoSelected.id" -->
-        <el-select
-          v-model="RoomProductList.streamerInfo"
-          placeholder="选择主播"
-          size="large"
-          style="width: 240px"
-        >
-          <el-option
-            v-for="item in streamerNameOptions"
-            :key="item.id"
-            :label="item.name"
-            :value="item"
-          />
-        </el-select>
-      </el-card>
-
-      <StreamerInfoComponent disableChange v-model="RoomProductList.streamerInfo" />
+      <StreamerInfoComponent
+        disableChange
+        v-model="RoomProductList.streamerInfo"
+        :optionList="streamerNameOptions"
+      />
     </el-card>
 
     <el-card shadow="never">

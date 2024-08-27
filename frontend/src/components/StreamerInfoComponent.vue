@@ -16,6 +16,10 @@ const props = defineProps({
   disableChange: {
     type: Boolean,
     default: false
+  },
+  optionList: {
+    type: Array,
+    default: () => [] as StreamerInfo[]
   }
 })
 
@@ -52,6 +56,20 @@ const labelPosition = ref('top')
   <div>
     <el-row :gutter="20">
       <el-col :span="12">
+        <el-card shadow="never" v-if="optionList.length >= 1">
+          <h2>选择主播</h2>
+          <el-divider />
+          <!-- @change="productInfo.streamer_id = streamInfoSelected.id" -->
+          <el-select
+            v-model="modelSteamerInfo"
+            placeholder="选择主播"
+            size="large"
+            style="width: 240px"
+          >
+            <el-option v-for="item in optionList" :key="item.id" :label="item.name" :value="item" />
+          </el-select>
+        </el-card>
+
         <el-card shadow="never">
           <h2>基本信息</h2>
           <el-divider />
