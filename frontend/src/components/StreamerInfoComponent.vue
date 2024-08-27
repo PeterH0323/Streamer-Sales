@@ -11,6 +11,14 @@ import FileUpload from '@/components/FileUpload.vue'
 // 定义 和父组件通信的双向绑定 model
 const modelSteamerInfo = defineModel({ default: {} as StreamerInfo })
 
+// 定义组件入参
+const props = defineProps({
+  disableChange: {
+    type: Boolean,
+    default: false
+  }
+})
+
 // 性格操作
 const inputCharacterValue = ref('')
 const inputCharacterVisible = ref(false)
@@ -49,13 +57,17 @@ const labelPosition = ref('top')
           <el-divider />
           <el-form :label-position="labelPosition" :label-width="formLabelWidth">
             <el-form-item label="姓名">
-              <el-input v-model="modelSteamerInfo.name" size="large" />
+              <el-input
+                v-model="modelSteamerInfo.name"
+                size="large"
+                :disabled="props.disableChange"
+              />
             </el-form-item>
             <el-form-item label="主播性格">
               <el-tag
                 v-for="(characterItem, index) in modelSteamerInfo.character"
                 :key="index"
-                closable
+                :closable="!props.disableChange"
                 :disable-transitions="false"
                 @close="handleCharacterClose(characterItem)"
                 round
@@ -74,7 +86,14 @@ const labelPosition = ref('top')
                 @blur="handleCharacterInputConfirm"
                 size="large"
               />
-              <el-button v-else @click="showCharacterInput" circle :icon="Plus"> </el-button>
+              <el-button
+                v-else
+                @click="showCharacterInput"
+                circle
+                :icon="Plus"
+                v-show="!props.disableChange"
+              >
+              </el-button>
             </el-form-item>
           </el-form>
         </el-card>
@@ -92,7 +111,11 @@ const labelPosition = ref('top')
                   style="margin-right: 20px"
                 ></audio>
                 <el-tag v-else size="large" type="danger"> 未找到音频 </el-tag>
-                <FileUpload v-model="modelSteamerInfo.tts_reference_audio" file-type="audio" />
+                <FileUpload
+                  v-show="!props.disableChange"
+                  v-model="modelSteamerInfo.tts_reference_audio"
+                  file-type="audio"
+                />
               </div>
             </el-form-item>
 
@@ -123,7 +146,11 @@ const labelPosition = ref('top')
             />
           </div>
           <div class="make-center" style="margin-top: 10px">
-            <FileUpload v-model="modelSteamerInfo.base_mp4_path" file-type="video" />
+            <FileUpload
+              v-show="!props.disableChange"
+              v-model="modelSteamerInfo.base_mp4_path"
+              file-type="video"
+            />
           </div>
         </el-card>
       </el-col>

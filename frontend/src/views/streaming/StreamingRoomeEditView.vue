@@ -15,6 +15,7 @@ import type { StreamerInfo } from '@/api/streamerInfo'
 import VideoComponent from '@/components/VideoComponent.vue'
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 import { streamerInfoListRequest } from '@/api/streamerInfo'
+import StreamerInfoComponent from '@/components/StreamerInfoComponent.vue'
 
 const router = useRouter()
 
@@ -214,84 +215,39 @@ const handelControlClick = (
       </template>
     </el-drawer>
 
-    <el-card>
+    <el-card shadow="never" style="margin-top: 10px">
       <el-form-item label="直播间名称">
         <el-input v-model="RoomProductList.name" />
       </el-form-item>
     </el-card>
 
-    <el-card>
-      <!-- TODO 后续主播信息做成 component -->
-      <el-row :gutter="20">
-        <el-col :span="16">
-          <h2>主播基本信息</h2>
+    <el-card shadow="never">
+      <el-card shadow="never">
+        <h2>选择主播</h2>
+        <el-divider />
+        <!-- @change="productInfo.streamer_id = streamInfoSelected.id" -->
+        <el-select
+          v-model="RoomProductList.streamerInfo"
+          placeholder="选择主播"
+          size="large"
+          style="width: 240px"
+        >
+          <el-option
+            v-for="item in streamerNameOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item"
+          />
+        </el-select>
+      </el-card>
 
-          <!-- TODO 修改之后提醒用户会清除生成的文案，可取消 -->
-          <el-form-item label="选择主播">
-            <!-- @change="productInfo.streamer_id = streamInfoSelected.id" -->
-            <el-select
-              v-model="RoomProductList.streamerInfo"
-              placeholder="选择主播"
-              size="large"
-              style="width: 240px"
-            >
-              <el-option
-                v-for="item in streamerNameOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item"
-              />
-              <!-- TODO hover 的时候显示头图？使用一个概览筐 or 弹窗加载缩略图然后让客户选择？ -->
-            </el-select>
-          </el-form-item>
-
-          <el-form-item label="姓名">
-            <el-input v-model="RoomProductList.streamerInfo.name" disabled />
-          </el-form-item>
-          <el-form-item label="主播性格">
-            <el-input v-model="RoomProductList.streamerInfo.character" disabled />
-          </el-form-item>
-          <el-divider />
-
-          <h2>TTS 配置</h2>
-          <el-form-item label="音频文件">
-            <!-- TODO 支持新增？ -->
-            <audio
-              v-if="RoomProductList.streamerInfo.tts_reference_audio"
-              :src="RoomProductList.streamerInfo.tts_reference_audio"
-              controls
-            ></audio>
-            <div v-else>未找到音频</div>
-          </el-form-item>
-
-          <el-form-item label="情感">
-            <el-tag type="primary"> {{ RoomProductList.streamerInfo.tts_tag }} </el-tag>
-          </el-form-item>
-
-          <el-form-item label="声音参考文字">
-            <el-input v-model="RoomProductList.streamerInfo.tts_reference_sentence" />
-          </el-form-item>
-          <el-form-item label="TTS 权重">
-            <el-input v-model="RoomProductList.streamerInfo.tts_weight_tag" />
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="8">
-          <div>
-            <!-- 数字人视频 -->
-            <VideoComponent
-              :src="RoomProductList.streamerInfo.base_mp4_path"
-              :key="RoomProductList.streamerInfo.id"
-            />
-          </div>
-        </el-col>
-      </el-row>
+      <StreamerInfoComponent disableChange v-model="RoomProductList.streamerInfo" />
     </el-card>
 
-    <el-card>
-      <el-button type="primary" style="margin-bottom: 10px" @click="handelAddProductClick"
-        >增删商品</el-button
-      >
+    <el-card shadow="never">
+      <el-button type="primary" style="margin-bottom: 10px" @click="handelAddProductClick">
+        增删商品
+      </el-button>
 
       <!-- TODO 商品表格可以做成 component 组件 -->
       <el-table :data="RoomProductList.product" max-height="1000" border>
@@ -447,5 +403,11 @@ const handelControlClick = (
     margin: 0; /* 根据需要调整 */
     padding: 0; /* 根据需要调整 */
   }
+}
+
+.el-card {
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 20px;
 }
 </style>
