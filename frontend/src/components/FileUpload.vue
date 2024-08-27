@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { ref, watchEffect } from 'vue'
 import { ElMessage, type UploadProps, type UploadProgressEvent } from 'element-plus'
 import { Plus, Document } from '@element-plus/icons-vue'
-import { ref, watchEffect } from 'vue'
 
 // 定义组件入参
 const props = defineProps({
@@ -44,6 +44,9 @@ const beforeFileUploadUpload: UploadProps['beforeUpload'] = (rawFile) => {
   } else if (props.fileType === 'video' && rawFile.type !== 'video/mp4') {
     ElMessage.error('主播视频必须是 mp4 格式!')
     return false
+  } else if (props.fileType === 'audio' && rawFile.type !== 'audio/wav') {
+    ElMessage.error('主播音频必须是 wav 格式!')
+    return false
   }
 
   if (props.fileType === 'video' && rawFile.size / 1024 / 1024 > 20) {
@@ -82,7 +85,7 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
     class="avatar-uploader"
     action="/products/upload/file"
     method="post"
-    :drag="props.fileType !== 'video'"
+    :drag="props.fileType !== 'video' && props.fileType !== 'audio'"
     :multiple="false"
     :show-file-list="false"
     :on-success="handleFileUploadSuccess"
@@ -108,8 +111,8 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
     </el-icon>
 
     <!-- 视频上传 -->
-    <el-button v-else-if="props.fileType === 'video'" type="danger">
-      {{ fileUrl === '' ? '上传视频' : '更换视频' }}
+    <el-button v-else-if="props.fileType === 'video' || props.fileType === 'audio'" type="danger">
+      {{ fileUrl === '' ? '上传' : '更换' }}{{ props.fileType === 'video' ? '视频' : '音频' }}
     </el-button>
 
     <!-- 拖动上传框 -->

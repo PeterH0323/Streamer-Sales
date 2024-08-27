@@ -122,13 +122,16 @@ defineExpose({ showItemInfoDialog })
             <el-divider />
             <el-form :label-position="labelPosition" :label-width="formLabelWidth">
               <el-form-item label="音频文件">
-                <!-- TODO 支持新增？ -->
-                <audio
-                  v-if="steamerInfo.tts_reference_audio"
-                  :src="steamerInfo.tts_reference_audio"
-                  controls
-                ></audio>
-                <div v-else>未找到音频</div>
+                <div class="make-center">
+                  <audio
+                    v-if="steamerInfo.tts_reference_audio"
+                    :src="steamerInfo.tts_reference_audio"
+                    controls
+                    style="margin-right: 20px"
+                  ></audio>
+                  <el-tag v-else size="large" type="danger"> 未找到音频 </el-tag>
+                  <FileUpload v-model="steamerInfo.tts_reference_audio" file-type="audio" />
+                </div>
               </el-form-item>
 
               <el-form-item label="情感">
