@@ -133,7 +133,7 @@ onMounted(() => {
       </el-col>
       <el-col :span="10">
         <div>
-          <el-scrollbar height="1000px" ref="scrollbarRef" id="scrollbarRef">
+          <el-scrollbar height="1110px" ref="scrollbarRef" id="scrollbarRef">
             <!-- 对话记录显示在右上角 -->
             <MessageComponent
               v-for="(item, index) in currentStatus.conversation"
@@ -149,45 +149,47 @@ onMounted(() => {
             <!-- <el-button :loading="loadingStreamRes" v-show="loadingStreamRes" /> -->
           </el-scrollbar>
 
+          <!-- 聊天记录右下角商品展示 -->
+          <div class="floating-card">
+            <el-card shadow="never">
+              <div class="product-info">
+                <p class="title">当前商品</p>
+
+                <!-- 商品图片 -->
+                <el-image
+                  style="width: 100px; height: 100px"
+                  :src="currentStatus.currentProductInfo.image_path"
+                  fit="contain"
+                />
+
+                <!-- 商品信息 -->
+                <p class="title">{{ currentStatus.currentProductInfo.product_name }}</p>
+                <p class="content">{{ currentStatus.currentProductInfo.heighlights }}</p>
+                <p class="price">¥ {{ currentStatus.currentProductInfo.selling_price }}</p>
+              </div>
+            </el-card>
+          </div>
+
           <!-- 对话框 -->
           <div class="bottom-items">
-            <el-button circle>
+            <el-button circle size="large">
               <el-icon><Mic /></el-icon>
             </el-button>
             <el-input
               v-model="inputValue"
               style="width: 100%; border-radius: 8px; margin: 0px 10px 0px 10px"
-              :autosize="{ minRows: 1, maxRows: 12 }"
+              :autosize="{ minRows: 2, maxRows: 12 }"
               type="textarea"
               placeholder="向主播提问"
               :disabled="disableInput"
+              size="large"
             />
-            <el-button circle @click="handelSendClick">
+            <el-button circle @click="handelSendClick" size="large">
               <el-icon><ChatDotRound /></el-icon>
             </el-button>
           </div>
 
-          <!-- 商品展示 -->
           <div style="margin-top: 10px">
-            <el-card style="border-radius: 5px">
-              <div class="bottom-items">
-                <div>
-                  <el-image
-                    style="width: 100px; height: 100px"
-                    :src="currentStatus.currentProductInfo.image_path"
-                    fit="contain"
-                  />
-                </div>
-
-                <div class="product-info">
-                  <h4>商品信息</h4>
-                  <div>商品名称：{{ currentStatus.currentProductInfo.product_name }}</div>
-                  <div>商品亮点：{{ currentStatus.currentProductInfo.heighlights }}</div>
-                  <div>价格：{{ currentStatus.currentProductInfo.selling_price }}</div>
-                </div>
-              </div>
-            </el-card>
-
             <div class="bottom-button">
               <el-button
                 type="primary"
@@ -211,15 +213,50 @@ onMounted(() => {
   display: flex;
   align-items: center;
   width: auto;
-
-  .product-info {
-    margin-left: 20px;
-  }
 }
 
 .bottom-button {
   display: flex;
   margin-top: 10px;
   float: right;
+}
+
+::v-deep(.el-input__wrapper) {
+  border-radius: 14px;
+}
+
+.el-card {
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.floating-card {
+  position: absolute;
+  right: 10px; /* 调整到右边的距离 */
+  bottom: 200px; /* 调整到底部的距离 */
+  z-index: 30; /* 确保 card 显示在最上层 */
+  width: 200px; /* 可以根据需要调整 */
+
+  .product-info {
+    display: flex;
+    flex-direction: column; /* 将子元素垂直排列 */
+    justify-content: center; /* 垂直居中 */
+    align-items: center; /* 水平居中 */
+
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .content {
+      font-size: 15px;
+      color: #b1b3b8;
+    }
+
+    .price {
+      font-size: 16px;
+      color: #fda100;
+    }
+  }
 }
 </style>
