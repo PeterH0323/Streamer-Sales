@@ -259,11 +259,11 @@ def combine_history(prompt: list, history_msg: list):
     return prompt
 
 
-async def get_all_streamer_info(need_to_formate_character=True):
+async def get_all_streamer_info(need_to_formate_character=False):
     # 加载对话配置文件
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
-        
+
     if not need_to_formate_character:
         # 不需要格式化性格
         return streamer_info
@@ -276,7 +276,7 @@ async def get_all_streamer_info(need_to_formate_character=True):
 
 
 async def get_streamer_info_by_id(id: int):
-    streamer_list = await get_all_streamer_info()
+    streamer_list = await get_all_streamer_info(True)
 
     pick_info = []
     for i in streamer_list:
@@ -286,6 +286,7 @@ async def get_streamer_info_by_id(id: int):
 
     return pick_info
 
+
 @dataclass
 class OnAirRoomStatusItem:
     conversation_id: str = ""
@@ -294,7 +295,8 @@ class OnAirRoomStatusItem:
     current_product_start_time: str = ""
     live_status: int = 0
     start_time: str = ""
-    streaming_video_path: str = ''
+    streaming_video_path: str = ""
+
 
 @dataclass
 class StreamRoomInfoItem:
@@ -306,6 +308,7 @@ class StreamRoomInfoItem:
     room_poster: str = ""
     status: OnAirRoomStatusItem = OnAirRoomStatusItem
     streamer_id: int = 0
+
 
 async def get_streaming_room_info(id=-1):
     # 加载直播间数据
@@ -389,6 +392,86 @@ async def get_user_info(id: str):
     }
 
     return user_info
+
+
+async def get_db_product_info(user_id: str = ""):
+    # 读取 yaml 文件
+    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
+        product_info_dict = yaml.safe_load(f)
+
+    # 过滤掉已经被删除的商品
+    filter_product_list = dict()
+    for k, v in product_info_dict.items():
+        if v.get("delete", False) == True:
+            continue
+        filter_product_list.update({k: v})
+
+    return filter_product_list
+
+
+def save_product_info(product_info_dict):
+    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
+        yaml.dump(product_info_dict, f, allow_unicode=True)
+
+
+def save_streamer_info(all_streamer_info_list):
+    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "w", encoding="utf-8") as f:
+        yaml.dump(all_streamer_info_list, f, allow_unicode=True)
+
+
+def save_stream_room_info(streaming_room_info):
+    # 保存
+    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
+        yaml.dump(streaming_room_info, f, allow_unicode=True)
+
+
+async def delete_item_by_id(item_type: str, delete_id: int):
+    """根据类型删除某个ID的信息"""
+
+    logger.info(delete_id)
+
+    assert item_type in ["product", "streamer", "room"]
+
+    get_func_map = {
+        "product": get_db_product_info,
+        "streamer": get_all_streamer_info,
+        "room": get_streaming_room_info,
+    }
+
+    save_func_map = {"product": save_product_info, "streamer": save_streamer_info, "room": save_stream_room_info}
+
+    id_name_map = {
+        "product": "product_id",
+        "streamer": "id",
+        "room": "room_id",
+    }
+
+    item_list = await get_func_map[item_type]()
+    logger.info(item_list)
+
+    process_success_flag = False
+
+    if item_type == "product":
+        for product_name, product_info in item_list.items():
+            if product_info[id_name_map[item_type]] != delete_id:
+                continue
+
+            item_list[product_name]["delete"] = True
+            process_success_flag = True
+            break
+    else:
+        for item in item_list:
+            if item[id_name_map[item_type]] != delete_id:
+                continue
+
+            item[id_name_map[item_type]].update({"delete": True})
+            process_success_flag = True
+            break
+
+    # 保存
+    save_func_map[item_type](item_list)
+
+    return process_success_flag
 
 
 @dataclass

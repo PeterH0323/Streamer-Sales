@@ -30,6 +30,7 @@ interface ProductListItem {
   sales_doc: string
   digital_human_video: string
   streamer_id: number
+  delete: boolean
 }
 
 interface ProductData {
@@ -112,6 +113,15 @@ const genProductInstructionContentRequest = (instructionPath_: string) => {
   })
 }
 
+// 删除商品接口
+const deleteProductByIdRequest = async (productId: number) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/products/delete/',
+    data: { product_id: productId }
+  })
+}
+
 export {
   type ProductListItem,
   type StreamerInfo,
@@ -121,5 +131,6 @@ export {
   productCreadeOrEditRequest,
   genProductInfoByLlmRequest,
   getProductByIdRequest,
-  genProductInstructionContentRequest
+  genProductInstructionContentRequest,
+  deleteProductByIdRequest
 }

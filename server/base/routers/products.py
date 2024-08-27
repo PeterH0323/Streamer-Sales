@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..modules.rag.rag_worker import rebuild_rag_db
-from ..utils import ResultCode, make_return_data
+from ..utils import ResultCode, delete_item_by_id, get_db_product_info, make_return_data
 
 router = APIRouter(
     prefix="/products",
@@ -54,12 +54,10 @@ class ProductInstructionItem(BaseModel):
     instructionPath: str
 
 
-async def get_db_product_info(user_id: str = ""):
-    # 读取 yaml 文件
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-
-    return product_info_dict
+class DeleteProductItem(BaseModel):
+    user_id: str = ""  # User 识别号，用于区分不用的用户调用
+    request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
+    product_id: int  # 8
 
 
 async def get_product_list(product_name="", id=-1):
@@ -218,6 +216,7 @@ async def upload_product_api(upload_product_item: UploadProductItem):
         "digital_human_video": upload_product_item.digital_human_video,
         "product_id": product_info_dict[max_id_key]["product_id"] + 1,
         "product_class": upload_product_item.product_class,
+        "delete": False,
     }
 
     if upload_product_item.product_name not in product_info_dict:
@@ -263,3 +262,14 @@ async def get_product_info_api(instruction_path: ProductInstructionItem):
         instruction_content = f.read()
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", instruction_content)
+
+
+@router.post("/delete")
+async def upload_product_api(delete_info: DeleteProductItem):
+
+    process_success_flag = await delete_item_by_id("product", delete_info.product_id)
+
+    if not process_success_flag:
+        return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")

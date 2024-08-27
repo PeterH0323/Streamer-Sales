@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Delete } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 
-import { queryCondition, queriedResult, getProductList } from '@/api/product'
+import {
+  queryCondition,
+  queriedResult,
+  getProductList,
+  deleteProductByIdRequest
+} from '@/api/product'
 
 const router = useRouter()
 
@@ -16,6 +22,26 @@ onMounted(() => {
   // 获取商品信息
   getProductList()
 })
+
+const DeleteProduct = async (id: number, productName: string) => {
+  ElMessageBox.confirm(`确定要删除 "${productName}" 吗？`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      const { data } = await deleteProductByIdRequest(id)
+      if (data.code === 0) {
+        ElMessage.success('删除成功')
+        getProductList()
+      } else {
+        ElMessage.error('删除失败')
+      }
+    })
+    .catch(() => {
+      // catch error
+    })
+}
 </script>
 
 <template>
@@ -98,7 +124,11 @@ onMounted(() => {
             >
               编辑
             </el-button>
-            <el-button type="danger">下架</el-button>
+            <el-button
+              type="danger"
+              @click="DeleteProduct(row.product_id, row.product_name)"
+              :icon="Delete"
+            />
           </div>
         </el-table-column>
       </el-table>
