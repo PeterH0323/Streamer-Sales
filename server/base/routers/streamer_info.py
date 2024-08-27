@@ -89,7 +89,7 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
         all_streamer_info_list[update_index] = asdict(streamer_info)
     else:
         logger.info("新 ID，新增模式，新增对应配置")
-        streamer_info.update({"id": max_streamer_id + 1})  # 直播间 ID
+        streamer_info.id = max_streamer_id + 1  # 直播间 ID
         all_streamer_info_list.append(asdict(streamer_info))
 
     logger.info(streamer_info)
