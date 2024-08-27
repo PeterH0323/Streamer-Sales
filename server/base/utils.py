@@ -263,16 +263,21 @@ async def get_all_streamer_info(need_to_formate_character=False):
     # 加载对话配置文件
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
+    filter_streamer_list = []
+    for streamer in streamer_info:
+        if streamer["delete"]:
+            continue
+        filter_streamer_list.append(streamer)
 
     if not need_to_formate_character:
         # 不需要格式化性格
-        return streamer_info
+        return filter_streamer_list
 
-    for i in streamer_info:
+    for i in filter_streamer_list:
         # 将性格 list 变为字符串
         i["character"] = "、".join(i["character"])
 
-    return streamer_info
+    return filter_streamer_list
 
 
 async def get_streamer_info_by_id(id: int):
@@ -315,12 +320,18 @@ async def get_streaming_room_info(id=-1):
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
         streaming_room_info = yaml.safe_load(f)
 
+    filter_list = []
+    for room in streaming_room_info:
+        if room['delete']:
+            continue
+        filter_list.append(room)
+    
     if id <= 0:
         # 全部返回
-        return streaming_room_info
+        return filter_list
 
     # 选择特定的直播间
-    for room_info in streaming_room_info:
+    for room_info in filter_list:
         if room_info["room_id"] == id:
             return room_info
 
@@ -460,11 +471,11 @@ async def delete_item_by_id(item_type: str, delete_id: int):
             process_success_flag = True
             break
     else:
-        for item in item_list:
+        for idx, item in enumerate(item_list):
             if item[id_name_map[item_type]] != delete_id:
                 continue
 
-            item[id_name_map[item_type]].update({"delete": True})
+            item_list[idx]["delete"] = True
             process_success_flag = True
             break
 

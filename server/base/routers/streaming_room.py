@@ -24,6 +24,7 @@ from ..utils import (
     ResultCode,
     StreamRoomInfoItem,
     combine_history,
+    delete_item_by_id,
     get_all_streamer_info,
     get_conversation_list,
     get_streamer_info_by_id,
@@ -134,7 +135,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
         filter_list = filter_list[start_index:end_index]
 
     # 主播信息
-    streamer_list = await get_all_streamer_info()
+    streamer_list = await get_all_streamer_info(True)
     streamer_info = dict()
     for i in streamer_list:
         if i["id"] == streaming_room_info["streamer_id"]:
@@ -288,6 +289,7 @@ async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     else:
         logger.info("新 ID，新增模式，新增对应配置")
         new_info.update({"room_id": max_room_id + 1})  # 直播间 ID
+        new_info.update({"delete": False})  # 直播间 ID
         streaming_room_info.append(new_info)
 
     logger.info(new_info)
@@ -509,3 +511,15 @@ async def on_air_live_room_next_product_api(room_info: RoomProductListItem):
     res_data = await get_or_init_conversation(room_info.roomId, next_product=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
+
+
+
+@router.post("/delete")
+async def upload_product_api(delete_info: RoomProductListItem):
+
+    process_success_flag = await delete_item_by_id("room", delete_info.roomId)
+
+    if not process_success_flag:
+        return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")

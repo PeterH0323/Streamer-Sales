@@ -40,9 +40,19 @@ const streamerEditDetailRequest = async (streamerItem: StreamerInfo) => {
   })
 }
 
+// 删除特定主播信息
+const deleteStreamerByIdRequest = (streamerId_: number) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/streamer/delete',
+    data: { streamerId: streamerId_ }
+  })
+}
+
 export {
   type StreamerInfo,
   streamerInfoListRequest,
   streamerDetailInfoRequest,
-  streamerEditDetailRequest
+  streamerEditDetailRequest,
+  deleteStreamerByIdRequest
 }

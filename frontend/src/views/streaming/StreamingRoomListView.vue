@@ -1,22 +1,52 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus/es'
+import { ElMessage, ElMessageBox } from 'element-plus/es'
+import { Plus, Delete } from '@element-plus/icons-vue'
 
-import { type StreamingRoomInfo, streamerRoomListRequest } from '@/api/streamingRoom'
+import {
+  type StreamingRoomInfo,
+  streamerRoomListRequest,
+  deleteStreamingRoomByIdRequest
+} from '@/api/streamingRoom'
 
 // 获取主播信息
 const streamingList = ref([] as StreamingRoomInfo[])
 const router = useRouter()
 
 onMounted(async () => {
-  // 获取主播信息
+  // 获取直播间信息
   const { data } = await streamerRoomListRequest()
   if (data.code === 0) {
     streamingList.value = data.data
     ElMessage.success('获取直播间信息成功')
   }
 })
+
+const DeleteStreamingRoom = async (id: number, productName: string) => {
+  ElMessageBox.confirm(`确定要删除 "${productName}" 吗？`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      const { data } = await deleteStreamingRoomByIdRequest(id)
+      if (data.code === 0) {
+        ElMessage.success('删除成功')
+        // 获取直播间信息
+        const { data } = await streamerRoomListRequest()
+        if (data.code === 0) {
+          streamingList.value = data.data
+          ElMessage.success('获取直播间信息成功')
+        }
+      } else {
+        ElMessage.error('删除失败')
+      }
+    })
+    .catch(() => {
+      // catch error
+    })
+}
 
 const chunkArray = (array: StreamingRoomInfo[], chunkSize: number) => {
   // 切割每 n 个为一行（即一个数组），方便后续进行 v-for 遍历
@@ -36,6 +66,8 @@ const tagMap = { 0: '未开播', 1: '直播中', 2: '已下播' }
   <div>
     <div style="margin-bottom: 20px">
       <el-button @click="router.push({ name: 'StreamingCreate' })" type="primary">
+        <el-icon style="margin-right: 5px"><Plus /></el-icon>
+
         新建直播间
       </el-button>
     </div>
@@ -69,7 +101,12 @@ const tagMap = { 0: '未开播', 1: '直播中', 2: '已下播' }
               >
                 进入直播间
               </el-button>
-              <el-button type="danger" :disabled="item.status.live_status === 1"> 删除 </el-button>
+              <el-button
+                type="danger"
+                :disabled="item.status.live_status === 1"
+                :icon="Delete"
+                @click="DeleteStreamingRoom(item.room_id, item.name)"
+              />
             </div>
           </el-card>
         </el-col>

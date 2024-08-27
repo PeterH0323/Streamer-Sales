@@ -12,7 +12,7 @@ from pydantic import BaseModel
 import yaml
 
 from ...web_configs import WEB_CONFIGS
-from ..utils import ResultCode, get_all_streamer_info, get_streamer_info_by_id, make_return_data
+from ..utils import ResultCode, delete_item_by_id, get_all_streamer_info, get_streamer_info_by_id, make_return_data
 
 router = APIRouter(
     prefix="/streamer",
@@ -36,7 +36,7 @@ class StreamerInfoItem:
 
     poster_image: str = ""
     base_mp4_path: str = ""
-    enable: bool = False
+    delete: bool = False
 
 
 class StreamerInfo(BaseModel):
@@ -47,7 +47,7 @@ class StreamerInfo(BaseModel):
 @router.post("/list")
 async def get_streamer_info_api():
     """获取所有主播信息，用于用户进行主播的选择"""
-    streamer_list = await get_all_streamer_info()
+    streamer_list = await get_all_streamer_info(True)
 
     logger.info(streamer_list)
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_list)
@@ -97,3 +97,15 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
         yaml.dump(all_streamer_info_list, f, allow_unicode=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_info.id)
+
+
+
+@router.post("/delete")
+async def upload_product_api(delete_info: StreamerInfo):
+
+    process_success_flag = await delete_item_by_id("streamer", delete_info.streamerId)
+
+    if not process_success_flag:
+        return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")

@@ -134,6 +134,15 @@ const onAirRoomNextProductRequest = async (roomId_: number) => {
   })
 }
 
+// 删除特定直播间信息
+const deleteStreamingRoomByIdRequest = (roomId_: number) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/streaming-room/delete',
+    data: { roomId: roomId_ }
+  })
+}
+
 export {
   type StreamingRoomInfo,
   type ProductItem,
@@ -146,5 +155,6 @@ export {
   RoomCreadeOrEditRequest,
   onAirRoomInfoRequest,
   onAirRoomChatRequest,
-  onAirRoomNextProductRequest
+  onAirRoomNextProductRequest,
+  deleteStreamingRoomByIdRequest
 }

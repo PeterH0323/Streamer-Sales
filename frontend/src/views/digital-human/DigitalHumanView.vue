@@ -1,13 +1,43 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
-import { ElMessage } from 'element-plus/es'
+import { ElMessage, ElMessageBox } from 'element-plus/es'
+import { Plus, Delete } from '@element-plus/icons-vue'
 
-import { streamerInfoListRequest, type StreamerInfo } from '@/api/streamerInfo'
+import {
+  streamerInfoListRequest,
+  deleteStreamerByIdRequest,
+  type StreamerInfo
+} from '@/api/streamerInfo'
 
 import showItemInfoDialog from '@/views/digital-human/DigitalHumanEditDialogView.vue'
 
 // 获取主播信息
 const streamerNameOptions = ref([] as StreamerInfo[])
+
+const DeleteDigitalHuman = async (id: number, name: string) => {
+  ElMessageBox.confirm(`确定要删除 "${name}" 吗？`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      const { data } = await deleteStreamerByIdRequest(id)
+      if (data.code === 0) {
+        ElMessage.success('删除成功')
+        // 获取主播信息
+        const { data } = await streamerInfoListRequest()
+        if (data.code === 0) {
+          streamerNameOptions.value = data.data
+          ElMessage.success('获取主播信息成功')
+        }
+      } else {
+        ElMessage.error('删除失败')
+      }
+    })
+    .catch(() => {
+      // catch error
+    })
+}
 
 onMounted(async () => {
   // 获取主播信息
@@ -42,6 +72,7 @@ const ShowItemInfo = ref()
         size="large"
         @click="ShowItemInfo.showItemInfoDialog(0)"
       >
+        <el-icon style="margin-right: 5px"><Plus /></el-icon>
         新增主播
       </el-button>
     </div>
@@ -60,7 +91,11 @@ const ShowItemInfo = ref()
               <el-button type="primary" @click="ShowItemInfo.showItemInfoDialog(item.id)">
                 详情
               </el-button>
-              <el-button type="danger"> 删除 </el-button>
+              <el-button
+                type="danger"
+                @click="DeleteDigitalHuman(item.id, item.name)"
+                :icon="Delete"
+              />
             </div>
           </el-card>
         </el-col>
