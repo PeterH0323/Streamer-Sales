@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import { Check, Warning } from '@element-plus/icons-vue'
+import { Check, Warning, Edit } from '@element-plus/icons-vue'
 import {
   roomDetailRequest,
   roomPorductAddListRequest,
@@ -12,7 +12,6 @@ import {
   type RoomDetailItem
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
-import VideoComponent from '@/components/VideoComponent.vue'
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 import { streamerInfoListRequest } from '@/api/streamerInfo'
 import StreamerInfoComponent from '@/components/StreamerInfoComponent.vue'
@@ -216,9 +215,10 @@ const handelControlClick = (
     </el-drawer>
 
     <el-card shadow="never" style="margin-top: 10px">
-      <el-form-item label="直播间名称">
-        <el-input v-model="RoomProductList.name" />
-      </el-form-item>
+      <h2>直播间名称</h2>
+      <el-divider />
+
+      <el-input v-model="RoomProductList.name" size="large" />
     </el-card>
 
     <el-card shadow="never">
@@ -230,7 +230,14 @@ const handelControlClick = (
     </el-card>
 
     <el-card shadow="never">
-      <el-button type="primary" style="margin-bottom: 10px" @click="handelAddProductClick">
+      <el-button
+        type="primary"
+        style="margin-bottom: 15px"
+        @click="handelAddProductClick"
+        size="large"
+        round
+      >
+        <el-icon style="margin-right: 5px"><Edit /></el-icon>
         增删商品
       </el-button>
 
@@ -328,17 +335,6 @@ const handelControlClick = (
 
       <template #footer>
         <div class="bottom-item">
-          <div>
-            <el-button type="success" @click="handelOnAirClick">
-              {{ RoomProductList.liveStatus === 1 ? '进入' : '开始' }}直播</el-button
-            >
-            <el-button
-              type="primary"
-              @click="onSubmit"
-              :disabled="RoomProductList.product.length === 0"
-              >保存</el-button
-            >
-          </div>
           <el-pagination
             v-model:current-page="RoomProductList.currentPage"
             v-model:page-size="RoomProductList.pageSize"
@@ -351,6 +347,17 @@ const handelControlClick = (
               (currentPage: number) => getProductListInfo(currentPage, RoomProductList.pageSize)
             "
           />
+          <div>
+            <el-button type="success" @click="handelOnAirClick">
+              {{ RoomProductList.liveStatus === 1 ? '进入' : '开始' }}直播</el-button
+            >
+            <el-button
+              type="primary"
+              @click="onSubmit"
+              :disabled="RoomProductList.product.length === 0"
+              >保存</el-button
+            >
+          </div>
         </div>
       </template>
     </el-card>
@@ -394,5 +401,9 @@ const handelControlClick = (
   margin-bottom: 20px;
   padding: 20px;
   border-radius: 20px;
+}
+
+::v-deep(.el-input__wrapper) {
+  border-radius: 14px;
 }
 </style>
