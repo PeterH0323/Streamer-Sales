@@ -78,46 +78,48 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
 </script>
 
 <template>
-  <el-progress v-show="isShowProgress" type="circle" :percentage="uploadPercentage" />
-  <!-- TODO 长时间上传后端会断开？ -->
-  <el-upload
-    v-show="!isShowProgress"
-    class="avatar-uploader"
-    action="/products/upload/file"
-    method="post"
-    :drag="props.fileType !== 'video' && props.fileType !== 'audio'"
-    :multiple="false"
-    :show-file-list="false"
-    :on-success="handleFileUploadSuccess"
-    :before-upload="beforeFileUploadUpload"
-    :on-progress="handleUploadProgress"
-    :on-error="handleFileUploadFail"
-  >
-    <!-- 图片 -->
-    <img
-      v-if="fileUrl && props.fileType === 'image'"
-      :src="fileUrl"
-      class="avatar"
-      @load="isShowProgress = false"
-    />
-
-    <!-- markdown 文档 -->
-    <el-icon
-      v-else-if="fileUrl && props.fileType === 'doc'"
-      :size="50"
-      class="avatar-uploader-icon"
+  <div>
+    <el-progress v-show="isShowProgress" type="circle" :percentage="uploadPercentage" />
+    <!-- TODO 长时间上传后端会断开？ -->
+    <el-upload
+      v-show="!isShowProgress"
+      class="avatar-uploader"
+      action="/products/upload/file"
+      method="post"
+      :drag="props.fileType !== 'video' && props.fileType !== 'audio'"
+      :multiple="false"
+      :show-file-list="false"
+      :on-success="handleFileUploadSuccess"
+      :before-upload="beforeFileUploadUpload"
+      :on-progress="handleUploadProgress"
+      :on-error="handleFileUploadFail"
     >
-      <Document />
-    </el-icon>
+      <!-- 图片 -->
+      <img
+        v-if="fileUrl && props.fileType === 'image'"
+        :src="fileUrl"
+        class="avatar"
+        @load="isShowProgress = false"
+      />
 
-    <!-- 视频上传 -->
-    <el-button v-else-if="props.fileType === 'video' || props.fileType === 'audio'" type="danger">
-      {{ fileUrl === '' ? '上传' : '更换' }}{{ props.fileType === 'video' ? '视频' : '音频' }}
-    </el-button>
+      <!-- markdown 文档 -->
+      <el-icon
+        v-else-if="fileUrl && props.fileType === 'doc'"
+        :size="50"
+        class="avatar-uploader-icon"
+      >
+        <Document />
+      </el-icon>
 
-    <!-- 拖动上传框 -->
-    <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-  </el-upload>
+      <!-- 视频上传 -->
+      <el-button v-else-if="props.fileType === 'video' || props.fileType === 'audio'" type="danger">
+        {{ fileUrl === '' ? '上传' : '更换' }}{{ props.fileType === 'video' ? '视频' : '音频' }}
+      </el-button>
+
+      <!-- 拖动上传框 -->
+      <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+    </el-upload>
+  </div>
 </template>
 
 <style lang="scss" scoped>
