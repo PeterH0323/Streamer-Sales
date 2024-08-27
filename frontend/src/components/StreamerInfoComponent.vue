@@ -142,10 +142,18 @@ const labelPosition = ref('top')
             </el-form-item>
 
             <el-form-item label="音频对应文字">
-              <el-input v-model="modelSteamerInfo.tts_reference_sentence" size="large" />
+              <el-input
+                v-model="modelSteamerInfo.tts_reference_sentence"
+                size="large"
+                :disabled="props.disableChange"
+              />
             </el-form-item>
             <el-form-item label="TTS 权重" :label-width="formLabelWidth">
-              <el-input v-model="modelSteamerInfo.tts_weight_tag" size="large" />
+              <el-input
+                v-model="modelSteamerInfo.tts_weight_tag"
+                size="large"
+                :disabled="props.disableChange"
+              />
             </el-form-item>
           </el-form>
         </el-card>
