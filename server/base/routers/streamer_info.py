@@ -6,6 +6,7 @@
 # time: 2024/08/10
 """
 from dataclasses import asdict, dataclass
+from typing import List, Optional
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
@@ -25,7 +26,7 @@ router = APIRouter(
 class StreamerInfoItem:
     id: int = 0
     name: str = ""
-    character: str = ""
+    character: List[str] = None
     value: str = ""
     avater: str = ""  # 头像
 
@@ -47,7 +48,7 @@ class StreamerInfo(BaseModel):
 @router.post("/list")
 async def get_streamer_info_api():
     """获取所有主播信息，用于用户进行主播的选择"""
-    streamer_list = await get_all_streamer_info(True)
+    streamer_list = await get_all_streamer_info()
 
     logger.info(streamer_list)
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_list)
@@ -60,7 +61,8 @@ async def get_streamer_info_api(streamer_info: StreamerInfo):
 
     if len(pick_info) == 0:
         # 没找到 or 主播 ID = 0，回复一个空的
-        pick_info = [asdict(StreamerInfoItem())]
+        new_info = StreamerInfoItem(character=[""])
+        pick_info = [asdict(new_info)]
 
     logger.info(pick_info)
     return make_return_data(True, ResultCode.SUCCESS, "成功", pick_info)
@@ -70,9 +72,7 @@ async def get_streamer_info_api(streamer_info: StreamerInfo):
 async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
     """新增 or 修改主播信息"""
 
-    streamer_info.character = streamer_info.character.split("、")  # 将性格转为 list
-
-    all_streamer_info_list = await get_all_streamer_info(need_to_formate_character=False)
+    all_streamer_info_list = await get_all_streamer_info()
     max_streamer_id = -1
     update_index = -1
     for idx, item in enumerate(all_streamer_info_list):
@@ -97,7 +97,6 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
         yaml.dump(all_streamer_info_list, f, allow_unicode=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_info.id)
-
 
 
 @router.post("/delete")

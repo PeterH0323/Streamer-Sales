@@ -135,7 +135,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
         filter_list = filter_list[start_index:end_index]
 
     # 主播信息
-    streamer_list = await get_all_streamer_info(True)
+    streamer_list = await get_all_streamer_info()
     streamer_info = dict()
     for i in streamer_list:
         if i["id"] == streaming_room_info["streamer_id"]:
@@ -511,7 +511,6 @@ async def on_air_live_room_next_product_api(room_info: RoomProductListItem):
     res_data = await get_or_init_conversation(room_info.roomId, next_product=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
-
 
 
 @router.post("/delete")

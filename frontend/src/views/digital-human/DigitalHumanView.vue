@@ -61,6 +61,16 @@ const chunkedArray = computed(() => chunkArray(streamerNameOptions.value, 4))
 
 // 信息弹窗显示标识
 const ShowItemInfo = ref()
+
+const makeCharacterString = (characterList: string[]) => {
+  // 将字符数组转为字符串
+  let character = ''
+  for (var charString of characterList) {
+    character += charString + '、'
+  }
+  character = character.slice(0, -1) // 去掉最后一个 、
+  return character
+}
 </script>
 
 <template>
@@ -84,7 +94,7 @@ const ShowItemInfo = ref()
             <div class="streamer-info">
               <p class="title">{{ item.name }}</p>
               <p class="content">
-                {{ item.character }}
+                {{ makeCharacterString(item.character) }}
               </p>
             </div>
             <div class="bottom-button">

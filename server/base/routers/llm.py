@@ -70,7 +70,7 @@ async def gen_poduct_base_prompt(streamer_id, product_id):
     streamer_info = streamer_info[0]
 
     # 将销售角色名和角色信息插入到 system prompt
-    system_str = system.replace("{role_type}", streamer_info["name"]).replace("{character}", streamer_info["character"])
+    system_str = system.replace("{role_type}", streamer_info["name"]).replace("{character}", "、".join(streamer_info["character"]))
 
     # 根据 ID 获取商品信息
     product_list, _ = await get_product_list(id=product_id)

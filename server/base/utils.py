@@ -259,7 +259,7 @@ def combine_history(prompt: list, history_msg: list):
     return prompt
 
 
-async def get_all_streamer_info(need_to_formate_character=False):
+async def get_all_streamer_info():
     # 加载对话配置文件
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
@@ -269,19 +269,11 @@ async def get_all_streamer_info(need_to_formate_character=False):
             continue
         filter_streamer_list.append(streamer)
 
-    if not need_to_formate_character:
-        # 不需要格式化性格
-        return filter_streamer_list
-
-    for i in filter_streamer_list:
-        # 将性格 list 变为字符串
-        i["character"] = "、".join(i["character"])
-
     return filter_streamer_list
 
 
 async def get_streamer_info_by_id(id: int):
-    streamer_list = await get_all_streamer_info(True)
+    streamer_list = await get_all_streamer_info()
 
     pick_info = []
     for i in streamer_list:
