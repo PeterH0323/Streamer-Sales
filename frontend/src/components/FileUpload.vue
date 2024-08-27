@@ -15,10 +15,10 @@ const props = defineProps({
 const modelFilePath = defineModel({ default: '' })
 
 // 上传文件，上传后为本机内存地址，方便加载
-const imageUrl = ref('')
+const fileUrl = ref('')
 watchEffect(() => {
   // 用于在编辑模式下显示图片
-  imageUrl.value = modelFilePath.value
+  fileUrl.value = modelFilePath.value
 })
 
 // 是否显示进度条
@@ -26,7 +26,7 @@ const isShowProgress = ref(false)
 
 // 文件上传成功后的 callback
 const handleFileUploadSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-  imageUrl.value = URL.createObjectURL(uploadFile.raw!) // 生成内存地址，方便加载
+  fileUrl.value = URL.createObjectURL(uploadFile.raw!) // 生成内存地址，方便加载
   modelFilePath.value = response.data // 更新父组件双向绑定的值
   isShowProgress.value = false
 }
@@ -34,13 +34,22 @@ const handleFileUploadSuccess: UploadProps['onSuccess'] = (response, uploadFile)
 // 文件上传前的校验 callback
 const beforeFileUploadUpload: UploadProps['beforeUpload'] = (rawFile) => {
   console.log(rawFile)
+
   if (props.fileType === 'image' && rawFile.type !== 'image/png' && rawFile.type !== 'image/jpeg') {
     ElMessage.error('商品图片必须是 PNG / JPG 格式!')
     return false
   } else if (props.fileType === 'doc' && !rawFile.name.endsWith('.md')) {
     ElMessage.error('商品说明书必须是 markdown 格式!')
     return false
-  } else if (rawFile.size / 1024 / 1024 > 2) {
+  } else if (props.fileType === 'video' && rawFile.type !== 'video/mp4') {
+    ElMessage.error('主播视频必须是 mp4 格式!')
+    return false
+  }
+
+  if (props.fileType === 'video' && rawFile.size / 1024 / 1024 > 20) {
+    ElMessage.error('主播视频文件大小不能超过 20MB!')
+    return false
+  } else if (props.fileType !== 'video' && rawFile.size / 1024 / 1024 > 2) {
     ElMessage.error('文件大小不能超过 2MB!')
     return false
   }
@@ -73,7 +82,7 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
     class="avatar-uploader"
     action="/products/upload/file"
     method="post"
-    drag
+    :drag="props.fileType !== 'video'"
     :multiple="false"
     :show-file-list="false"
     :on-success="handleFileUploadSuccess"
@@ -81,18 +90,29 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
     :on-progress="handleUploadProgress"
     :on-error="handleFileUploadFail"
   >
+    <!-- 图片 -->
     <img
-      v-if="imageUrl && props.fileType === 'image'"
-      :src="imageUrl"
+      v-if="fileUrl && props.fileType === 'image'"
+      :src="fileUrl"
       class="avatar"
       @load="isShowProgress = false"
     />
+
+    <!-- markdown 文档 -->
     <el-icon
-      v-else-if="imageUrl && props.fileType !== 'image'"
+      v-else-if="fileUrl && props.fileType === 'doc'"
       :size="50"
       class="avatar-uploader-icon"
-      ><Document
-    /></el-icon>
+    >
+      <Document />
+    </el-icon>
+
+    <!-- 视频上传 -->
+    <el-button v-else-if="props.fileType === 'video'" type="danger">
+      {{ fileUrl === '' ? '上传视频' : '更换视频' }}
+    </el-button>
+
+    <!-- 拖动上传框 -->
     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
   </el-upload>
 </template>
@@ -106,7 +126,7 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
 }
 </style>
 
-<style>
+<style lang="scss">
 // 上传图片全局 css
 .avatar-uploader .el-upload {
   border: 1px dashed var(--el-border-color);

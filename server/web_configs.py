@@ -20,6 +20,7 @@ class WebConfigs:
 
     # 数字人文件
     STREAMER_FILE_DIR = "digital_human"
+    STREAMER_INFO_FILES_DIR = "streamer_info_files"
 
     # ==================================================================
     #                             数据配置

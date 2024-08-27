@@ -152,13 +152,25 @@ async def get_product_info_api(productId: str):
 @router.post("/upload/file")
 async def upload_product_api(file: UploadFile = File(...)):
 
-    file_type = file.filename.split(".")[-1]  # eg. image/png
+    file_type = file.filename.split(".")[-1]  # eg. png
     logger.info(f"upload file type = {file_type}")
+
+    sub_dir_name_map = {
+        "md": WEB_CONFIGS.INSTRUCTIONS_DIR,
+        "png": WEB_CONFIGS.IMAGES_DIR,
+        "jpg": WEB_CONFIGS.IMAGES_DIR,
+        "mp4": WEB_CONFIGS.STREAMER_INFO_FILES_DIR,
+        "wav": WEB_CONFIGS.STREAMER_INFO_FILES_DIR,
+    }
+    if file_type in ["wav", "mp4"]:
+        save_root = WEB_CONFIGS.STREAMER_FILE_DIR
+    else:
+        save_root = WEB_CONFIGS.PRODUCT_FILE_DIR
+
     upload_time = str(int(time.time())) + "__" + str(uuid.uuid4().hex)
-    sub_dir_name = WEB_CONFIGS.INSTRUCTIONS_DIR if file_type == "md" else WEB_CONFIGS.IMAGES_DIR
-    save_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(
-        WEB_CONFIGS.PRODUCT_FILE_DIR, sub_dir_name, upload_time + "." + file_type
-    )
+
+    sub_dir_name = sub_dir_name_map[file_type]
+    save_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(save_root, sub_dir_name, upload_time + "." + file_type)
     save_path.parent.mkdir(exist_ok=True, parents=True)
     logger.info(f"save path = {save_path}")
 
@@ -167,7 +179,10 @@ async def upload_product_api(file: UploadFile = File(...)):
         while chunk := await file.read(1024 * 1024 * 5):  # 每次读取 5MB 的数据块
             buffer.write(chunk)
 
-    file_url = f"{API_CONFIG.REQUEST_FILES_URL}/{sub_dir_name}/{Path(save_path).name}"
+    # TODO 如果上传 mp4 则自动生成缩略图作为主播 poster
+    
+    split_dir_name = Path(WEB_CONFIGS.SERVER_FILE_ROOT).name # 保存文件夹根目录名字
+    file_url = f"{API_CONFIG.REQUEST_FILES_URL}{str(save_path).split(split_dir_name)[-1]}"
     return make_return_data(True, ResultCode.SUCCESS, "成功", file_url)
 
 
