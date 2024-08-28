@@ -1,0 +1,239 @@
+14英寸平板电脑:
+  amount: 932
+  delete: false
+  delivery_company: 京东
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 轻薄
+  - 触控操作
+  - 电池续航好
+  - 移动办公便利
+  - 娱乐性强
+  - 适合儿童学习
+  image_path: http://localhost:8000/files/product_files/images/pad.png
+  instruction: http://localhost:8000/files/product_files/instructions/pad.md
+  product_class: 电子
+  product_id: 10
+  sales_doc: 14英寸平板电脑
+  selling_price: 1999.99
+  upload_date: '2024-08-18 12:11:53'
+65英寸OLED电视:
+  amount: 68731
+  delete: false
+  delivery_company: 京东
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 色彩鲜艳
+  - 对比度极高
+  - 响应速度快
+  - 无背光眩光
+  - 厚度较薄
+  - 自发光无需额外照明
+  image_path: http://localhost:8000/files/product_files/images/oled_tv.png
+  instruction: http://localhost:8000/files/product_files/instructions/oled_tv.md
+  product_class: 家电
+  product_id: 11
+  sales_doc: 65英寸OLED电视
+  selling_price: 12999.99
+  upload_date: '2024-08-18 12:11:53'
+不粘煎炒锅:
+  amount: 67423
+  delivery_company: 京东
+  departure_place: 武汉
+  digital_human_video: '666'
+  heighlights:
+  - 不粘涂层
+  - 耐磨耐用
+  - 导热快
+  - 易清洗
+  - 多种烹饪方式
+  - 设计人性化
+  image_path: http://localhost:8000/files/product_files/images/wok.png
+  instruction: http://localhost:8000/files/product_files/instructions/wok.md
+  product_class: 厨具
+  product_id: 9
+  sales_doc: 不粘煎炒锅
+  selling_price: 168.6
+  upload_date: '2024-08-18 12:11:53'
+光感润颜面膜:
+  amount: 68441
+  delete: false
+  delivery_company: 韵达
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 密集滋养
+  - 深层补水
+  - 急救修复
+  - 快速见效
+  - 定期护理
+  - 多种类型选择
+  image_path: http://localhost:8000/files/product_files/images/mask.png
+  instruction: http://localhost:8000/files/product_files/instructions/mask.md
+  product_class: 美妆
+  product_id: 4
+  sales_doc: 光感润颜面膜
+  selling_price: 299.0
+  upload_date: '2024-08-18 12:11:53'
+唇膏:
+  amount: 1068
+  delete: false
+  delivery_company: 圆通
+  departure_place: 宁波
+  digital_human_video: '666'
+  heighlights:
+  - 丰富色号
+  - 滋润保湿
+  - 显色度高
+  - 持久不脱色
+  - 易于涂抹
+  - 便携包装
+  image_path: http://localhost:8000/files/product_files/images/lip_stick.png
+  instruction: http://localhost:8000/files/product_files/instructions/lip_stick.md
+  product_class: 美妆
+  product_id: 2
+  sales_doc: 唇膏
+  selling_price: 399.8
+  upload_date: '2024-08-18 12:11:53'
+墨水钢笔:
+  amount: 681684
+  delete: false
+  delivery_company: 圆通
+  departure_place: 宁波
+  digital_human_video: '666'
+  heighlights:
+  - 耐用性
+  - 可书写性
+  - 不同颜色和类型
+  - 轻便设计
+  - 环保材料
+  - 易于携带
+  image_path: http://localhost:8000/files/product_files/images/pen.png
+  instruction: http://localhost:8000/files/product_files/instructions/pen.md
+  product_class: 文具
+  product_id: 6
+  sales_doc: 墨水钢笔
+  selling_price: 36.8
+  upload_date: '2024-08-18 12:11:53'
+声波电动牙刷:
+  amount: 10000
+  delete: true
+  delivery_company: 顺丰
+  departure_place: 汕头
+  digital_human_video: '666'
+  heighlights:
+  - 高效清洁
+  - 减少手动压力
+  - 定时提醒
+  - 智能模式调节
+  - 无线充电
+  - 噪音低
+  image_path: http://localhost:8000/files/product_files/images/elec_toothblush.png
+  instruction: http://localhost:8000/files/product_files/instructions/elec_toothblush.md
+  product_class: 电子
+  product_id: 1
+  sales_doc: 声波电动牙刷
+  selling_price: 99.9
+  upload_date: '2024-08-18 12:11:53'
+本草精华洗发露:
+  amount: 106999
+  delete: false
+  delivery_company: 申通
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 温和配方
+  - 深层清洁
+  - 滋养头皮
+  - 丰富泡沫
+  - 易冲洗
+  - 适合各种发质
+  image_path: http://localhost:8000/files/product_files/images/shampoo.png
+  instruction: http://localhost:8000/files/product_files/instructions/shampoo.md
+  product_class: 日用品
+  product_id: 3
+  sales_doc: 本草精华洗发露
+  selling_price: 60.0
+  upload_date: '2024-08-18 12:11:53'
+瑜伽垫:
+  amount: 987913
+  delete: false
+  delivery_company: 圆通
+  departure_place: 汕头
+  digital_human_video: '666'
+  heighlights:
+  - 防滑材质
+  - 吸湿排汗
+  - 厚度适中
+  - 耐用易清洁
+  - 各种瑜伽动作适用
+  - 轻巧便携
+  image_path: http://localhost:8000/files/product_files/images/yoga_mat.png
+  instruction: http://localhost:8000/files/product_files/instructions/yoga_mat.md
+  product_class: 运动
+  product_id: 7
+  sales_doc: 瑜伽垫
+  selling_price: 16.8
+  upload_date: '2024-08-18 12:11:53'
+薰衣草淡香氛:
+  amount: 681321
+  delete: false
+  delivery_company: 韵达
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 浪漫优雅
+  - 花香调为主
+  - 情感表达
+  - 适合各种年龄
+  - 瓶身设计精致
+  - 提升女性魅力
+  image_path: http://localhost:8000/files/product_files/images/perfume.png
+  instruction: http://localhost:8000/files/product_files/instructions/perfume.md
+  product_class: 家居用品
+  product_id: 5
+  sales_doc: 薰衣草淡香氛
+  selling_price: 499.0
+  upload_date: '2024-08-18 12:11:53'
+进口和牛羽下肉:
+  amount: 96836
+  delete: false
+  delivery_company: 顺丰
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 富含铁质
+  - 营养价值高
+  - 肌肉纤维好
+  - 红白相间纹理
+  - 适合烧烤炖煮
+  - 草食动物来源
+  image_path: http://localhost:8000/files/product_files/images/beef.png
+  instruction: http://localhost:8000/files/product_files/instructions/beef.md
+  product_class: 食品
+  product_id: 12
+  sales_doc: 进口和牛羽下肉
+  selling_price: 99.68
+  upload_date: '2024-08-18 12:11:53'
+速干运动裤:
+  amount: 12435
+  delete: false
+  delivery_company: 圆通
+  departure_place: 广州
+  digital_human_video: '666'
+  heighlights:
+  - 快干
+  - 伸缩自如
+  - 吸湿排汗
+  - 防风保暖
+  - 高腰设计
+  - 多口袋实用
+  image_path: http://localhost:8000/files/product_files/images/pants.png
+  instruction: http://localhost:8000/files/product_files/instructions/pants.md
+  product_class: 衣服
+  product_id: 8
+  sales_doc: 速干运动裤
+  selling_price: 66.9
+  upload_date: '2024-08-18 12:11:53'
