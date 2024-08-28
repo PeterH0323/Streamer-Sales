@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElNotification, type FormInstance, type FormRules } from 'element-plus'
-import { login_request } from '@/api/user'
+import { loginRequest } from '@/api/user'
 import { useTokenStore } from '@/stores/userToken'
 
 const router = useRouter()
@@ -56,20 +56,20 @@ const onSubmit = async () => {
   })
 
   // 校验成功，执行登录
-  const log_res = await login_request(loginForm).then((res) => {
-    if (!res.data.success) {
+  const log_res = await loginRequest(loginForm).then((res) => {
+    if (res.data.code !== 0) {
       // 登录失败
       ElMessage.error('账号名或密码错误')
       isLogining.value = false
       throw new Error('账号名或密码错误') // 抛出异常
     }
-    return res.data
+    return res.data.data
   })
 
   console.log(log_res)
 
   // 保存 token 信息
-  tokenStore.saveToken(log_res.content) // TODO 后面用 pinia-plugin-persistedstate 实现持久化保存
+  tokenStore.saveToken(log_res)
 
   // 设置已经完成登录
   isLogining.value = false

@@ -1,4 +1,5 @@
-import { request_handler } from '@/api/base'
+import { request_handler, type ResultPackage } from '@/api/base'
+import { type TokenItem } from '@/stores/userToken'
 
 // 调用登录接口数据结构定义
 type loginFormType = {
@@ -7,20 +8,12 @@ type loginFormType = {
   vertify_code?: string
 }
 
-// 登录接口返回数据结构定义
-type loginResultType = {
-  success: boolean
-  state: number
-  message: string
-  content: string
-}
-
-const login_request = (loginForm: loginFormType) => {
-  return request_handler<loginResultType>({
+const loginRequest = (loginForm: loginFormType) => {
+  return request_handler<ResultPackage<TokenItem>>({
     method: 'POST',
     url: '/user/login',
     data: loginForm
   })
 }
 
-export { login_request }
+export { loginRequest }

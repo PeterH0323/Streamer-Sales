@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
+from ..utils import ResultCode, make_return_data
+
 router = APIRouter(
     prefix="/user",
     tags=["user"],
@@ -17,4 +19,5 @@ class UserItem(BaseModel):
 @router.post("/login")
 async def user_login(user_item: UserItem):
     logger.info(f"Got user info = {user_item}")
-    return {"success": True, "message": "success", "state": 0, "content": {"access_token": "46541354846131"}}
+    content =  {"access_token": "46541354846131"}
+    return make_return_data(True, ResultCode.SUCCESS, "成功", content)

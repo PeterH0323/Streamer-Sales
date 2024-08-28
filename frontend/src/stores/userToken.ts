@@ -6,20 +6,27 @@ interface TokenItem {
   access_token: Object
 }
 
-export const useTokenStore = defineStore('user-token', () => {
-  const tokenJson = ref('')
-  const token = computed<TokenItem>(() => {
-    try {
-      return tokenJson.value // 接口返回的已经是对象了，无需进行 json 转换，如需：JSON.parse(tokenJson.value || '{}')
-    } catch (error) {
-      ElMessage.error('接口错误')
-      throw error
+export const useTokenStore = defineStore('user-token', {
+  state: () => {
+    const tokenJson = ref({} as TokenItem)
+    const token = computed(() => {
+      try {
+        return tokenJson.value
+      } catch (error) {
+        ElMessage.error('接口错误')
+        throw error
+      }
+    })
+
+    function saveToken(data: TokenItem) {
+      tokenJson.value = data
     }
-  })
 
-  function saveToken(data: string) {
-    tokenJson.value = data
+    return { token, saveToken }
+  },
+
+  persist: {
+    paths: ['token'], // 需要持久化保存的字段名
+    storage: localStorage
   }
-
-  return { token, saveToken }
 })
