@@ -22,6 +22,10 @@ class WebConfigs:
     STREAMER_FILE_DIR = "digital_human"
     STREAMER_INFO_FILES_DIR = "streamer_info_files"
 
+    # JWT Token 加密秘钥，生成命令：openssl rand -hex 32
+    TOKEN_JWT_SECURITY_KEY = "b4d77c499c312026406e5c683b6c458ba8ee62b798ab08e145b357b95c0e843b"
+    TOKEN_JWT_ALGORITHM = "HS256" 
+
     # ==================================================================
     #                             数据配置
     # ==================================================================

@@ -3,10 +3,10 @@ import { ElMessage } from 'element-plus'
 
 import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo } from '@/api/streamerInfo'
+import { useTokenStore } from '@/stores/userToken'
 
 // 调用登录接口数据结构定义
 type ProductListType = {
-  // accessToken: string // 登录验证 header
   currentPage?: number // 当前页号
   pageSize?: number // 每页记录数
   productName?: string // 商品名称
@@ -40,6 +40,9 @@ interface ProductData {
   totalSize: number
 }
 
+// pinia 保存的 token
+const tokenStore = useTokenStore()
+
 // 查询 - 条件
 const queryCondition = ref<ProductListType>({
   currentPage: 1,
@@ -68,7 +71,10 @@ const productListRequest = (params: ProductListType) => {
   return request_handler<ResultPackage<ProductData>>({
     method: 'POST',
     url: '/products/list',
-    data: params
+    data: params,
+    headers: {
+      Authorization: `${tokenStore.token.token_type} ${tokenStore.token.access_token}`
+    }
   })
 }
 

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import uvicorn
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
@@ -98,11 +97,3 @@ async def validation_exception_handler(request, exc):
     logger.info(request)
     logger.info(exc)
     return PlainTextResponse(str(exc), status_code=400)
-
-
-# 执行
-# uvicorn server.main:app --reload
-
-# if __name__ == "__main__":
-#     # for debug
-#     uvicorn.run(app, host="0.0.0.0", port=8000)

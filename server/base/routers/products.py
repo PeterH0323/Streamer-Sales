@@ -5,9 +5,11 @@ import time
 from typing import List
 import uuid
 import yaml
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
 from loguru import logger
 from pydantic import BaseModel
+
+from .users import get_current_user_info
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..modules.rag.rag_worker import rebuild_rag_db
@@ -56,7 +58,7 @@ class ProductInstructionItem(BaseModel):
 
 class DeleteProductItem(BaseModel):
     user_id: str = ""  # User 识别号，用于区分不用的用户调用
-    request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
+    request_id: str = ""  # 请求 ID
     product_id: int  # 8
 
 
@@ -128,10 +130,10 @@ async def get_prduct_by_page(currentPage, pageSize, productName=""):
 
     return res_data
 
+@router.post("/list", summary='获取所有商品信息，支持分页' )
+async def get_product_info_api(product_query_item: ProductQueryItem, user_id: str = Depends(get_current_user_info)):
 
-@router.post("/list")
-async def get_product_info_api(product_query_item: ProductQueryItem):
-
+    logger.info(user_id)
     logger.info(f"Got product_query_item = {product_query_item}")
     res_data = await get_prduct_by_page(
         product_query_item.currentPage, product_query_item.pageSize, product_query_item.productName

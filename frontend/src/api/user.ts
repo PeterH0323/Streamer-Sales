@@ -9,10 +9,17 @@ type loginFormType = {
 }
 
 const loginRequest = (loginForm: loginFormType) => {
-  return request_handler<ResultPackage<TokenItem>>({
+  const formData = new FormData()
+  formData.append('username', loginForm.username)
+  formData.append('password', loginForm.password)
+
+  return request_handler<TokenItem>({
     method: 'POST',
     url: '/user/login',
-    data: loginForm
+    data: formData,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   })
 }
 

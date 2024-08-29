@@ -3,7 +3,8 @@ import { defineStore } from 'pinia'
 import { ElMessage } from 'element-plus'
 
 interface TokenItem {
-  access_token: Object
+  access_token: string
+  token_type: string
 }
 
 export const useTokenStore = defineStore('user-token', {

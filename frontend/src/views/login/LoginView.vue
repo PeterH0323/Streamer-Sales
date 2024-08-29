@@ -26,8 +26,8 @@ interface FormType {
 
 // 双向绑定对象
 const loginForm = reactive<FormType>({
-  username: 'admin',
-  password: 'admin123456'
+  username: 'hingwen.wong',
+  password: '123456'
   // vertify_code: ''
 })
 
@@ -56,15 +56,25 @@ const onSubmit = async () => {
   })
 
   // 校验成功，执行登录
-  const log_res = await loginRequest(loginForm).then((res) => {
-    if (res.data.code !== 0) {
-      // 登录失败
-      ElMessage.error('账号名或密码错误')
-      isLogining.value = false
-      throw new Error('账号名或密码错误') // 抛出异常
-    }
-    return res.data.data
-  })
+  const log_res = await loginRequest(loginForm)
+    .then((res) => {
+      console.info(res)
+      if (res.status !== 200) {
+        // 登录失败
+        ElMessage.error('账号名或密码错误')
+        isLogining.value = false
+        throw new Error('账号名或密码错误') // 抛出异常
+      }
+      return res.data
+    })
+    .catch((error) => {
+      console.error(error)
+      if (error.response && error.response.status === 401) {
+        ElMessage.error('账号名或密码错误')
+        isLogining.value = false
+        throw new Error('账号名或密码错误') // 抛出异常
+      }
+    })
 
   console.log(log_res)
 
