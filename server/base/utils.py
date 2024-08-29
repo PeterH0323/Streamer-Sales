@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import cv2
 import yaml
 from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
@@ -314,10 +315,10 @@ async def get_streaming_room_info(id=-1):
 
     filter_list = []
     for room in streaming_room_info:
-        if room['delete']:
+        if room["delete"]:
             continue
         filter_list.append(room)
-    
+
     if id <= 0:
         # 全部返回
         return filter_list
@@ -328,6 +329,37 @@ async def get_streaming_room_info(id=-1):
             return room_info
 
     return []
+
+
+def make_poster_by_video_first_frame(video_path: str, image_output_name:str):
+    """根据视频第一帧生成缩略图
+
+    Args:
+        video_path (str): 视频文件路径
+
+    Returns:
+        str: 第一帧保存的图片路径
+    """
+
+    # 打开视频文件
+    cap = cv2.VideoCapture(video_path)
+
+    # 读取第一帧
+    ret, frame = cap.read()
+
+    # 检查是否成功读取
+    poster_save_path = str(Path(video_path).parent.joinpath(image_output_name))
+    if ret:
+        # 保存图像到文件
+        cv2.imwrite(poster_save_path, frame)
+        logger.info(f"第一帧已保存为 {poster_save_path}")
+    else:
+        logger.error("无法读取视频帧")
+
+    # 释放视频捕获对象
+    cap.release()
+
+    return poster_save_path
 
 
 async def update_streaming_room_info(id, new_info):
