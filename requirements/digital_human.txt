@@ -14,4 +14,3 @@ wget==3.2
 
 # Web app 2.0
 fastapi[all]==0.111.0
-sse-starlette==2.1.0
