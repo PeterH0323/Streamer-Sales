@@ -80,7 +80,7 @@ class MessageItem:
     datetime: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-@router.post("/list")
+@router.post("/list", summary="获取所有直播间信息接口")
 async def get_streaming_room_api():
     """获取所有直播间信息"""
     # 加载直播间配置文件
@@ -94,7 +94,7 @@ async def get_streaming_room_api():
     return make_return_data(True, ResultCode.SUCCESS, "成功", streaming_room_list)
 
 
-@router.post("/detail")
+@router.post("/detail", summary="获取特定直播间信息接口")
 async def get_streaming_room_api(room_info: RoomProductListItem):
     """获取特定直播间信息"""
     # 加载直播间配置文件
@@ -162,9 +162,9 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/product-add")
+@router.post("/product-add", summary="直播间编辑or添加商品接口")
 async def get_streaming_room_api(room_info: RoomProductListItem):
-    """直播间编辑中添加商品"""
+    """直播间编辑or添加商品"""
     # 加载对话配置文件
     if room_info.roomId == 0:
         # 新的直播间
@@ -227,7 +227,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
     return make_return_data(True, ResultCode.SUCCESS, "成功", page_info)
 
 
-@router.post("/edit/form")
+@router.post("/edit/form", summary="新增 or 编辑直播间接口")
 async def streaming_room_edit_api(edit_item: RoomProductEdifItem):
     """新增 or 编辑直播间接口
 
@@ -321,7 +321,7 @@ async def get_agent_res(prompt, departure_place, delivery_company):
     return agent_response
 
 
-@router.post("/chat")
+@router.post("/chat", summary="直播间开播对话接口")
 async def get_on_air_live_room_api(room_chat: RoomChatItem):
     streaming_room_info = await get_streaming_room_info(room_chat.roomId)
 
@@ -483,7 +483,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     return res_data
 
 
-@router.post("/live-info")
+@router.post("/live-info", summary="获取正在直播的直播间信息接口")
 async def get_on_air_live_room_api(room_info: RoomProductListItem):
     """获取正在直播的直播间信息
 
@@ -500,7 +500,7 @@ async def get_on_air_live_room_api(room_info: RoomProductListItem):
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/next-product")
+@router.post("/next-product", summary="直播间进行下一个商品讲解接口")
 async def on_air_live_room_next_product_api(room_info: RoomProductListItem):
     """直播间进行下一个商品讲解
 
@@ -513,7 +513,7 @@ async def on_air_live_room_next_product_api(room_info: RoomProductListItem):
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/delete")
+@router.post("/delete", summary="删除直播间接口")
 async def upload_product_api(delete_info: RoomProductListItem):
 
     process_success_flag = await delete_item_by_id("room", delete_info.roomId)
