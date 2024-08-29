@@ -81,7 +81,7 @@ const getDigitalHumanVideo = async () => {
 
   isGenerating.value = true
   ElMessage.success('正在生成，请稍候')
-  const { data } = await genDigitalHuamnVideoRequest(salesDoc.value)
+  const { data } = await genDigitalHuamnVideoRequest(streamerId.value, salesDoc.value)
   console.log(data)
   if (data.code === 0) {
     infoValue.value = data.data
@@ -105,13 +105,6 @@ const handleGenSalesDocClick = async () => {
     ElMessage.success('生成文案成功')
   }
   isGenerating.value = false
-}
-
-// 跳转编辑页面
-const handelEditClick = () => {
-  dialogFormVisible.value = false
-  console.log(productId.value)
-  router.push({ name: 'ProductEdit', params: { productId: productId.value } })
 }
 
 defineExpose({ showItemInfoDialog })

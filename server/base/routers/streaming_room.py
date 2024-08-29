@@ -374,7 +374,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem):
     streamer_res = await get_llm_res(prompt)
 
     # 生成数字人视频，并更新直播间数字人视频信息
-    server_video_path = await gen_tts_and_digital_human_video_app(streamer_res)
+    server_video_path = await gen_tts_and_digital_human_video_app(streaming_room_info["streamer_id"], streamer_res)
     streaming_room_info["status"]["streaming_video_path"] = server_video_path
 
     stream_info = conversation_list[0]

@@ -16,10 +16,11 @@ router = APIRouter(
 
 
 class GenDigitalHumanVideoItem(BaseModel):
+    streamerId: int
     salesDoc: str
 
 
-async def gen_tts_and_digital_human_video_app(sales_doc: str):
+async def gen_tts_and_digital_human_video_app(streamer_id: int, sales_doc: str):
     logger.info(sales_doc)
 
     request_id = str(uuid.uuid1())
@@ -44,6 +45,7 @@ async def gen_tts_and_digital_human_video_app(sales_doc: str):
         "request_id": request_id,
         "chunk_id": 0,
         "tts_path": str(tts_save_path),
+        "streamer_id": str(streamer_id),
     }
     video_path = Path(WEB_CONFIGS.DIGITAL_HUMAN_VIDEO_OUTPUT_PATH).joinpath(request_id + ".mp4")
     logger.info(f"Generating digital human: {video_path}")
@@ -66,6 +68,6 @@ async def get_digital_human_according_doc_api(gen_item: GenDigitalHumanVideoItem
         gen_item (GenDigitalHumanVideoItem): _description_
 
     """
-    server_video_path = await gen_tts_and_digital_human_video_app(gen_item.salesDoc)
+    server_video_path = await gen_tts_and_digital_human_video_app(gen_item.streamerId, gen_item.salesDoc)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", server_video_path)

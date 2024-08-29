@@ -8,7 +8,7 @@ class ServerPluginsInfo:
 
     def __init__(self) -> None:
         self.tts_server_enabled = self.check_server(API_CONFIG.TTS_URL + "/check")
-        self.digital_human_server_enabled = self.check_server(API_CONFIG.DIGITAL_HUMAN_URL + "/check")
+        self.digital_human_server_enabled = self.check_server(API_CONFIG.DIGITAL_HUMAN_CHECK_URL)
         self.asr_server_enabled = self.check_server(API_CONFIG.ASR_URL + "/check")
 
         if WEB_CONFIGS.AGENT_DELIVERY_TIME_API_KEY is None or WEB_CONFIGS.AGENT_WEATHER_API_KEY is None:
@@ -19,12 +19,12 @@ class ServerPluginsInfo:
         self.rag_enabled = WEB_CONFIGS.ENABLE_RAG
             
         logger.info(
-            "self check plugins info : \n"
-            f"rag {self.rag_enabled}\n"
-            f"tts {self.tts_server_enabled}\n"
-            f"digital hunam {self.digital_human_server_enabled}\n"
-            f"asr {self.asr_server_enabled}\n"
-            f"agent {self.agent_enabled}\n"
+            "\nself check plugins info : \n"
+            f"| rag            | {self.rag_enabled} |\n"
+            f"| tts            | {self.tts_server_enabled} |\n"
+            f"| digital hunam  | {self.digital_human_server_enabled} |\n"
+            f"| asr            | {self.asr_server_enabled} |\n"
+            f"| agent          | {self.agent_enabled} |\n"
         )
 
     def check_server(self, url):

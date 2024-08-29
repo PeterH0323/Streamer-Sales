@@ -127,9 +127,12 @@ class ApiConfig:
     BASE_ROUTER_NAME: str = "base" if USING_DOCKER_COMPOSE else "127.0.0.1"
 
     TTS_URL: str = f"http://{TTS_ROUTER_NAME}:8001/tts"
-    DIGITAL_HUMAN_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human"
     ASR_URL: str = f"http://{ASR_ROUTER_NAME}:8003/asr"
     LLM_URL: str = f"http://{LLM_ROUTER_NAME}:23333"
+
+    DIGITAL_HUMAN_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human/gen"
+    DIGITAL_HUMAN_CHECK_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human/check"
+    DIGITAL_HUMAN_PREPROCESS_URL: str = f"http://{DIGITAL_ROUTER_NAME}:8002/digital_human/preprocess"
 
     CHAT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/chat"
     UPLOAD_PRODUCT_URL: str = f"http://{BASE_ROUTER_NAME}:8000/streamer-sales/upload_product"

@@ -6,13 +6,16 @@
 # time: 2024/08/10
 """
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import List, Optional
+import uuid
 from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
+import requests
 import yaml
 
-from ...web_configs import WEB_CONFIGS
+from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..utils import ResultCode, delete_item_by_id, get_all_streamer_info, get_streamer_info_by_id, make_return_data
 
 router = APIRouter(
@@ -83,14 +86,35 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
 
         max_streamer_id = max(item["id"], max_streamer_id)
 
+    need_to_preprocess_digital_human = False
     if update_index >= 0:
         # 修改
         logger.info("已有 ID，编辑模式，修改对应配置")
+        
+        if all_streamer_info_list[update_index]['base_mp4_path'] != streamer_info.base_mp4_path:
+            need_to_preprocess_digital_human = True
+        
         all_streamer_info_list[update_index] = asdict(streamer_info)
     else:
         logger.info("新 ID，新增模式，新增对应配置")
         streamer_info.id = max_streamer_id + 1  # 直播间 ID
         all_streamer_info_list.append(asdict(streamer_info))
+        need_to_preprocess_digital_human = True
+        
+    if need_to_preprocess_digital_human:
+        # 调取接口生成进行数字人预处理
+        
+        # streamer_info.base_mp4_path 是 服务器地址，需要进行转换
+        video_local_dir = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(WEB_CONFIGS.STREAMER_FILE_DIR, WEB_CONFIGS.STREAMER_INFO_FILES_DIR)
+        
+        digital_human_gen_info = {
+            "user_id": "123",
+            "request_id": str(uuid.uuid1()),
+            "streamer_id": str(streamer_info.id),
+            "video_path": str(video_local_dir.joinpath(Path(streamer_info.base_mp4_path).name))
+        }
+        logger.info(f"Getting digital human preprocessing: {streamer_info.id}")
+        _ = requests.post(API_CONFIG.DIGITAL_HUMAN_PREPROCESS_URL, json=digital_human_gen_info)
 
     logger.info(streamer_info)
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "w", encoding="utf-8") as f:

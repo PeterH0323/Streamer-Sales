@@ -1,5 +1,4 @@
 import copy
-from datetime import datetime
 import glob
 import json
 import os
@@ -8,26 +7,20 @@ import queue
 import shutil
 import threading
 import time
-from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 import cv2
-from loguru import logger
 import numpy as np
-
 import torch
 import wget
+from loguru import logger
 from tqdm import tqdm
 
-from .musetalk.models.unet import PositionalEncoding, UNet
-from .musetalk.models.vae import VAE
+from ...web_configs import WEB_CONFIGS
 from .musetalk.utils.blending import get_image_blending, get_image_prepare_material, init_face_parsing_model
-from .musetalk.utils.face_parsing import FaceParsing
 from .musetalk.utils.preprocessing import get_landmark_and_bbox, read_imgs
 from .musetalk.utils.utils import datagen, load_all_model
-from .musetalk.whisper.audio2feature import Audio2Feature
-from ...web_configs import WEB_CONFIGS
 
 
 def setup_ffmpeg_env(model_dir):
@@ -55,9 +48,9 @@ def setup_ffmpeg_env(model_dir):
             continue
         ffmpeg_dir = str(ffmpeg_dir_path)
         break
-    print(f"setting ffmpeg dir: {ffmpeg_dir}")
+    logger.info(f"setting ffmpeg dir: {ffmpeg_dir}")
     if str(ffmpeg_dir) not in os.getenv("PATH"):
-        print(f"add ffmpeg to path : {str(ffmpeg_dir)}")
+        logger.info(f"add ffmpeg to path : {str(ffmpeg_dir)}")
         os.environ["PATH"] = f"{str(ffmpeg_dir)}:{os.environ['PATH']}"
 
 
@@ -80,7 +73,7 @@ def init_digital_model(model_dir, use_float16=False):
         )
 
     # load model weights
-    print("Loading models...")
+    logger.info("Loading models...")
     audio_processor, vae, unet, pe = load_all_model(
         audio2feature_model_path=str(whisper_pth_path),
         vae_model_path=sd_model_path,
@@ -94,7 +87,7 @@ def init_digital_model(model_dir, use_float16=False):
         pe = pe.half()
         vae.vae = vae.vae.half()
         unet.model = unet.model.half()
-    print("Loaded models done !...")
+    logger.info("Loaded models done !...")
     return audio_processor, vae, unet, pe
 
 
@@ -168,66 +161,52 @@ def osmakedirs(path_list):
         os.makedirs(path) if not os.path.exists(path) else None
 
 
-@dataclass
-class HandlerDigitalHuman:
-    audio_processor: Optional[Audio2Feature] = None
-    vae: Optional[VAE] = None
-    unet: Optional[UNet] = None
-    pe: Optional[PositionalEncoding] = None
-    face_parsing_model: Optional[FaceParsing] = None
-    frame_list_cycle: Optional[List] = None
-    coord_list_cycle: Optional[List] = None
-    input_latent_list_cycle: Optional[List] = None
-    mask_coords_list_cycle: Optional[List] = None
-    mask_list_cycle: Optional[List] = None
-    fps: int = 25
-    bbox_shift: int = 0
-    use_float16: bool = False
-
-
 @torch.no_grad()
 class Avatar:
     def __init__(self, avatar_id, work_dir, model_dir, video_path, bbox_shift, batch_size, fps, preparation_force):
-        self.avatar_id = avatar_id
+        self.avatar_id = str(avatar_id)
         self.video_path = video_path
+
         self.bbox_shift = bbox_shift
-        self.avatar_path = work_dir
         self.model_dir = model_dir
-        self.full_imgs_path = f"{self.avatar_path}/full_imgs"
-        self.coords_path = f"{self.avatar_path}/coords.pkl"
-        self.latents_out_path = f"{self.avatar_path}/latents.pt"
-        # self.video_out_path = f"{self.avatar_path}/vid_output/"
-        self.mask_out_path = f"{self.avatar_path}/mask"
-        self.mask_coords_path = f"{self.avatar_path}/mask_coords.pkl"
-        self.avatar_info_path = f"{self.avatar_path}/avator_info.json"
-        self.avatar_info = {"avatar_id": avatar_id, "video_path": video_path, "bbox_shift": bbox_shift}
+        self.work_dir = work_dir
         self.preparation_force = preparation_force
         self.batch_size = batch_size
         self.idx = 0
+        self.fps = fps
+
+        self.frame_list_cycle = []
+        self.coord_list_cycle = []
+        self.input_latent_list_cycle = []
+        self.mask_coords_list_cycle = []
+        self.mask_list_cycle = []
 
         # 模型初始化，防止 pose 导致 OOM，放到最后加载
-        face_parsing_model = load_face_parsing_model(self.model_dir)
-        audio_processor, vae, unet, pe = init_digital_model(self.model_dir, use_float16=False)
-        pe = pe.half()
-        vae.vae = vae.vae.half()
-        unet.model = unet.model.half()
+        self.face_parsing_model = load_face_parsing_model(self.model_dir)
+        self.audio_processor, self.vae, self.unet, self.pe = init_digital_model(self.model_dir, use_float16=False)
+        self.pe = self.pe.half()
+        self.vae.vae = self.vae.vae.half()
+        self.unet.model = self.unet.model.half()
 
-        self.init(vae_model=vae, face_parsing_model=face_parsing_model)
+        self.change_character(avatar_id)
 
-        self.model_handler = HandlerDigitalHuman(
-            audio_processor=audio_processor,
-            vae=vae,
-            unet=unet,
-            pe=pe,
-            face_parsing_model=face_parsing_model,
-            frame_list_cycle=self.frame_list_cycle,
-            coord_list_cycle=self.coord_list_cycle,
-            input_latent_list_cycle=self.input_latent_list_cycle,
-            mask_coords_list_cycle=self.mask_coords_list_cycle,
-            mask_list_cycle=self.mask_list_cycle,
-            fps=fps,
-            bbox_shift=bbox_shift,
-        )
+    def change_character(self, avatar_id, video_path=""):
+
+        if video_path != "":
+            logger.info(f"Switch video from {self.video_path} to {video_path}")
+            self.video_path = video_path
+
+        self.avatar_id = str(avatar_id)
+        self.avatar_path = f"{self.work_dir}/{self.avatar_id}"
+        self.full_imgs_path = f"{self.avatar_path}/full_imgs"
+        self.coords_path = f"{self.avatar_path}/coords.pkl"
+        self.latents_out_path = f"{self.avatar_path}/latents.pt"
+        self.mask_out_path = f"{self.avatar_path}/mask"
+        self.mask_coords_path = f"{self.avatar_path}/mask_coords.pkl"
+        self.avatar_info_path = f"{self.avatar_path}/avator_info.json"
+        self.avatar_info = {"avatar_id": self.avatar_id, "video_path": self.video_path, "bbox_shift": self.bbox_shift}
+
+        self.init(vae_model=self.vae, face_parsing_model=self.face_parsing_model)
 
     def init(self, vae_model, face_parsing_model):
         need_to_prepare = False
@@ -258,15 +237,15 @@ class Avatar:
             ]:
                 if not os.path.exists(prepare_file):
                     # 如有文件不存在，则需要重新生成
-                    print(f"Missing file {prepare_file}, will process prerpare...")
+                    logger.info(f"Missing file {prepare_file}, will process prerpare...")
                     need_to_prepare = True
                     shutil.rmtree(self.avatar_path)
                     break
 
         if need_to_prepare:
-            print("*********************************")
-            print(f"  creating avator: {self.avatar_id}")
-            print("*********************************")
+            logger.info("*********************************")
+            logger.info(f"  creating avator: {self.avatar_id}")
+            logger.info("*********************************")
             osmakedirs([self.avatar_path, self.full_imgs_path, self.mask_out_path])
             self.prepare_material(vae_model=vae_model, face_parsing_model=face_parsing_model)
 
@@ -283,14 +262,14 @@ class Avatar:
         self.mask_list_cycle = read_imgs(input_mask_list)
 
     def prepare_material(self, vae_model, face_parsing_model):
-        print("preparing data materials ... ...")
+        logger.info("preparing data materials ... ...")
         with open(self.avatar_info_path, "w") as f:
             json.dump(self.avatar_info, f)
 
         if os.path.isfile(self.video_path):
             video2imgs(self.video_path, self.full_imgs_path, ext="png")
         else:
-            print(f"copy files in {self.video_path}")
+            logger.info(f"copy files in {self.video_path}")
             files = os.listdir(self.video_path)
             files.sort()
             files = [file for file in files if file.split(".")[-1] == "png"]
@@ -298,10 +277,11 @@ class Avatar:
                 shutil.copyfile(f"{self.video_path}/{filename}", f"{self.full_imgs_path}/{filename}")
         input_img_list = sorted(glob.glob(os.path.join(self.full_imgs_path, "*.[jpJP][pnPN]*[gG]")))
 
-        print("extracting landmarks...")
+        logger.info("extracting landmarks...")
         pose_model = load_pose_model(self.model_dir)
         coord_list, frame_list = get_landmark_and_bbox(input_img_list, pose_model, self.bbox_shift)
         del pose_model
+        torch.cuda.empty_cache()
 
         input_latent_list = []
         idx = -1
@@ -341,7 +321,7 @@ class Avatar:
         torch.save(self.input_latent_list_cycle, os.path.join(self.latents_out_path))
 
     def process_frames(self, res_frame_queue, video_len, skip_save_images, save_dir_name):
-        print(video_len)
+        logger.info(video_len)
         while True:
             if self.idx >= video_len - 1:
                 break
@@ -371,12 +351,12 @@ class Avatar:
         tmp_tag = "tmp_" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
         os.makedirs(self.avatar_path + f"/{tmp_tag}", exist_ok=True)
-        print("start inference")
+        logger.info("start inference")
         ############################################## extract audio feature ##############################################
         start_time = time.time()
-        whisper_feature = self.model_handler.audio_processor.audio2feat(audio_path)
-        whisper_chunks = self.model_handler.audio_processor.feature2chunks(feature_array=whisper_feature, fps=fps)
-        print(f"processing audio:{audio_path} costs {(time.time() - start_time) * 1000}ms")
+        whisper_feature = self.audio_processor.audio2feat(audio_path)
+        whisper_chunks = self.audio_processor.feature2chunks(feature_array=whisper_feature, fps=fps)
+        logger.info(f"processing audio:{audio_path} costs {(time.time() - start_time) * 1000}ms")
         ############################################## inference batch by batch ##############################################
         video_num = len(whisper_chunks)
         res_frame_queue = queue.Queue()
@@ -392,17 +372,13 @@ class Avatar:
 
         for i, (whisper_batch, latent_batch) in enumerate(tqdm(gen, total=int(np.ceil(float(video_num) / self.batch_size)))):
             audio_feature_batch = torch.from_numpy(whisper_batch)
-            audio_feature_batch = audio_feature_batch.to(
-                device=self.model_handler.unet.device, dtype=self.model_handler.unet.model.dtype
-            )
-            audio_feature_batch = self.model_handler.pe(audio_feature_batch)
-            latent_batch = latent_batch.to(dtype=self.model_handler.unet.model.dtype)
+            audio_feature_batch = audio_feature_batch.to(device=self.unet.device, dtype=self.unet.model.dtype)
+            audio_feature_batch = self.pe(audio_feature_batch)
+            latent_batch = latent_batch.to(dtype=self.unet.model.dtype)
 
             timesteps = torch.tensor([0], device="cuda")
-            pred_latents = self.model_handler.unet.model(
-                latent_batch, timesteps, encoder_hidden_states=audio_feature_batch
-            ).sample
-            recon = self.model_handler.vae.decode_latents(pred_latents)
+            pred_latents = self.unet.model(latent_batch, timesteps, encoder_hidden_states=audio_feature_batch).sample
+            recon = self.vae.decode_latents(pred_latents)
             for res_frame in recon:
                 res_frame_queue.put(res_frame)
         # Close the queue and sub-thread after all tasks are completed
@@ -436,7 +412,7 @@ class Avatar:
 def digital_human_preprocess(model_dir, use_float16, video_path, work_dir, fps, bbox_shift):
 
     avatar = Avatar(
-        avatar_id="lelemiao",
+        avatar_id="1",  # lelemiao
         work_dir=work_dir,
         model_dir=model_dir,
         video_path=video_path,
@@ -454,6 +430,7 @@ def digital_human_preprocess(model_dir, use_float16, video_path, work_dir, fps, 
 @torch.no_grad()
 def gen_digital_human_video(
     avatar_handler: Avatar,
+    stream_id,
     audio_path,
     work_dir,
     video_path,
@@ -465,6 +442,10 @@ def gen_digital_human_video(
     # output_vid_image_dir = Path(work_dir).joinpath(f"{Path(video_path).stem}+{Path(audio_path).stem}")
     # output_vid_file_path = output_vid_image_dir.with_suffix(".mp4")
 
+    if avatar_handler.avatar_id != str(stream_id):
+        logger.info(f"Change digital human avatar from {avatar_handler.avatar_id} to {stream_id}")
+        avatar_handler.change_character(str(stream_id))
+
     output_vid_file_path = Path(work_dir).joinpath(video_path)
     output_vid = avatar_handler.inference(
         audio_path=audio_path,  # wav file
@@ -474,6 +455,27 @@ def gen_digital_human_video(
     )
 
     return output_vid
+
+
+@torch.no_grad()
+def gen_digital_human_preprocess(avatar_handler: Avatar, stream_id, work_dir, video_path):
+    """更换数字人并进行预处理"""
+
+    if not Path(work_dir).exists():
+        Path(work_dir).mkdir(exist_ok=True, parents=True)
+
+    old_id = avatar_handler.avatar_id  # 方便后续切回去
+    old_video_path = avatar_handler.video_path  # 方便后续切回去
+    avatar_handler.preparation_force = True  # 强制生成，避免在一个 ID 重复上传
+
+    logger.info(f"Processing for id: {stream_id}")
+    avatar_handler.change_character(str(stream_id), video_path)
+
+    # 还原配置
+    avatar_handler.preparation_force = False
+    avatar_handler.change_character(old_id, old_video_path)
+
+    return True
 
 
 if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
