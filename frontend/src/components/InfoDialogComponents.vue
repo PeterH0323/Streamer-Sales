@@ -113,61 +113,59 @@ defineExpose({ showItemInfoDialog })
 <template>
   <div>
     <!-- 显示说明书 or 文案 or 数字人视频-->
-    <teleport to="body">
-      <el-dialog v-model="dialogFormVisible" :title="titleName + title" width="1000" top="5vh">
-        <!-- 主播文案  -->
-        <template v-if="itemType === 'SalesDoc'">
-          <div>
-            <el-input
-              type="textarea"
-              v-model="infoValue"
-              maxlength="2000"
-              :autosize="{ minRows: 20 }"
-              show-word-limit
-            />
-            <div class="bottom-gen-btn">
-              <el-button @click="handleGenSalesDocClick" :loading="isGenerating" type="primary">
-                AI 生成
-              </el-button>
-            </div>
-          </div>
-        </template>
-
-        <!-- 说明书 -->
-        <template v-else-if="itemType === 'Instruction'">
-          <div style="text-align: left">
-            <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
-          </div>
-        </template>
-
-        <!-- 数字人视频 -->
-        <template v-else-if="itemType === 'DigitalHuman'">
-          <div>
-            <VideoComponent :src="infoValue" :key="infoValue" />
-
-            <div class="bottom-gen-btn">
-              <el-button @click="getDigitalHumanVideo" :loading="isGenerating" type="primary">
-                AI 生成数字人视频
-              </el-button>
-            </div>
-          </div>
-        </template>
-        <template #footer>
-          <div class="dialog-footer bottom-gen-btn">
-            <!-- <el-button type="primary" @click="handelEditClick"> 编辑 </el-button> -->
-
-            <el-button
-              v-show="itemType !== 'Instruction'"
-              @click="dialogFormVisible = false"
-              type="success"
-            >
-              保存
+    <el-dialog v-model="dialogFormVisible" :title="titleName + title" width="1000" top="5vh">
+      <!-- 主播文案  -->
+      <template v-if="itemType === 'SalesDoc'">
+        <div>
+          <el-input
+            type="textarea"
+            v-model="infoValue"
+            maxlength="2000"
+            :autosize="{ minRows: 20 }"
+            show-word-limit
+          />
+          <div class="bottom-gen-btn">
+            <el-button @click="handleGenSalesDocClick" :loading="isGenerating" type="primary">
+              AI 生成
             </el-button>
-            <el-button @click="dialogFormVisible = false">关闭</el-button>
           </div>
-        </template>
-      </el-dialog>
-    </teleport>
+        </div>
+      </template>
+
+      <!-- 说明书 -->
+      <template v-else-if="itemType === 'Instruction'">
+        <div style="text-align: left">
+          <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
+        </div>
+      </template>
+
+      <!-- 数字人视频 -->
+      <template v-else-if="itemType === 'DigitalHuman'">
+        <div class="make-center">
+          <VideoComponent :src="infoValue" :key="infoValue" :height="600" />
+        </div>
+
+        <div class="bottom-gen-btn">
+          <el-button @click="getDigitalHumanVideo" :loading="isGenerating" type="primary">
+            AI 生成数字人视频
+          </el-button>
+        </div>
+      </template>
+      <template #footer>
+        <div class="dialog-footer bottom-gen-btn">
+          <!-- <el-button type="primary" @click="handelEditClick"> 编辑 </el-button> -->
+
+          <el-button
+            v-show="itemType !== 'Instruction'"
+            @click="dialogFormVisible = false"
+            type="success"
+          >
+            保存
+          </el-button>
+          <el-button @click="dialogFormVisible = false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -178,5 +176,24 @@ defineExpose({ showItemInfoDialog })
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.make-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+::v-deep(.el-input__wrapper) {
+  border-radius: 14px;
+}
+
+// 使用 ::v-deep 选择器来覆盖 el-dialog 的默认样式。
+::v-deep(.el-dialog) {
+  border-radius: 10px;
+  padding: 20px;
+
+  --el-dialog-bg-color: #f7f8fa;
+  --el-dialog-title-font-size: 20px;
 }
 </style>
