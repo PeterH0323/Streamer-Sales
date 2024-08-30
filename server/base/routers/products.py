@@ -81,16 +81,12 @@ async def upload_product_api(upload_product_item: ProductItem, user_id: int = De
         delete=False,
     )
 
-    if upload_product_item.product_name not in product_info_dict:
-        # 没有则加入
-        product_info_dict.update({upload_product_item.product_name: dict(new_info_dict)})
-    else:
+    if upload_product_item.product_name in product_info_dict:
         # 有则更新
         new_info_dict.product_id = product_info_dict[upload_product_item.product_name]["product_id"]  # 使用原来的 ID
-        product_info_dict[upload_product_item.product_name] = dict(new_info_dict)
 
     # 保存
-    save_product_info(product_info_dict)
+    save_product_info(upload_product_item.product_name, dict(new_info_dict))
 
     if WEB_CONFIGS.ENABLE_RAG:
         # 重新生成 RAG 向量数据库
