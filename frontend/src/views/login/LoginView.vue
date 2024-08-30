@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElNotification, type FormInstance, type FormRules } from 'element-plus'
 import { loginRequest } from '@/api/user'
-import { useTokenStore } from '@/stores/userToken'
+import { useTokenStore, type TokenItem } from '@/stores/userToken'
 
 const router = useRouter()
 const route = useRoute()
@@ -79,7 +79,7 @@ const onSubmit = async () => {
   console.log(log_res)
 
   // 保存 token 信息
-  tokenStore.saveToken(log_res)
+  tokenStore.saveToken(log_res as TokenItem)
 
   // 设置已经完成登录
   isLogining.value = false
@@ -91,7 +91,7 @@ const onSubmit = async () => {
     type: 'success'
   })
 
-  router.push(route.query.redirect || '/') // 页面跳转，如果是被未登录拦截的话，登录成功后跳转会目标页面
+  router.push((route.query.redirect as string) || '/') // 页面跳转，如果是被未登录拦截的话，登录成功后跳转会目标页面
 }
 </script>
 
