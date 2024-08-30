@@ -14,14 +14,14 @@ router = APIRouter(
 
 
 class GenProductItem(BaseModel):
-    user_id: str = ""  # User 识别号，用于区分不用的用户调用
+    user_id: int = ""  # User 识别号，用于区分不用的用户调用
     request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
     gen_type: str  # "./product_info/images/pants.png"
     instruction: str  # "./product_info/instructions/pants.md"
 
 
 class GenSalesDocItem(BaseModel):
-    user_id: str = ""  # User 识别号，用于区分不用的用户调用
+    user_id: int = ""  # User 识别号，用于区分不用的用户调用
     request_id: str = ""  # 请求 ID，用于生成 TTS & 数字人
     streamerId: int
     productId: int
@@ -77,7 +77,7 @@ async def gen_poduct_base_prompt(streamer_id, product_id):
     product_info = product_list[0]
 
     product_info_str = product_info_struct_template[0].replace("{name}", product_info["product_name"])
-    product_info_str += product_info_struct_template[1].replace("{highlights}", product_info["heighlights"])
+    product_info_str += product_info_struct_template[1].replace("{highlights}", "、".join(product_info["heighlights"]))
 
     # 生成商品文案 prompt
     first_input = first_input_template.replace("{product_info}", product_info_str)

@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus/es'
+import { ElInput } from 'element-plus'
+import type { InputInstance } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 
 import FileUpload from '@/components/FileUpload.vue'
 
-import {
-  type ProductListItem,
-  getProductByIdRequest,
-  productCreadeOrEditRequest
-} from '@/api/product'
+import { type ProductItem, getProductByIdRequest, productCreadeOrEditRequest } from '@/api/product'
 
 const router = useRouter()
 
@@ -25,7 +24,33 @@ const props = defineProps({
 const currentStep = ref(0)
 
 // 商品信息
-const productInfo = ref({} as ProductListItem)
+const productInfo = ref({} as ProductItem)
+productInfo.value.heighlights = [] // 初始化
+
+// 商品亮点操作
+const inputHeighlightValue = ref('')
+const inputHeighlightVisible = ref(false)
+const InputHeighlightRef = ref<InputInstance>()
+
+const handleHeighlightClose = (tag: string) => {
+  // 删除性格操作
+  productInfo.value.heighlights.splice(productInfo.value.heighlights.indexOf(tag), 1)
+}
+
+const showHeighlightInput = () => {
+  inputHeighlightVisible.value = true
+  nextTick(() => {
+    InputHeighlightRef.value!.input!.focus()
+  })
+}
+
+const handleHeighlightInputConfirm = () => {
+  if (inputHeighlightValue.value) {
+    productInfo.value.heighlights.push(inputHeighlightValue.value)
+  }
+  inputHeighlightVisible.value = false
+  inputHeighlightValue.value = ''
+}
 
 // 表单提交
 const onSubmit = async () => {
@@ -105,7 +130,39 @@ onMounted(async () => {
             <el-input v-model="productInfo.product_class" />
           </el-form-item>
           <el-form-item label="商品亮点">
-            <el-input v-model="productInfo.heighlights" maxlength="200" show-word-limit />
+            <el-tag
+              v-for="(heighlights, index) in productInfo.heighlights"
+              :key="index"
+              :disable-transitions="false"
+              closable
+              @close="handleHeighlightClose(heighlights)"
+              round
+              size="large"
+              style="margin: 3px"
+            >
+              {{ heighlights }}
+            </el-tag>
+
+            <el-input
+              v-if="inputHeighlightVisible"
+              ref="InputHeighlightRef"
+              v-model="inputHeighlightValue"
+              class="w-20"
+              @keyup.enter="handleHeighlightInputConfirm"
+              @blur="handleHeighlightInputConfirm"
+              size="large"
+            />
+            <el-button
+              v-else
+              @click="showHeighlightInput"
+              circle
+              :icon="Plus"
+              type="primary"
+              plain
+              size="small"
+              :disabled="productInfo.heighlights.length > 7"
+            >
+            </el-button>
           </el-form-item>
           <el-form-item label="价格">
             <el-input-number
@@ -172,11 +229,6 @@ onMounted(async () => {
 // 中间表单控件
 .el-form {
   padding: 0px 180px 0px 100px; // 从上开始顺时针四个放心
-}
-
-// 视频控件
-.video-container {
-  // margin-left: 1000px;
 }
 
 // 每个表单底部 AI 生成按钮

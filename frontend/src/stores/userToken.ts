@@ -1,26 +1,17 @@
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ElMessage } from 'element-plus'
 
 interface TokenItem {
   access_token: string
   token_type: string
 }
 
-export const useTokenStore = defineStore('user-token', {
+const useTokenStore = defineStore('user-token', {
   state: () => {
-    const tokenJson = ref({} as TokenItem)
-    const token = computed(() => {
-      try {
-        return tokenJson.value
-      } catch (error) {
-        ElMessage.error('接口错误')
-        throw error
-      }
-    })
+    const token = ref({} as TokenItem)
 
     function saveToken(data: TokenItem) {
-      tokenJson.value = data
+      token.value = data
     }
 
     return { token, saveToken }
@@ -31,3 +22,5 @@ export const useTokenStore = defineStore('user-token', {
     storage: localStorage
   }
 })
+
+export { type TokenItem, useTokenStore }

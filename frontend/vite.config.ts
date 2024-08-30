@@ -10,6 +10,7 @@ export default defineConfig({
     proxy: {
       '/user': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/products': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
+      '/upload': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/streamer': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/llm': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/dashboard': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,

@@ -13,12 +13,14 @@ from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
 
+
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
 from .server_info import SERVER_PLUGINS_INFO
+from .database.product_db import get_db_product_info, save_product_info
 
 
 class ChatGenConfig(BaseModel):
@@ -331,7 +333,7 @@ async def get_streaming_room_info(id=-1):
     return []
 
 
-def make_poster_by_video_first_frame(video_path: str, image_output_name:str):
+def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
     """根据视频第一帧生成缩略图
 
     Args:
@@ -429,26 +431,6 @@ async def get_user_info(id: str):
     return user_info
 
 
-async def get_db_product_info(user_id: str = ""):
-    # 读取 yaml 文件
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-
-    # 过滤掉已经被删除的商品
-    filter_product_list = dict()
-    for k, v in product_info_dict.items():
-        if v.get("delete", False) == True:
-            continue
-        filter_product_list.update({k: v})
-
-    return filter_product_list
-
-
-def save_product_info(product_info_dict):
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(product_info_dict, f, allow_unicode=True)
-
-
 def save_streamer_info(all_streamer_info_list):
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "w", encoding="utf-8") as f:
         yaml.dump(all_streamer_info_list, f, allow_unicode=True)
@@ -460,7 +442,7 @@ def save_stream_room_info(streaming_room_info):
         yaml.dump(streaming_room_info, f, allow_unicode=True)
 
 
-async def delete_item_by_id(item_type: str, delete_id: int):
+async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = ""):
     """根据类型删除某个ID的信息"""
 
     logger.info(delete_id)

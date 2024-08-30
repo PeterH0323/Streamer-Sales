@@ -170,7 +170,6 @@ const router = createRouter({
 import { useTokenStore } from '@/stores/userToken'
 
 router.beforeEach((to, from, next) => {
-  //TODO 加入登录验证
   if (to.matched.some((r) => r.meta?.requiresAuth)) {
     // 登录状态缓存
     const tokenStore = useTokenStore()

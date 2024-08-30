@@ -3,6 +3,8 @@ import { ref, watchEffect } from 'vue'
 import { ElMessage, type UploadProps, type UploadProgressEvent } from 'element-plus'
 import { Plus, Document } from '@element-plus/icons-vue'
 
+import { header_authorization } from '@/api/user'
+
 // 定义组件入参
 const props = defineProps({
   fileType: {
@@ -84,7 +86,10 @@ const handleUploadProgress = (evt: UploadProgressEvent) => {
     <el-upload
       v-show="!isShowProgress"
       class="avatar-uploader"
-      action="/products/upload/file"
+      action="/upload/file"
+      :headers="{
+        Authorization: header_authorization
+      }"
       method="post"
       :drag="props.fileType !== 'video' && props.fileType !== 'audio'"
       :multiple="false"

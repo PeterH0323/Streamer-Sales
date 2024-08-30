@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { MdPreview } from 'md-editor-v3'
 
@@ -12,7 +11,6 @@ import VideoComponent from '@/components/VideoComponent.vue'
 import { genDigitalHuamnVideoRequest } from '@/api/digitalHuman'
 
 const dialogFormVisible = ref(false)
-const router = useRouter()
 
 // AI 生成后的 文案 or 数字人视频 值双向绑定
 const modelGenValue = defineModel({ default: '' })

@@ -1,5 +1,5 @@
 import { request_handler, type ResultPackage } from '@/api/base'
-import { type StreamerInfo, type ProductListItem } from '@/api/product'
+import { type StreamerInfo, type ProductItem } from '@/api/product'
 
 interface StreamingRoomProductList {
   product_id: number
@@ -20,7 +20,7 @@ interface messageItem {
 interface StreamingRoomStatusItem {
   streamerInfo: StreamerInfo
   conversation: messageItem[]
-  currentProductInfo: ProductListItem
+  currentProductInfo: ProductItem
   currentStreamerVideo: string
   currentProductIndex: number
   startTime: string
@@ -44,9 +44,9 @@ interface RoomProductData {
   currentPage: number
   pageSize: number
   totalSize: number
-  product: ProductItem[]
+  product: RoomProductItem[]
 }
-interface ProductItem {
+interface RoomProductItem {
   name: string
   id: number
   image: string
@@ -145,7 +145,7 @@ const deleteStreamingRoomByIdRequest = (roomId_: number) => {
 
 export {
   type StreamingRoomInfo,
-  type ProductItem,
+  type RoomProductItem,
   type RoomProductData,
   type RoomDetailItem,
   type StreamingRoomStatusItem,

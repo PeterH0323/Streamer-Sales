@@ -10,7 +10,7 @@ import {
   onAirRoomNextProductRequest,
   type StreamingRoomStatusItem
 } from '@/api/streamingRoom'
-import type { ProductListItem, StreamerInfo } from '@/api/product'
+import type { ProductItem, StreamerInfo } from '@/api/product'
 
 // 定义传参
 const props = defineProps({
@@ -24,7 +24,7 @@ const props = defineProps({
 const inputValue = ref('')
 
 const currentStatus = ref({} as StreamingRoomStatusItem)
-currentStatus.value.currentProductInfo = {} as ProductListItem
+currentStatus.value.currentProductInfo = {} as ProductItem
 currentStatus.value.streamerInfo = {} as StreamerInfo
 
 const getRoomInfo = async () => {

@@ -3,7 +3,6 @@
   delete: false
   delivery_company: 京东
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 轻薄
   - 触控操作
@@ -15,15 +14,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/pad.md
   product_class: 电子
   product_id: 10
-  sales_doc: 14英寸平板电脑
   selling_price: 1999.99
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 65英寸OLED电视:
   amount: 68731
   delete: false
   delivery_company: 京东
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 色彩鲜艳
   - 对比度极高
@@ -35,14 +34,14 @@
   instruction: http://localhost:8000/files/product_files/instructions/oled_tv.md
   product_class: 家电
   product_id: 11
-  sales_doc: 65英寸OLED电视
   selling_price: 12999.99
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 不粘煎炒锅:
   amount: 67423
   delivery_company: 京东
   departure_place: 武汉
-  digital_human_video: '666'
   heighlights:
   - 不粘涂层
   - 耐磨耐用
@@ -54,15 +53,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/wok.md
   product_class: 厨具
   product_id: 9
-  sales_doc: 不粘煎炒锅
   selling_price: 168.6
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 光感润颜面膜:
   amount: 68441
   delete: false
   delivery_company: 韵达
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 密集滋养
   - 深层补水
@@ -74,15 +73,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/mask.md
   product_class: 美妆
   product_id: 4
-  sales_doc: 光感润颜面膜
   selling_price: 299.0
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 唇膏:
   amount: 1068
   delete: false
   delivery_company: 圆通
   departure_place: 宁波
-  digital_human_video: '666'
   heighlights:
   - 丰富色号
   - 滋润保湿
@@ -94,15 +93,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/lip_stick.md
   product_class: 美妆
   product_id: 2
-  sales_doc: 唇膏
   selling_price: 399.8
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 墨水钢笔:
   amount: 681684
   delete: false
   delivery_company: 圆通
   departure_place: 宁波
-  digital_human_video: '666'
   heighlights:
   - 耐用性
   - 可书写性
@@ -114,15 +113,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/pen.md
   product_class: 文具
   product_id: 6
-  sales_doc: 墨水钢笔
   selling_price: 36.8
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 声波电动牙刷:
   amount: 10000
   delete: true
   delivery_company: 顺丰
   departure_place: 汕头
-  digital_human_video: '666'
   heighlights:
   - 高效清洁
   - 减少手动压力
@@ -134,15 +133,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/elec_toothblush.md
   product_class: 电子
   product_id: 1
-  sales_doc: 声波电动牙刷
   selling_price: 99.9
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 本草精华洗发露:
   amount: 106999
   delete: false
   delivery_company: 申通
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 温和配方
   - 深层清洁
@@ -154,15 +153,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/shampoo.md
   product_class: 日用品
   product_id: 3
-  sales_doc: 本草精华洗发露
   selling_price: 60.0
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 瑜伽垫:
   amount: 987913
   delete: false
   delivery_company: 圆通
   departure_place: 汕头
-  digital_human_video: '666'
   heighlights:
   - 防滑材质
   - 吸湿排汗
@@ -174,15 +173,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/yoga_mat.md
   product_class: 运动
   product_id: 7
-  sales_doc: 瑜伽垫
   selling_price: 16.8
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 薰衣草淡香氛:
   amount: 681321
   delete: false
   delivery_company: 韵达
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 浪漫优雅
   - 花香调为主
@@ -194,15 +193,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/perfume.md
   product_class: 家居用品
   product_id: 5
-  sales_doc: 薰衣草淡香氛
   selling_price: 499.0
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 进口和牛羽下肉:
   amount: 96836
   delete: false
   delivery_company: 顺丰
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 富含铁质
   - 营养价值高
@@ -214,15 +213,15 @@
   instruction: http://localhost:8000/files/product_files/instructions/beef.md
   product_class: 食品
   product_id: 12
-  sales_doc: 进口和牛羽下肉
   selling_price: 99.68
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1
+
 速干运动裤:
   amount: 12435
   delete: false
   delivery_company: 圆通
   departure_place: 广州
-  digital_human_video: '666'
   heighlights:
   - 快干
   - 伸缩自如
@@ -234,6 +233,6 @@
   instruction: http://localhost:8000/files/product_files/instructions/pants.md
   product_class: 衣服
   product_id: 8
-  sales_doc: 速干运动裤
   selling_price: 66.9
   upload_date: '2024-08-18 12:11:53'
+  user_id: 1

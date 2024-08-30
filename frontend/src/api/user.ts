@@ -1,5 +1,6 @@
-import { request_handler, type ResultPackage } from '@/api/base'
-import { type TokenItem } from '@/stores/userToken'
+import { computed } from 'vue'
+import { request_handler } from '@/api/base'
+import { type TokenItem, useTokenStore } from '@/stores/userToken'
 
 // 调用登录接口数据结构定义
 type loginFormType = {
@@ -7,6 +8,14 @@ type loginFormType = {
   password: string
   vertify_code?: string
 }
+
+// pinia 保存的 token
+const tokenStore = useTokenStore()
+
+const header_authorization = computed(() => {
+  console.log('Update token')
+  return `${tokenStore.token.token_type} ${tokenStore.token.access_token}`
+})
 
 const loginRequest = (loginForm: loginFormType) => {
   const formData = new FormData()
@@ -23,4 +32,4 @@ const loginRequest = (loginForm: loginFormType) => {
   })
 }
 
-export { loginRequest }
+export { loginRequest, header_authorization }
