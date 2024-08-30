@@ -5,7 +5,7 @@ import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import { header_authorization } from '@/api/user'
 
-// 调用登录接口数据结构定义
+// 调用商品信息接口数据结构定义
 type ProductListType = {
   currentPage?: number // 当前页号
   pageSize?: number // 每页记录数

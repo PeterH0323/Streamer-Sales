@@ -14,7 +14,9 @@ from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel
 
+
 from ...web_configs import WEB_CONFIGS
+from ..database.streamer_info_db import get_streamers_info
 from ..modules.agent.agent_worker import get_agent_result
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..server_info import SERVER_PLUGINS_INFO
@@ -25,9 +27,7 @@ from ..utils import (
     StreamRoomInfoItem,
     combine_history,
     delete_item_by_id,
-    get_all_streamer_info,
     get_conversation_list,
-    get_streamer_info_by_id,
     get_streaming_room_info,
     get_user_info,
     make_return_data,
@@ -87,7 +87,7 @@ async def get_streaming_room_api():
     streaming_room_list = await get_streaming_room_info()
 
     for room in streaming_room_list:
-        streamer_info = await get_streamer_info_by_id(room["streamer_id"])
+        streamer_info = await get_streamers_info(room["streamer_id"])
         room.update({"streamer_info": streamer_info[0]})
 
     logger.info(streaming_room_list)
@@ -135,7 +135,7 @@ async def get_streaming_room_api(room_info: RoomProductListItem):
         filter_list = filter_list[start_index:end_index]
 
     # 主播信息
-    streamer_list = await get_all_streamer_info()
+    streamer_list = await get_streamers_info()
     streamer_info = dict()
     for i in streamer_list:
         if i["id"] == streaming_room_info["streamer_id"]:
@@ -406,7 +406,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     logger.info(streaming_room_info)
 
     # 根据 ID 获取主播信息
-    streamer_info = await get_streamer_info_by_id(streaming_room_info["streamer_id"])
+    streamer_info = await get_streamers_info(streaming_room_info["streamer_id"])
     streamer_info = streamer_info[0]
 
     # 商品信息

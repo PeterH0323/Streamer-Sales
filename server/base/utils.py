@@ -13,14 +13,14 @@ from loguru import logger
 from pydantic import BaseModel
 from tqdm import tqdm
 
-
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
+from .database.product_db import get_db_product_info, save_product_info
+from .database.streamer_info_db import get_streamers_info, save_streamer_info
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
 from .server_info import SERVER_PLUGINS_INFO
-from .database.product_db import get_db_product_info, save_product_info
 
 
 class ChatGenConfig(BaseModel):
@@ -262,31 +262,6 @@ def combine_history(prompt: list, history_msg: list):
     return prompt
 
 
-async def get_all_streamer_info():
-    # 加载对话配置文件
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streamer_info = yaml.safe_load(f)
-    filter_streamer_list = []
-    for streamer in streamer_info:
-        if streamer["delete"]:
-            continue
-        filter_streamer_list.append(streamer)
-
-    return filter_streamer_list
-
-
-async def get_streamer_info_by_id(id: int):
-    streamer_list = await get_all_streamer_info()
-
-    pick_info = []
-    for i in streamer_list:
-        if i["id"] == id:
-            pick_info = [i]
-            break
-
-    return pick_info
-
-
 @dataclass
 class OnAirRoomStatusItem:
     conversation_id: str = ""
@@ -431,11 +406,6 @@ async def get_user_info(id: str):
     return user_info
 
 
-def save_streamer_info(all_streamer_info_list):
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(all_streamer_info_list, f, allow_unicode=True)
-
-
 def save_stream_room_info(streaming_room_info):
     # 保存
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -451,7 +421,7 @@ async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
 
     get_func_map = {
         "product": get_db_product_info,
-        "streamer": get_all_streamer_info,
+        "streamer": get_streamers_info,
         "room": get_streaming_room_info,
     }
 

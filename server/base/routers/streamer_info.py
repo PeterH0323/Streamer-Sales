@@ -1,29 +1,26 @@
-#!usr/bin/env python
-# -*- coding:utf-8 _*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-# author: HinGwenWong
-# github: https://github.com/PeterH0323/Streamer-Sales
-# time: 2024/08/10
+@File    :   streamer_info.py
+@Time    :   2024/08/10
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   主播管理信息页面接口
 """
-from dataclasses import asdict, dataclass
-from pathlib import Path
-from typing import List, Optional
+
 import uuid
-from fastapi import APIRouter
-from loguru import logger
-from pydantic import BaseModel
+from pathlib import Path
+
 import requests
-import yaml
+from fastapi import APIRouter, Depends
+from loguru import logger
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
-from ..utils import (
-    ResultCode,
-    delete_item_by_id,
-    get_all_streamer_info,
-    get_streamer_info_by_id,
-    make_poster_by_video_first_frame,
-    make_return_data,
-)
+from ..database.streamer_info_db import get_max_streamer_id, get_streamers_info, save_streamer_info
+from ..models.streamer_info_model import StreamerInfo, StreamerInfoItem
+from ..utils import ResultCode, delete_item_by_id, make_poster_by_video_first_frame, make_return_data
+from .users import get_current_user_info
 
 router = APIRouter(
     prefix="/streamer",
@@ -32,66 +29,45 @@ router = APIRouter(
 )
 
 
-@dataclass
-class StreamerInfoItem:
-    id: int = 0
-    name: str = ""
-    character: List[str] = None
-    value: str = ""
-    avater: str = ""  # 头像
-
-    tts_weight_tag: str = ""  # 艾丝妲
-    tts_tag: str = ""
-    tts_reference_sentence: str = ""
-    tts_reference_audio: str = ""
-
-    poster_image: str = ""
-    base_mp4_path: str = ""
-    delete: bool = False
-
-
-class StreamerInfo(BaseModel):
-    # 主播信息
-    streamerId: int
-
-
-@router.post("/list")
-async def get_streamer_info_api():
+@router.post("/list", summary="获取所有主播信息接口，用于用户进行主播的选择")
+async def get_streamer_info_api(user_id: int = Depends(get_current_user_info)):
     """获取所有主播信息，用于用户进行主播的选择"""
-    streamer_list = await get_all_streamer_info()
+    streamer_list = await get_streamers_info(user_id)
 
     logger.info(streamer_list)
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_list)
 
 
-@router.post("/info")
-async def get_streamer_info_api(streamer_info: StreamerInfo):
+@router.get("/info", summary="用于获取特定主播的信息接口")
+async def get_streamer_info_api(streamerId: int, user_id: int = Depends(get_current_user_info)):
     """用于获取特定主播的信息"""
-    pick_info = await get_streamer_info_by_id(streamer_info.streamerId)
+
+    pick_info = []
+    if streamerId > 0:
+        pick_info = await get_streamers_info(user_id, streamerId)
 
     if len(pick_info) == 0:
         # 没找到 or 主播 ID = 0，回复一个空的
         new_info = StreamerInfoItem(character=[""])
-        pick_info = [asdict(new_info)]
+        pick_info = [dict(new_info)]
 
     logger.info(pick_info)
     return make_return_data(True, ResultCode.SUCCESS, "成功", pick_info)
 
 
-@router.post("/edit")
-async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
+@router.post("/edit", summary="新增 or 修改主播信息接口")
+async def edit_streamer_info_api(streamer_info: StreamerInfoItem, user_id: int = Depends(get_current_user_info)):
     """新增 or 修改主播信息"""
 
-    all_streamer_info_list = await get_all_streamer_info()
-    max_streamer_id = -1
+    all_streamer_info_list = await get_streamers_info(user_id)
+    max_streamer_id = get_max_streamer_id()
+
     update_index = -1
     for idx, item in enumerate(all_streamer_info_list):
 
         if item["id"] == streamer_info.id:
             update_index = idx
             break
-
-        max_streamer_id = max(item["id"], max_streamer_id)
 
     need_to_preprocess_digital_human = False
     if update_index >= 0:
@@ -101,11 +77,10 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
         if all_streamer_info_list[update_index]["base_mp4_path"] != streamer_info.base_mp4_path:
             need_to_preprocess_digital_human = True
 
-        all_streamer_info_list[update_index] = asdict(streamer_info)
     else:
         logger.info("新 ID，新增模式，新增对应配置")
-        streamer_info.id = max_streamer_id + 1  # 直播间 ID
-        all_streamer_info_list.append(asdict(streamer_info))
+        streamer_info.id = max_streamer_id + 1  #  主播 ID
+        streamer_info.user_id = user_id
         need_to_preprocess_digital_human = True
         update_index += 1
 
@@ -128,20 +103,21 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem):
 
         poster_save_name = Path(streamer_info.base_mp4_path).stem + ".png"
         make_poster_by_video_first_frame(str(video_local_dir.joinpath(Path(streamer_info.base_mp4_path).name)), poster_save_name)
-        all_streamer_info_list[update_index]['poster_image'] = str(Path(streamer_info.base_mp4_path).parent.joinpath(poster_save_name))
-        streamer_info.poster_image = all_streamer_info_list[update_index]['poster_image']
+        all_streamer_info_list[update_index]["poster_image"] = str(
+            Path(streamer_info.base_mp4_path).parent.joinpath(poster_save_name)
+        )
+        streamer_info.poster_image = all_streamer_info_list[update_index]["poster_image"]
 
     logger.info(streamer_info)
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(all_streamer_info_list, f, allow_unicode=True)
+    save_streamer_info(streamer_info)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_info.id)
 
 
-@router.post("/delete")
-async def upload_product_api(delete_info: StreamerInfo):
+@router.post("/delete", summary="删除主播接口")
+async def upload_product_api(delete_info: StreamerInfo, user_id: int = Depends(get_current_user_info)):
 
-    process_success_flag = await delete_item_by_id("streamer", delete_info.streamerId)
+    process_success_flag = await delete_item_by_id("streamer", delete_info.streamerId, user_id)
 
     if not process_success_flag:
         return make_return_data(False, ResultCode.FAIL, "失败", "")

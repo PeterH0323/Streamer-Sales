@@ -14,7 +14,7 @@ const dialogInfoVisible = ref(false)
 // 定义标题
 const steamerInfo = ref({} as StreamerInfo)
 const showItemInfoDialog = async (streamerId: number) => {
-  console.log(streamerId)
+  console.log('streamerId = ', streamerId)
   dialogInfoVisible.value = true
 
   // 请求接口获取主播数据
