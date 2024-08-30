@@ -192,15 +192,31 @@ const handelControlClick = (
       <template #default>
         <div>
           <ul class="product-list">
-            <li v-for="item in DrawerProductList.product" :key="item.id" class="list-item">
+            <li
+              v-for="item in DrawerProductList.product"
+              :key="item.id"
+              style="margin-bottom: 10px"
+            >
               <el-checkbox-button
                 v-model="item.selected"
                 size="large"
-                style="width: 160px; height: 160px; padding: 20px"
                 border
+                class="item-checkbox-button"
               >
-                <el-image style="width: 100px; height: 100px" :src="item.image" fit="contain" />
-                <p>{{ item.name }}</p>
+                <el-card shadow="never">
+                  <el-row :gutter="0">
+                    <el-col :span="6">
+                      <el-image style="width: 80px; height: 80px" :src="item.image" fit="contain" />
+                    </el-col>
+                    <el-col :span="18">
+                      <div class="product-info">
+                        <p class="title">{{ item.name }}</p>
+                        <p class="content">{{ item.heighlights }}</p>
+                        <p class="price">￥{{ item.price }}</p>
+                      </div>
+                    </el-col>
+                  </el-row>
+                </el-card>
               </el-checkbox-button>
             </li>
           </ul>
@@ -372,15 +388,7 @@ const handelControlClick = (
   align-items: center;
 }
 
-.list-item {
-  width: 50%; /* 每行两个元素 */
-  box-sizing: border-box; /* 确保 padding 不影响宽度计算 */
-  padding: 10px; /* 调整间距 */
-}
-
 .product-list {
-  display: flex;
-  flex-wrap: wrap; /* 允许换行 */
   padding-left: 0; /* 去掉默认的缩进 */
   margin: 0; /* 去掉默认的外边距 */
   list-style-type: none; /* 去掉列表项前的默认圆点 */
@@ -388,12 +396,6 @@ const handelControlClick = (
   .ul {
     list-style-type: none;
     padding-left: 0; /* 去掉默认的缩进 */
-    margin: 0; /* 根据需要调整外边距 */
-  }
-
-  .li {
-    margin: 0; /* 根据需要调整 */
-    padding: 0; /* 根据需要调整 */
   }
 }
 
@@ -405,5 +407,45 @@ const handelControlClick = (
 
 ::v-deep(.el-input__wrapper) {
   border-radius: 14px;
+}
+
+.item-checkbox-button {
+  ::v-deep(.el-checkbox-button__inner) {
+    border-radius: 20px; /* 设置 checkbox button 圆角大小 */
+    line-height: 0;
+    text-align: left;
+    padding: 5px 5px;
+  }
+
+  .el-card__body {
+    padding: 0px !important;
+  }
+  .el-card {
+    margin: 0px;
+    width: 450px;
+    height: 120px;
+    padding: 0px;
+
+    .product-info {
+      display: flex;
+      flex-direction: column; /* 将子元素垂直排列 */
+      margin-left: 10px;
+
+      .title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .content {
+        font-size: 12px;
+        color: #b1b3b8;
+      }
+
+      .price {
+        font-size: 12px;
+        color: #fda100;
+      }
+    }
+  }
 }
 </style>
