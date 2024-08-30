@@ -442,7 +442,7 @@ def save_stream_room_info(streaming_room_info):
         yaml.dump(streaming_room_info, f, allow_unicode=True)
 
 
-async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = ""):
+async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
     """根据类型删除某个ID的信息"""
 
     logger.info(delete_id)
@@ -463,7 +463,7 @@ async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = ""):
         "room": "room_id",
     }
 
-    item_list = await get_func_map[item_type]()
+    item_list = await get_func_map[item_type](user_id)
     logger.info(item_list)
 
     process_success_flag = False

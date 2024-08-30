@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+@File    :   users.py
+@Time    :   2024/08/30
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   用户登录和 Token 认证接口
+'''
+
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -21,7 +32,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 fake_users_db = {
     "hingwen.wong": {
         "username": "hingwen.wong",
-        "user_id": "1",
+        "user_id": 1,
         "ip_address": "127.0.0.1",
         "email": "peterhuang0323@qq.com",
         "hashed_password": "$2b$12$zXXveodjipHZMoSxJz5ODul7Z9YeRJd0GeSBjpwHdqEtBbAFvEdre",
@@ -99,6 +110,8 @@ def get_current_user_info(token: str = Depends(oauth2_scheme)):
     if not user_id:
         logger.error(f"can not get user_id: {user_id}")
         raise HTTPException(status_code=401, detail="Could not validate credentials")
+
+    # TODO 超时强制重新登录
 
     logger.info(f"Got user_id: {user_id}")
     return user_id

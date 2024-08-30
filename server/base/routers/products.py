@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends
 from loguru import logger
 
 from ...web_configs import WEB_CONFIGS
-from ..database.product_db import get_db_product_info, get_prduct_by_page, get_product_list, save_product_info
+from ..database.product_db import get_db_product_info, get_prduct_by_page, get_product_list, get_product_max_id, save_product_info
 from ..models.product_model import DeleteProductItem, ProductItem, ProductQueryItem
 from ..modules.rag.rag_worker import rebuild_rag_db
 from ..utils import ResultCode, delete_item_by_id, make_return_data
@@ -34,14 +34,14 @@ async def get_product_info_api(product_query_item: ProductQueryItem, user_id: in
 
     logger.info(f"Got product_query_item = {product_query_item}")
     res_data = await get_prduct_by_page(
-        product_query_item.currentPage, product_query_item.pageSize, product_query_item.productName
+        user_id, product_query_item.currentPage, product_query_item.pageSize, product_query_item.productName
     )
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
 @router.get("/info", summary="获取特定商品 ID 的详细信息接口")
 async def get_product_info_api(productId: str, user_id: int = Depends(get_current_user_info)):
-    product_list, _ = await get_product_list(id=int(productId))
+    product_list, _ = await get_product_list(user_id, id=int(productId))
 
     logger.info(product_list)
     return make_return_data(True, ResultCode.SUCCESS, "成功", product_list[0])
@@ -60,11 +60,10 @@ async def upload_product_api(upload_product_item: ProductItem, user_id: int = De
 
     # TODO 后续直接插入到数据库就行，无需自行将 id + 1
     # 获取现有数据
-    product_info_dict = await get_db_product_info()
+    product_info_dict = await get_db_product_info(user_id)
 
     # 排序防止乱序
     product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"]))
-    max_id_key = max(product_info_dict, key=lambda x: product_info_dict[x]["product_id"])
 
     new_info_dict = ProductItem(
         user_id=user_id,
@@ -77,7 +76,7 @@ async def upload_product_api(upload_product_item: ProductItem, user_id: int = De
         selling_price=upload_product_item.selling_price,
         amount=upload_product_item.amount,
         upload_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        product_id=product_info_dict[max_id_key]["product_id"] + 1,
+        product_id=get_product_max_id() + 1,
         product_class=upload_product_item.product_class,
         delete=False,
     )
