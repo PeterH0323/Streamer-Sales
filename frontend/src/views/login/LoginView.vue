@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage, ElNotification, type FormInstance, type FormRules } from 'element-plus'
+
 import { loginRequest } from '@/api/user'
 import { useTokenStore, type TokenItem } from '@/stores/userToken'
 
@@ -105,19 +107,21 @@ const onSubmit = async () => {
       size="large"
       ref="formRef"
     >
-      <h2>销冠 —— 卖货主播大模型</h2>
+      <h2>销冠 —— AI 卖货主播大模型</h2>
 
-      <!-- prop -> 校验规则的名称 -->
+      <!-- 校验规则的名称 -->
       <el-form-item label="用户名" prop="username">
-        <el-input v-model="loginForm.username" />
+        <el-input :prefix-icon="User" v-model="loginForm.username" />
       </el-form-item>
 
       <el-form-item label="密码" prop="password">
-        <el-input v-model="loginForm.password" type="password" />
+        <el-input :prefix-icon="Lock" v-model="loginForm.password" type="password" />
       </el-form-item>
 
       <el-form-item>
-        <el-button type="primary" @click="onSubmit" :loading="isLogining">确认</el-button>
+        <el-button type="primary" color="#626aef" @click="onSubmit" :loading="isLogining">
+          登录
+        </el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -125,17 +129,19 @@ const onSubmit = async () => {
 
 <style lang="scss" scoped>
 .login {
-  background-color: #dddddd;
+  background-color: #dde5f4;
   height: 100vh; // 满屏
   display: flex; // 居中显示
   justify-content: center;
   align-items: center;
 
+  background-image: linear-gradient(to right, #dde5f4, #cadaf7); // 背景渐变色
+
   .el-form {
-    width: 300px;
-    background-color: #ffffff;
+    width: 320px;
+    background-color: #f1f7fe;
     padding: 30px; // 周围外加的 padding 像素
-    border-radius: 10px; // 边框圆角
+    border-radius: 24px; // 边框圆角
   }
 
   .el-form-item {
@@ -145,6 +151,12 @@ const onSubmit = async () => {
   .el-button {
     width: 100%;
     margin-top: 20px;
+    border-radius: 10px;
   }
+}
+
+::v-deep(.el-input__wrapper) {
+  border-radius: 14px;
+  padding: 5px 5px 5px 5px;
 }
 </style>

@@ -18,7 +18,7 @@ const route = useRoute()
           </a>
         </div>
         <div class="logo">
-          <h1>销冠 —— AI 卖货主播</h1>
+          <h1>销冠 - AI 卖货主播大模型</h1>
         </div>
         <div class="logo" style="line-height: 0">
           <a href="https://github.com/PeterH0323/Streamer-Sales">
