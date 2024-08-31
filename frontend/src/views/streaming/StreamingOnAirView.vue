@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
-import { ChatDotRound, Mic } from '@element-plus/icons-vue'
+import { ChatDotRound, Microphone, VideoPause } from '@element-plus/icons-vue'
 
 import VideoComponent from '@/components/VideoComponent.vue'
 import MessageComponent from '@/components/MessageComponent.vue'
 import {
+  genAsrResult,
   onAirRoomChatRequest,
   onAirRoomInfoRequest,
   onAirRoomNextProductRequest,
+  sendAudioToServer,
   type StreamingRoomStatusItem
 } from '@/api/streamingRoom'
 import type { ProductItem, StreamerInfo } from '@/api/product'
+import { ElMessage } from 'element-plus'
 
 // 定义传参
 const props = defineProps({
@@ -114,6 +117,84 @@ onMounted(() => {
   // 获取直播间实时信息格信息
   getRoomInfo()
 })
+
+// 录音
+// 状态管理
+const isRecording = ref(false)
+let mediaRecorder = null
+let chunks = []
+let stream = null
+
+// 开始录音
+const startRecording = () => {
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then((s) => {
+      stream = s
+      mediaRecorder = new MediaRecorder(s)
+      mediaRecorder.start()
+      mediaRecorder.addEventListener('dataavailable', handleDataAvailable)
+      mediaRecorder.addEventListener('stop', handleStop)
+    })
+    .catch((err) => {
+      ElMessage.error('无法访问麦克风: ' + err.message)
+    })
+}
+
+// 停止录音
+const stopRecording = () => {
+  if (mediaRecorder) {
+    mediaRecorder.stop()
+  }
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop())
+  }
+}
+
+// 切换录音状态
+const handleRecord = () => {
+  if (isRecording.value) {
+    stopRecording()
+  } else {
+    startRecording()
+  }
+  isRecording.value = !isRecording.value
+}
+
+// 处理录音数据
+const handleDataAvailable = (e) => {
+  chunks.push(e.data)
+}
+
+// 处理录音停止事件
+const handleStop = async () => {
+  const blob = new Blob(chunks, { type: 'audio/webm' })
+  try {
+    // 将 asr 文件发送到服务器
+    const { data } = await sendAudioToServer(blob)
+    if (data.code === 0) {
+      ElMessage.success('正在进行语音转文字，请稍候！')
+      // 调取接口开始进行 asr 识别
+
+      console.info(data)
+      const { data: asr_data } = await genAsrResult(
+        Number(props.roomId),
+        userInfo.value.userId,
+        data.data
+      )
+      ElMessage.success('语音转文字成功！')
+
+      // 自动进行对话
+      if (asr_data.code === 0) {
+        inputValue.value = asr_data.data
+        handelSendClick()
+      }
+    }
+  } catch (error) {
+    ElMessage.error('语音转文字失败: ' + error.message)
+  }
+  chunks = []
+}
 </script>
 
 <template>
@@ -172,8 +253,14 @@ onMounted(() => {
 
           <!-- 对话框 -->
           <div class="bottom-items">
-            <el-button circle size="large">
-              <el-icon><Mic /></el-icon>
+            <el-button
+              circle
+              size="large"
+              :type="isRecording ? 'danger' : 'primary'"
+              @click="handleRecord"
+            >
+              <el-icon v-if="!isRecording"><Microphone /></el-icon>
+              <el-icon v-else><VideoPause /></el-icon>
             </el-button>
             <el-input
               v-model="inputValue"

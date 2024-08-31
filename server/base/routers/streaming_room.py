@@ -9,15 +9,15 @@
 @Desc    :   主播间信息交互接口
 """
 
+from pathlib import Path
 import uuid
 from datetime import datetime
-from typing import List
 
-import yaml
+import requests
 from fastapi import APIRouter, Depends
 from loguru import logger
 
-from ...web_configs import WEB_CONFIGS
+from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..database.streamer_info_db import get_streamers_info
 from ..database.streamer_room_db import (
     get_conversation_list,
@@ -276,6 +276,11 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
     return make_return_data(True, ResultCode.SUCCESS, "成功", new_info.room_id)
 
 
+# ============================================================
+#                          开播接口
+# ============================================================
+
+
 async def get_agent_res(prompt, departure_place, delivery_company):
     """调用 Agent 能力"""
     agent_response = ""
@@ -296,14 +301,9 @@ async def get_agent_res(prompt, departure_place, delivery_company):
     return agent_response
 
 
-# ============================================================
-#                          开播接口
-# ============================================================
-
-
 @router.post("/chat", summary="直播间开播对话接口")
 async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
-    streaming_room_info = await get_streaming_room_info(room_chat.roomId)
+    streaming_room_info = await get_streaming_room_info(user_id, room_chat.roomId)
 
     # 获取直播间对话
     conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
@@ -380,9 +380,9 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-async def get_or_init_conversation(room_id: int, next_product=False):
+async def get_or_init_conversation(user_id, room_id: int, next_product=False):
     # 根据直播间 ID 获取信息
-    streaming_room_info = await get_streaming_room_info(room_id)
+    streaming_room_info = await get_streaming_room_info(user_id, room_id)
     logger.info(streaming_room_info)
 
     # 根据 ID 获取主播信息
@@ -398,7 +398,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
 
     assert prodcut_index >= 0
     product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_product_list(id=int(product_info["product_id"]))
+    product_list, _ = await get_product_list(user_id, id=int(product_info["product_id"]))
 
     # 是否为最后的商品
     if len(streaming_room_info["product_list"]) - 1 == prodcut_index:
@@ -447,7 +447,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
 
     # 保存直播间信息
-    update_streaming_room_info(room_id, streaming_room_info)
+    update_streaming_room_info(streaming_room_info)
 
     res_data = {
         "streamerInfo": streamer_info,
@@ -475,7 +475,7 @@ async def get_on_air_live_room_api(room_info: RoomProductListItem, user_id: int 
         room_info (RoomProductListItem): 直播间 ID
     """
 
-    res_data = await get_or_init_conversation(room_info.roomId, next_product=False)
+    res_data = await get_or_init_conversation(user_id, room_info.roomId, next_product=False)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
@@ -502,3 +502,26 @@ async def upload_product_api(delete_info: RoomProductListItem, user_id: int = De
         return make_return_data(False, ResultCode.FAIL, "失败", "")
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
+
+
+@router.post("/asr", summary="直播间调取 ASR 语音转文字 接口")
+async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
+
+    # room_chat.asr_file 是 服务器地址，需要进行转换
+    asr_local_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(WEB_CONFIGS.ASR_FILE_DIR, Path(room_chat.asrFileUrl).name)
+
+    # 获取 ASR 结果
+    req_data = {
+        "user_id": user_id,
+        "request_id": str(uuid.uuid1()),
+        "wav_path": str(asr_local_path),
+    }
+    logger.info(req_data)
+
+    res = requests.post(API_CONFIG.ASR_URL, json=req_data).json()
+    asr_str = res["result"]
+    logger.info(f"ASR res = {asr_str}")
+
+    # 删除过程文件
+    asr_local_path.unlink()
+    return make_return_data(True, ResultCode.SUCCESS, "成功", asr_str)

@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import PlainTextResponse
 from loguru import logger
 from pydantic import BaseModel
 
@@ -14,7 +16,7 @@ else:
 
 
 class ASRItem(BaseModel):
-    user_id: str  # User 识别号，用于区分不用的用户调用
+    user_id: int  # User 识别号，用于区分不用的用户调用
     request_id: str  # 请求 ID，用于生成 TTS & 数字人
     wav_path: str  # wav 文件路径
 
@@ -38,3 +40,19 @@ async def get_asr(asr_item: ASRItem):
 @app.get("/asr/check")
 async def check_server():
     return {"message": "server enabled"}
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    """调 API 入参错误的回调接口
+
+    Args:
+        request (_type_): _description_
+        exc (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    logger.info(request)
+    logger.info(exc)
+    return PlainTextResponse(str(exc), status_code=400)

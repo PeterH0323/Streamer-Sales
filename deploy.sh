@@ -13,6 +13,7 @@ uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001
 uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002
 
 # ASR
+export MODELSCOPE_CACHE="./weights/asr_weights"
 uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003
 
 # LLM

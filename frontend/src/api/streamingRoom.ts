@@ -169,6 +169,33 @@ const deleteStreamingRoomByIdRequest = (roomId_: number) => {
   })
 }
 
+// 发送音频文件到服务器
+const sendAudioToServer = async (blob) => {
+  const formData = new FormData()
+  formData.append('file', blob, 'recording.webm')
+
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/upload/file',
+    data: formData,
+    headers: {
+      Authorization: header_authorization.value
+    }
+  })
+}
+
+// 获取 ASR 结果
+const genAsrResult = async (roomId_: number, userId_: string, asrFileUrl_: string) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/streaming-room/asr',
+    data: { roomId: roomId_, userId: userId_, asrFileUrl: asrFileUrl_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
+  })
+}
+
 export {
   type StreamingRoomInfo,
   type RoomProductItem,
@@ -182,5 +209,7 @@ export {
   onAirRoomInfoRequest,
   onAirRoomChatRequest,
   onAirRoomNextProductRequest,
-  deleteStreamingRoomByIdRequest
+  deleteStreamingRoomByIdRequest,
+  sendAudioToServer,
+  genAsrResult
 }

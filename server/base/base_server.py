@@ -141,9 +141,12 @@ async def upload_product_api(file: UploadFile = File(...), user_id: int = Depend
         "jpg": WEB_CONFIGS.IMAGES_DIR,
         "mp4": WEB_CONFIGS.STREAMER_INFO_FILES_DIR,
         "wav": WEB_CONFIGS.STREAMER_INFO_FILES_DIR,
+        "webm": WEB_CONFIGS.ASR_FILE_DIR,
     }
     if file_type in ["wav", "mp4"]:
         save_root = WEB_CONFIGS.STREAMER_FILE_DIR
+    elif file_type in ["webm"]:
+        save_root = ""
     else:
         save_root = WEB_CONFIGS.PRODUCT_FILE_DIR
 
