@@ -137,10 +137,6 @@ const labelPosition = ref('top')
               </div>
             </el-form-item>
 
-            <el-form-item label="情感">
-              <el-tag type="primary"> {{ modelSteamerInfo.tts_tag }} </el-tag>
-            </el-form-item>
-
             <el-form-item label="音频对应文字">
               <el-input
                 v-model="modelSteamerInfo.tts_reference_sentence"

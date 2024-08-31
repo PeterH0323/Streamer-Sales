@@ -11,7 +11,6 @@ interface StreamerInfo {
   avater: string
 
   tts_weight_tag: string
-  tts_tag: string
   tts_reference_audio: string
   tts_reference_sentence: string
 

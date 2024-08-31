@@ -18,7 +18,7 @@ class ProductItem(BaseModel):
     """商品信息"""
 
     user_id: int = 0
-    product_id: int = -1
+    product_id: int = 0
     product_name: str = ""
     product_class: str
     heighlights: List[str]
@@ -29,11 +29,20 @@ class ProductItem(BaseModel):
     selling_price: float
     amount: int
     upload_date: str = ""
+    delete: bool = False
 
 
-class ProductQueryItem(BaseModel):
-    currentPage: int = 1  # 当前页号
-    pageSize: int = 10  # 每页记录数
+class PageItem(BaseModel):
+    currentPage: int = 0  # 当前页数
+    pageSize: int = 0  # 页面的组件数量
+    totalSize: int = 0  # 总大小
+
+
+class ProductPageItem(PageItem):
+    product_list: List[ProductItem] = []
+
+
+class ProductQueryItem(PageItem):
     productName: str = ""  # 商品名，用于指定查询
     productId: str = "-1"  # 商品ID，用于指定查询
     instructionPath: str = ""  # 商品说明书路径，用于获取说明书内容

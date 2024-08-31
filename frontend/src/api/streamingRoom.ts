@@ -1,5 +1,6 @@
 import { request_handler, type ResultPackage } from '@/api/base'
-import { type StreamerInfo, type ProductItem } from '@/api/product'
+import type { StreamerInfo, ProductItem } from '@/api/product'
+import { header_authorization } from '@/api/user'
 
 interface StreamingRoomProductList {
   product_id: number
@@ -26,6 +27,7 @@ interface StreamingRoomStatusItem {
   startTime: string
   currentPoductStartTime: string
   finalProduct: boolean
+  live_status: number
 }
 
 interface StreamingRoomInfo {
@@ -34,7 +36,7 @@ interface StreamingRoomInfo {
   name: string
   streamer_id: number
   background_image: string
-  prohibited_words_id: string
+  prohibited_words_id: number
   product_list: StreamingRoomProductList[]
   streamer_info: StreamerInfo
   status: StreamingRoomStatusItem
@@ -44,8 +46,9 @@ interface RoomProductData {
   currentPage: number
   pageSize: number
   totalSize: number
-  product: RoomProductItem[]
+  product_list: RoomProductItem[]
 }
+
 interface RoomProductItem {
   name: string
   id: number
@@ -57,18 +60,17 @@ interface RoomProductItem {
 }
 
 interface RoomDetailItem {
-  currentPage?: number
-  pageSize?: number
-  totalSize?: number
-  product: []
-  streamerInfo: StreamerInfo
-  roomId: number
+  currentPage: number
+  pageSize: number
+  totalSize: number
+  product_list: []
+  streamer_info: StreamerInfo
+  room_id: number
   name: string
   room_poster: string
   streamer_id: string
   background_image: string
-  prohibited_words_id: string
-  liveStatus: number
+  prohibited_words_id: number
   status: StreamingRoomStatusItem
 }
 
@@ -76,7 +78,10 @@ interface RoomDetailItem {
 const streamerRoomListRequest = () => {
   return request_handler<ResultPackage<StreamingRoomInfo[]>>({
     method: 'POST',
-    url: '/streaming-room/list'
+    url: '/streaming-room/list',
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -85,7 +90,10 @@ const roomDetailRequest = (roomId_: string, currentPage_: number, pageSize_: num
   return request_handler<ResultPackage<RoomDetailItem>>({
     method: 'POST',
     url: '/streaming-room/detail',
-    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ }
+    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -94,7 +102,10 @@ const roomPorductAddListRequest = (roomId_: number, currentPage_: number, pageSi
   return request_handler<ResultPackage<RoomProductData>>({
     method: 'POST',
     url: '/streaming-room/product-add',
-    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ }
+    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -103,7 +114,10 @@ const RoomCreadeOrEditRequest = async (params: RoomDetailItem) => {
   return request_handler<ResultPackage<number>>({
     method: 'POST',
     url: '/streaming-room/edit/form',
-    data: params
+    data: params,
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -112,7 +126,10 @@ const onAirRoomInfoRequest = (roomId_: number) => {
   return request_handler<ResultPackage<StreamingRoomStatusItem>>({
     method: 'POST',
     url: '/streaming-room/live-info',
-    data: { roomId: roomId_ }
+    data: { roomId: roomId_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -121,7 +138,10 @@ const onAirRoomChatRequest = async (roomId_: number, userId_: string, message_: 
   return request_handler<ResultPackage<messageItem>>({
     method: 'POST',
     url: '/streaming-room/chat',
-    data: { roomId: roomId_, userId: userId_, message: message_ }
+    data: { roomId: roomId_, userId: userId_, message: message_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -130,7 +150,10 @@ const onAirRoomNextProductRequest = async (roomId_: number) => {
   return request_handler<ResultPackage<messageItem>>({
     method: 'POST',
     url: '/streaming-room/next-product',
-    data: { roomId: roomId_ }
+    data: { roomId: roomId_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 
@@ -139,7 +162,10 @@ const deleteStreamingRoomByIdRequest = (roomId_: number) => {
   return request_handler<ResultPackage<string>>({
     method: 'POST',
     url: '/streaming-room/delete',
-    data: { roomId: roomId_ }
+    data: { roomId: roomId_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
   })
 }
 

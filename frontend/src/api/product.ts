@@ -32,8 +32,8 @@ interface ProductItem {
 }
 
 interface ProductData {
-  product: ProductItem[]
-  current: number
+  product_list: ProductItem[]
+  currentPage: number
   pageSize: number
   totalSize: number
 }

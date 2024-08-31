@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
 @File    :   users.py
 @Time    :   2024/08/30
 @Project :   https://github.com/PeterH0323/Streamer-Sales
 @Author  :   HinGwenWong
 @Version :   1.0
 @Desc    :   用户登录和 Token 认证接口
-'''
+"""
 
 from datetime import datetime, timedelta, timezone
 
@@ -16,9 +16,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from loguru import logger
 from passlib.context import CryptContext
-from pydantic import BaseModel
+
 
 from ...web_configs import WEB_CONFIGS
+from ..models.user_model import UserInfo, TokenItem
+from ..database.user_db import fake_users_db
 
 router = APIRouter(
     prefix="/user",
@@ -27,38 +29,6 @@ router = APIRouter(
 )
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
-
-# TODO 后续删除！
-fake_users_db = {
-    "hingwen.wong": {
-        "username": "hingwen.wong",
-        "user_id": 1,
-        "ip_address": "127.0.0.1",
-        "email": "peterhuang0323@qq.com",
-        "hashed_password": "$2b$12$zXXveodjipHZMoSxJz5ODul7Z9YeRJd0GeSBjpwHdqEtBbAFvEdre",
-        "disabled": False,
-    }
-}
-
-
-class TokenItem(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class UserItem(BaseModel):
-    username: str  # User 识别号，用于区分不用的用户调用
-    password: str  # 请求 ID，用于生成 TTS & 数字人
-
-
-class UserInfo(BaseModel):
-    username: str
-    user_id: int
-    ip_adress: str | None = None
-    disabled: bool | None = None
-    full_name: str | None = None
-    email: str | None = None
-    hashed_password: str | None = None
 
 
 PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")

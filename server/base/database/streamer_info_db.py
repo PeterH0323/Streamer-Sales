@@ -10,13 +10,14 @@
 """
 
 
+from typing import List
 import yaml
 
 from ..models.streamer_info_model import StreamerInfoItem
 from ...web_configs import WEB_CONFIGS
 
 
-async def get_streamers_info(user_id: int, stream_id: int = -1):
+async def get_streamers_info(user_id: int, stream_id: int = -1) -> List[StreamerInfoItem]:
     # 加载数据库文件
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
@@ -43,7 +44,12 @@ async def get_streamers_info(user_id: int, stream_id: int = -1):
     return filter_streamer_list
 
 
-def get_max_streamer_id():
+def get_max_streamer_id() -> int:
+    """获取目前数据库中最大的 ID
+
+    Returns:
+        int: 最大 ID
+    """
 
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         streamer_info = yaml.safe_load(f)
@@ -56,6 +62,11 @@ def get_max_streamer_id():
 
 
 def save_streamer_info(new_streamer_info: StreamerInfoItem):
+    """更新 or 新增数据库信息
+
+    Args:
+        new_streamer_info (StreamerInfoItem): 新的主播信息，如果 ID 匹配则更新，如果不匹配现有的则更新
+    """
 
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
         all_streamer_info_list = yaml.safe_load(f)

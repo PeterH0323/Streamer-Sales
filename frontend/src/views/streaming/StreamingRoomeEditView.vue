@@ -9,7 +9,8 @@ import {
   roomPorductAddListRequest,
   RoomCreadeOrEditRequest,
   type RoomProductData,
-  type RoomDetailItem
+  type RoomDetailItem,
+  type StreamingRoomStatusItem
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
@@ -31,7 +32,7 @@ const ShowItemInfo = ref()
 
 // 侧边栏
 const DrawerProductList = ref({} as RoomProductData)
-DrawerProductList.value.product = [] // 设置默认值
+DrawerProductList.value.product_list = [] // 设置默认值
 DrawerProductList.value.totalSize = 0
 
 const currentPage = ref(1)
@@ -66,11 +67,12 @@ const getProductInfo = async () => {
 
 // 获取商品表格信息
 const RoomProductList = ref({} as RoomDetailItem)
-RoomProductList.value.streamerInfo = {} as StreamerInfo
-RoomProductList.value.streamerInfo.id = 0
+RoomProductList.value.streamer_info = {} as StreamerInfo
+RoomProductList.value.streamer_info.id = 0
 RoomProductList.value.pageSize = 10
-RoomProductList.value.roomId = 0
-RoomProductList.value.product = []
+RoomProductList.value.room_id = 0
+RoomProductList.value.product_list = []
+RoomProductList.value.status = {} as StreamingRoomStatusItem
 const EditProductList = ref({} as RoomDetailItem)
 
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
@@ -121,14 +123,15 @@ function cancelClick() {
 
 async function confirmClick() {
   EditProductList.value = RoomProductList.value
-  EditProductList.value.product = DrawerProductList.value.product
-  EditProductList.value.streamer_id = RoomProductList.value.streamerInfo.id
+  EditProductList.value.product_list = DrawerProductList.value.product_list
+  EditProductList.value.streamer_id = RoomProductList.value.streamer_info.id
 
+  console.log(EditProductList.value)
   // 调用接口更新选择的商品
   const { data } = await RoomCreadeOrEditRequest(EditProductList.value)
   if (data.code === 0) {
     // 新建会返回直播间后台保存 ID
-    RoomProductList.value.roomId = data.data
+    RoomProductList.value.room_id = data.data
   }
   ElMessage.success('操作成功')
   drawerShow.value = false
@@ -193,7 +196,7 @@ const handelControlClick = (
         <div>
           <ul class="product-list">
             <li
-              v-for="item in DrawerProductList.product"
+              v-for="item in DrawerProductList.product_list"
               :key="item.id"
               style="margin-bottom: 10px"
             >
@@ -206,13 +209,17 @@ const handelControlClick = (
                 <el-card shadow="never">
                   <el-row :gutter="0">
                     <el-col :span="6">
-                      <el-image style="width: 80px; height: 80px" :src="item.image" fit="contain" />
+                      <el-image
+                        style="width: 80px; height: 80px"
+                        :src="item.image_path"
+                        fit="contain"
+                      />
                     </el-col>
                     <el-col :span="18">
                       <div class="product-info">
                         <p class="title">{{ item.name }}</p>
                         <p class="content">{{ item.heighlights }}</p>
-                        <p class="price">￥{{ item.price }}</p>
+                        <p class="price">￥{{ item.selling_price }}</p>
                       </div>
                     </el-col>
                   </el-row>
@@ -240,7 +247,7 @@ const handelControlClick = (
     <el-card shadow="never">
       <StreamerInfoComponent
         disableChange
-        v-model="RoomProductList.streamerInfo"
+        v-model="RoomProductList.streamer_info"
         :optionList="streamerNameOptions"
       />
     </el-card>
@@ -258,7 +265,7 @@ const handelControlClick = (
       </el-button>
 
       <!-- TODO 商品表格可以做成 component 组件 -->
-      <el-table :data="RoomProductList.product" max-height="1000" border>
+      <el-table :data="RoomProductList.product_list" max-height="1000" border>
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
         <el-table-column prop="image_path" label="图片" align="center">
@@ -290,7 +297,7 @@ const handelControlClick = (
                   'Instruction',
                   row.instruction,
                   row.product_id,
-                  RoomProductList.streamerInfo.id,
+                  RoomProductList.streamer_info.id,
                   row.sales_doc
                 )
               "
@@ -309,7 +316,7 @@ const handelControlClick = (
                   'SalesDoc',
                   row.sales_doc,
                   row.product_id,
-                  RoomProductList.streamerInfo.id,
+                  RoomProductList.streamer_info.id,
                   row.sales_doc
                 )
               "
@@ -328,7 +335,7 @@ const handelControlClick = (
                   'DigitalHuman',
                   row.start_video,
                   row.product_id,
-                  RoomProductList.streamerInfo.id,
+                  RoomProductList.streamer_info.id,
                   row.sales_doc
                 )
               "
@@ -347,7 +354,7 @@ const handelControlClick = (
       </el-table>
 
       <!-- 信息弹窗 -->
-      <InfoDialogComponents ref="ShowItemInfo" v-model="RoomProductList.product" />
+      <InfoDialogComponents ref="ShowItemInfo" v-model="RoomProductList.product_list" />
 
       <template #footer>
         <div class="bottom-item">
@@ -365,12 +372,12 @@ const handelControlClick = (
           />
           <div>
             <el-button type="success" @click="handelOnAirClick">
-              {{ RoomProductList.liveStatus === 1 ? '进入' : '开始' }}直播</el-button
+              {{ RoomProductList.status.live_status === 1 ? '进入' : '开始' }}直播</el-button
             >
             <el-button
               type="primary"
               @click="onSubmit"
-              :disabled="RoomProductList.product.length === 0"
+              :disabled="RoomProductList.product_list.length === 0"
               >保存</el-button
             >
           </div>

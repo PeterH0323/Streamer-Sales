@@ -4,7 +4,7 @@ import wave
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import cv2
 import yaml
@@ -262,52 +262,6 @@ def combine_history(prompt: list, history_msg: list):
     return prompt
 
 
-@dataclass
-class OnAirRoomStatusItem:
-    conversation_id: str = ""
-    current_product_id: int = 1
-    current_product_index: int = 0
-    current_product_start_time: str = ""
-    live_status: int = 0
-    start_time: str = ""
-    streaming_video_path: str = ""
-
-
-@dataclass
-class StreamRoomInfoItem:
-    background_image: str = ""
-    name: str = ""
-    product_list: Optional[List] = None
-    prohibited_words_id: str = ""
-    room_id: int = 0
-    room_poster: str = ""
-    status: OnAirRoomStatusItem = OnAirRoomStatusItem
-    streamer_id: int = 0
-
-
-async def get_streaming_room_info(id=-1):
-    # 加载直播间数据
-    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streaming_room_info = yaml.safe_load(f)
-
-    filter_list = []
-    for room in streaming_room_info:
-        if room["delete"]:
-            continue
-        filter_list.append(room)
-
-    if id <= 0:
-        # 全部返回
-        return filter_list
-
-    # 选择特定的直播间
-    for room_info in filter_list:
-        if room_info["room_id"] == id:
-            return room_info
-
-    return []
-
-
 def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
     """根据视频第一帧生成缩略图
 
@@ -339,77 +293,12 @@ def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
     return poster_save_path
 
 
-async def update_streaming_room_info(id, new_info):
-    # 加载直播间文件
-    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streaming_room_info = yaml.safe_load(f)
-
-    # 选择特定的直播间
-    for idx, room_info in enumerate(streaming_room_info):
-        if room_info["room_id"] == id:
-            streaming_room_info[idx] = new_info
-
-    # 保存
-    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(streaming_room_info, f, allow_unicode=True)
-
-
 async def get_llm_product_prompt_base_info():
     # 加载对话配置文件
     with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
         dataset_yaml = yaml.safe_load(f)
 
     return dataset_yaml
-
-
-async def get_conversation_list(conversion_id: str):
-
-    if conversion_id == "":
-        return []
-
-    # 获取对应的 conversion ID 信息
-    with open(WEB_CONFIGS.CONVERSATION_MESSAGE_STORE_CONFIG_PATH, "r", encoding="utf-8") as f:
-        conversation_all = yaml.safe_load(f)
-
-    if conversation_all is None:
-        return []
-
-    conversation_list = conversation_all[conversion_id]
-
-    # 根据 message index 排序
-    conversation_list_sorted = sorted(conversation_list, key=lambda item: item["messageIndex"])
-
-    return conversation_list_sorted
-
-
-async def update_conversation_message_info(id, new_info):
-
-    with open(WEB_CONFIGS.CONVERSATION_MESSAGE_STORE_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streaming_room_info = yaml.safe_load(f)
-
-    if streaming_room_info is None:
-        # 初始化文件内容
-        streaming_room_info = dict()
-
-    streaming_room_info[id] = new_info
-
-    with open(WEB_CONFIGS.CONVERSATION_MESSAGE_STORE_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(streaming_room_info, f, allow_unicode=True)
-
-
-async def get_user_info(id: str):
-    user_info = {
-        "userName": "No1-user",
-        "avater": "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
-    }
-
-    return user_info
-
-
-def save_stream_room_info(streaming_room_info):
-    # 保存
-    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(streaming_room_info, f, allow_unicode=True)
 
 
 async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):

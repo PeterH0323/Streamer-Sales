@@ -24,7 +24,6 @@ class StreamerInfoItem(BaseModel):
     avater: str = ""  # 头像
 
     tts_weight_tag: str = ""  # 艾丝妲
-    tts_tag: str = ""
     tts_reference_sentence: str = ""
     tts_reference_audio: str = ""
 

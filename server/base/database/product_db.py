@@ -9,16 +9,16 @@
 @Desc    :   商品数据表文件读写
 """
 
-from typing import List
+from typing import List, Tuple
 
 import yaml
 from loguru import logger
 
 from ...web_configs import WEB_CONFIGS
-from ..models.product_model import ProductItem
+from ..models.product_model import ProductItem, ProductPageItem
 
 
-async def get_db_product_info(user_id):
+async def get_db_product_info(user_id) -> List[ProductItem]:
     # 读取 yaml 文件
     with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
@@ -68,7 +68,7 @@ def save_product_info(product_name: str, product_info_dict: ProductItem):
         yaml.dump(product_info_dict, f, allow_unicode=True)
 
 
-async def get_product_list(user_id, product_name="", id=-1):
+async def get_product_list(user_id, product_name="", id=-1) -> Tuple[List[ProductItem], int]:
     """读取商品信息
 
     Args:
@@ -107,7 +107,7 @@ async def get_product_list(user_id, product_name="", id=-1):
     return product_list, len(product_info_dict)
 
 
-async def get_prduct_by_page(user_id, currentPage, pageSize, productName=""):
+async def get_prduct_by_page(user_id, currentPage, pageSize, productName="") -> ProductPageItem:
     product_list, db_product_size = await get_product_list(user_id, product_name=productName)
     product_total_size = len(product_list)
 
@@ -134,11 +134,4 @@ async def get_prduct_by_page(user_id, currentPage, pageSize, productName=""):
     logger.info(product_list)
     logger.info(f"len {len(product_list)}")
 
-    res_data = {
-        "product": product_list,
-        "current": currentPage,
-        "pageSize": pageSize,
-        "totalSize": product_total_size,
-    }
-
-    return res_data
+    return ProductPageItem(product_list=product_list, currentPage=currentPage, pageSize=pageSize, totalSize=product_total_size)

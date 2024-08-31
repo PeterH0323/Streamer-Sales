@@ -51,7 +51,7 @@ const DeleteProduct = async (id: number, productName: string) => {
         <!-- 头部 -->
         <div class="card-header">
           <div>
-            <el-form :inline="true" :model="queriedResult.product">
+            <el-form :inline="true" :model="queriedResult.product_list">
               <el-form-item label="搜索">
                 <el-input
                   style="width: 240px"
@@ -84,7 +84,7 @@ const DeleteProduct = async (id: number, productName: string) => {
       </template>
 
       <!-- 中部表格信息-->
-      <el-table :data="queriedResult.product" max-height="1000">
+      <el-table :data="queriedResult.product_list" max-height="1000">
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
         <el-table-column prop="image_path" label="图片" align="center">
@@ -140,7 +140,7 @@ const DeleteProduct = async (id: number, productName: string) => {
       <template #footer>
         <!-- TODO 保持在页面最低位置 -->
         <el-pagination
-          v-model:current-page="queriedResult.current"
+          v-model:current-page="queriedResult.currentPage"
           v-model:page-size="queriedResult.pageSize"
           :page-sizes="[5, 10, 15, 20]"
           :background="true"
