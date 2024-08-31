@@ -46,7 +46,10 @@ async def get_streaming_room_info(user_id, id=-1) -> List[StreamRoomInfoDatabase
     return []
 
 
-async def update_streaming_room_info(room_id, new_info):
+def update_streaming_room_info(new_info):
+
+    new_info = dict(new_info)
+
     # 加载直播间文件
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
         streaming_room_info = yaml.safe_load(f)
@@ -54,12 +57,12 @@ async def update_streaming_room_info(room_id, new_info):
     # 选择特定的直播间
     new_room = True
     for idx, room_info in enumerate(streaming_room_info):
-        if room_info["room_id"] == room_id:
-            streaming_room_info[idx] = dict(new_info)
+        if room_info["room_id"] == new_info["room_id"]:
+            streaming_room_info[idx] = new_info
             new_room = False
 
     if new_room:
-        streaming_room_info.append(dict(new_info))
+        streaming_room_info.append(new_info)
 
     # 保存
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
@@ -98,10 +101,4 @@ async def update_conversation_message_info(id, new_info):
     streaming_room_info[id] = new_info
 
     with open(WEB_CONFIGS.CONVERSATION_MESSAGE_STORE_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(streaming_room_info, f, allow_unicode=True)
-
-
-def save_stream_room_info(streaming_room_info):
-    # 保存
-    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "w", encoding="utf-8") as f:
         yaml.dump(streaming_room_info, f, allow_unicode=True)

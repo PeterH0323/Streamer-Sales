@@ -62,7 +62,7 @@ async def get_streaming_room_api(user_id: int = Depends(get_current_user_info)):
     logger.info(streaming_room_list)
 
     # 加载到返回数据格式
-    res_room_list = [StreamRoomInfoReponseItem(**(info.model_dump())) for info in streaming_room_list]
+    res_room_list = [StreamRoomInfoReponseItem(**(info)) for info in streaming_room_list]
 
     for room in res_room_list:
         # 因为数据库中保存的是 主播 ID ，需要查库拿到 主播信息
@@ -271,7 +271,7 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
 
     logger.info(new_info)
     new_info.status = dict(new_info.status)
-    _ = await update_streaming_room_info(new_info.room_id, new_info)
+    update_streaming_room_info(new_info)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", new_info.room_id)
 
@@ -294,6 +294,11 @@ async def get_agent_res(prompt, departure_place, delivery_company):
         logger.info(f"Agent response: {agent_response}")
 
     return agent_response
+
+
+# ============================================================
+#                          开播接口
+# ============================================================
 
 
 @router.post("/chat", summary="直播间开播对话接口")
@@ -367,7 +372,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
 
     # 保存直播间信息
-    _ = await update_streaming_room_info(room_chat.roomId, streaming_room_info)
+    update_streaming_room_info(room_chat.roomId, streaming_room_info)
 
     logger.info(streaming_room_info["status"]["conversation_id"])
     logger.info(conversation_list)
@@ -442,7 +447,7 @@ async def get_or_init_conversation(room_id: int, next_product=False):
     _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
 
     # 保存直播间信息
-    _ = await update_streaming_room_info(room_id, streaming_room_info)
+    update_streaming_room_info(room_id, streaming_room_info)
 
     res_data = {
         "streamerInfo": streamer_info,

@@ -17,6 +17,7 @@ from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .database.product_db import get_db_product_info, save_product_info
 from .database.streamer_info_db import get_streamers_info, save_streamer_info
+from .database.streamer_room_db import get_streaming_room_info, update_streaming_room_info
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -314,7 +315,7 @@ async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
         "room": get_streaming_room_info,
     }
 
-    save_func_map = {"product": save_product_info, "streamer": save_streamer_info, "room": save_stream_room_info}
+    save_func_map = {"product": save_product_info, "streamer": save_streamer_info, "room": update_streaming_room_info}
 
     id_name_map = {
         "product": "product_id",
@@ -327,12 +328,15 @@ async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
 
     process_success_flag = False
 
+    save_info = None
     if item_type == "product":
         for product_name, product_info in item_list.items():
             if product_info[id_name_map[item_type]] != delete_id:
                 continue
 
             item_list[product_name]["delete"] = True
+            item_list[product_name].update({"product_name": product_name})
+            save_info = item_list[product_name]
             process_success_flag = True
             break
     else:
@@ -341,11 +345,12 @@ async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
                 continue
 
             item_list[idx]["delete"] = True
+            save_info = item_list[idx]
             process_success_flag = True
             break
 
     # 保存
-    save_func_map[item_type](item_list)
+    save_func_map[item_type](save_info)
 
     return process_success_flag
 

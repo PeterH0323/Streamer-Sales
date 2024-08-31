@@ -78,7 +78,7 @@ const EditProductList = ref({} as RoomDetailItem)
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
   let currentRoomId = props.roomId
   if (currentRoomId === '0') {
-    currentRoomId = String(RoomProductList.value.roomId)
+    currentRoomId = String(RoomProductList.value.room_id)
   }
 
   console.info('currentRoomId = ', currentRoomId)

@@ -50,7 +50,7 @@ async def get_product_max_id():
     return product_info_dict[max_id_key]["product_id"]
 
 
-def save_product_info(product_name: str, product_info_dict: ProductItem):
+def save_product_info(new_product_info_dict: ProductItem):
     """保存商品信息
 
     Args:
@@ -61,7 +61,7 @@ def save_product_info(product_name: str, product_info_dict: ProductItem):
         product_info_dict = yaml.safe_load(f)
 
     # 更新对应字段
-    product_info_dict.update({product_name: dict(product_info_dict)})
+    product_info_dict.update({new_product_info_dict["product_name"]: dict(new_product_info_dict)})
 
     # 保存
     with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
