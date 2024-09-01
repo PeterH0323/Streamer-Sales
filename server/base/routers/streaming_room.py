@@ -9,9 +9,9 @@
 @Desc    :   主播间信息交互接口
 """
 
-from pathlib import Path
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 import requests
 from fastapi import APIRouter, Depends
@@ -38,11 +38,10 @@ from ..models.streamer_room_model import (
     StreamRoomProductDatabaseItem,
     StreamRoomProductItem,
 )
-from ..modules.agent.agent_worker import get_agent_result
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..routers.users import get_current_user_info
 from ..server_info import SERVER_PLUGINS_INFO
-from ..utils import LLM_MODEL_HANDLER, ResultCode, delete_item_by_id, make_return_data
+from ..utils import ResultCode, delete_item_by_id, make_return_data
 from .digital_human import gen_tts_and_digital_human_video_app
 from .llm import combine_history, gen_poduct_base_prompt, get_agent_res, get_llm_res
 from .products import get_prduct_by_page, get_product_list
