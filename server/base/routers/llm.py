@@ -1,10 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from loguru import logger
-from pydantic import BaseModel
 
+from ..database.llm_db import get_llm_product_prompt_base_info
 from ..database.streamer_info_db import get_streamers_info
-from ..utils import LLM_MODEL_HANDLER, ResultCode, get_llm_product_prompt_base_info, make_return_data
+from ..models.llm_model import GenProductItem, GenSalesDocItem
+from ..modules.agent.agent_worker import get_agent_result
+from ..server_info import SERVER_PLUGINS_INFO
+from ..utils import LLM_MODEL_HANDLER, ResultCode, make_return_data
 from .products import get_product_list
+from .users import get_current_user_info
 
 router = APIRouter(
     prefix="/llm",
@@ -13,17 +17,27 @@ router = APIRouter(
 )
 
 
-class GenProductItem(BaseModel):
-    gen_type: str
-    instruction: str
+def combine_history(prompt: list, history_msg: list):
+    """生成对话历史 prompt
+
+    Args:
+        prompt (_type_): _description_
+        history_msg (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+    """
+    # 角色映射表
+    role_map = {"streamer": "assistant", "user": "user"}
+
+    # 生成历史对话信息
+    for message in history_msg:
+        prompt.append({"role": role_map[message["role"]], "content": message["message"]})
+
+    return prompt
 
 
-class GenSalesDocItem(BaseModel):
-    streamerId: int
-    productId: int
-
-
-async def gen_poduct_base_prompt(streamer_id, product_id):
+async def gen_poduct_base_prompt(user_id, streamer_id, product_id):
     """生成商品介绍的 prompt
 
     Args:
@@ -55,7 +69,7 @@ async def gen_poduct_base_prompt(streamer_id, product_id):
     )
 
     # 根据 ID 获取商品信息
-    product_list, _ = await get_product_list(id=product_id)
+    product_list, _ = await get_product_list(user_id, id=product_id)
     product_info = product_list[0]
 
     product_info_str = product_info_struct_template[0].replace("{name}", product_info["product_name"])
@@ -68,6 +82,26 @@ async def gen_poduct_base_prompt(streamer_id, product_id):
     logger.info(prompt)
 
     return prompt
+
+
+async def get_agent_res(prompt, departure_place, delivery_company):
+    """调用 Agent 能力"""
+    agent_response = ""
+
+    if not SERVER_PLUGINS_INFO.agent_enabled:
+        # 如果不开启则直接返回空
+        return ""
+
+    GENERATE_AGENT_TEMPLATE = (
+        "这是网上获取到的信息：“{}”\n 客户的问题：“{}” \n 请认真阅读信息并运用你的性格进行解答。"  # Agent prompt 模板
+    )
+    input_prompt = prompt[-1]["content"]
+    agent_response = get_agent_result(LLM_MODEL_HANDLER, input_prompt, departure_place, delivery_company)
+    if agent_response != "":
+        agent_response = GENERATE_AGENT_TEMPLATE.format(agent_response, input_prompt)
+        logger.info(f"Agent response: {agent_response}")
+
+    return agent_response
 
 
 async def get_llm_res(prompt):
@@ -83,7 +117,7 @@ async def get_llm_res(prompt):
 
 
 @router.post("/gen_product_info")
-async def get_product_info_api(gen_product_item: GenProductItem):
+async def get_product_info_api(gen_product_item: GenProductItem, user_id: int = Depends(get_current_user_info)):
     """TODO 根据说明书内容生成商品信息
 
     Args:
@@ -98,8 +132,8 @@ async def get_product_info_api(gen_product_item: GenProductItem):
         res_data += item
 
 
-@router.post("/gen_sales_doc")
-async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
+@router.post("/gen_sales_doc", summary="生成主播文案接口")
+async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem, user_id: int = Depends(get_current_user_info)):
     """生成口播文案
 
     Args:
@@ -109,7 +143,7 @@ async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem):
         _type_: _description_
     """
 
-    prompt = await gen_poduct_base_prompt(gen_sales_doc_item.streamerId, gen_sales_doc_item.productId)
+    prompt = await gen_poduct_base_prompt(user_id, gen_sales_doc_item.streamerId, gen_sales_doc_item.productId)
 
     res_data = await get_llm_res(prompt)
 
