@@ -243,26 +243,6 @@ async def streamer_sales_process(chat_item: ChatItem):
     )
 
 
-def combine_history(prompt: list, history_msg: list):
-    """生成对话历史 prompt
-
-    Args:
-        prompt (_type_): _description_
-        history_msg (_type_, optional): _description_. Defaults to None.
-
-    Returns:
-        _type_: _description_
-    """
-    # 角色映射表
-    role_map = {"streamer": "assistant", "user": "user"}
-
-    # 生成历史对话信息
-    for message in history_msg:
-        prompt.append({"role": role_map[message["role"]], "content": message["message"]})
-
-    return prompt
-
-
 def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
     """根据视频第一帧生成缩略图
 
@@ -292,14 +272,6 @@ def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
     cap.release()
 
     return poster_save_path
-
-
-async def get_llm_product_prompt_base_info():
-    # 加载对话配置文件
-    with open(WEB_CONFIGS.CONVERSATION_CFG_YAML_PATH, "r", encoding="utf-8") as f:
-        dataset_yaml = yaml.safe_load(f)
-
-    return dataset_yaml
 
 
 async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):

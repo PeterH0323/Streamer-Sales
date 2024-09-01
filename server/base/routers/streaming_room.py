@@ -42,9 +42,9 @@ from ..modules.agent.agent_worker import get_agent_result
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..routers.users import get_current_user_info
 from ..server_info import SERVER_PLUGINS_INFO
-from ..utils import LLM_MODEL_HANDLER, ResultCode, combine_history, delete_item_by_id, make_return_data
+from ..utils import LLM_MODEL_HANDLER, ResultCode, delete_item_by_id, make_return_data
 from .digital_human import gen_tts_and_digital_human_video_app
-from .llm import gen_poduct_base_prompt, get_llm_res
+from .llm import combine_history, gen_poduct_base_prompt, get_agent_res, get_llm_res
 from .products import get_prduct_by_page, get_product_list
 
 router = APIRouter(
@@ -59,6 +59,11 @@ async def get_streaming_room_api(user_id: int = Depends(get_current_user_info)):
     """获取所有直播间信息"""
     # 加载直播间数据
     streaming_room_list = await get_streaming_room_info(user_id)
+
+    if len(streaming_room_list) == 1 and streaming_room_list[0]["room_id"] == 0:
+        # 返回的是初始化信息，证明没有直播间
+        streaming_room_list = []
+
     logger.info(streaming_room_list)
 
     # 加载到返回数据格式
@@ -77,7 +82,10 @@ async def get_streaming_room_api(user_id: int = Depends(get_current_user_info)):
 async def get_streaming_room_api(room_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
     """获取特定直播间信息"""
     # 加载直播间配置文件
-    streaming_room_info = await get_streaming_room_info(user_id, room_info.roomId)
+    if room_info.roomId == 0:
+        streaming_room_info = dict(StreamRoomInfoDatabaseItem(status=dict(OnAirRoomStatusItem())))
+    else:
+        streaming_room_info = await get_streaming_room_info(user_id, room_info.roomId)
 
     # 将直播间的商品 ID 进行提取，后续作为 选中 id
     selected_id = dict()
@@ -248,7 +256,7 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
 
     # 新建
     streaming_room_info = await get_streaming_room_info(user_id)
-    max_room_id = -1
+    max_room_id = 0
     update_index = -1
     for idx, item in enumerate(streaming_room_info):
 
@@ -258,7 +266,7 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
 
         max_room_id = max(item["room_id"], max_room_id)
 
-    if update_index >= 0:
+    if update_index > 0:
         # 修改
         logger.info("已有 ID，编辑模式，修改对应配置")
         new_info.room_id = streaming_room_info[update_index]["room_id"]
@@ -281,26 +289,6 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
 # ============================================================
 
 
-async def get_agent_res(prompt, departure_place, delivery_company):
-    """调用 Agent 能力"""
-    agent_response = ""
-
-    if not SERVER_PLUGINS_INFO.agent_enabled:
-        # 如果不开启则直接返回空
-        return ""
-
-    GENERATE_AGENT_TEMPLATE = (
-        "这是网上获取到的信息：“{}”\n 客户的问题：“{}” \n 请认真阅读信息并运用你的性格进行解答。"  # Agent prompt 模板
-    )
-    input_prompt = prompt[-1]["content"]
-    agent_response = get_agent_result(LLM_MODEL_HANDLER, input_prompt, departure_place, delivery_company)
-    if agent_response != "":
-        agent_response = GENERATE_AGENT_TEMPLATE.format(agent_response, input_prompt)
-        logger.info(f"Agent response: {agent_response}")
-
-    return agent_response
-
-
 @router.post("/chat", summary="直播间开播对话接口")
 async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
     streaming_room_info = await get_streaming_room_info(user_id, room_chat.roomId)
@@ -310,12 +298,12 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     assert len(conversation_list) > 0
 
     # 获取用户信息
-    user_info = await get_user_info(room_chat.userId)
+    user_info = await get_user_info(user_id)
 
     user_msg = MessageItem(
         role="user",
         userId=room_chat.userId,
-        userName=user_info["userName"],
+        userName=user_info["username"],
         message=room_chat.message,
         avater=user_info["avater"],
         messageIndex=conversation_list[-1]["messageIndex"] + 1,
@@ -325,12 +313,12 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     # 获取商品信息
     prodcut_index = streaming_room_info["status"]["current_product_index"]
     product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_product_list(id=int(product_info["product_id"]))
+    product_list, _ = await get_product_list(user_id, id=int(product_info["product_id"]))
     product_detail = product_list[0]
 
     # 根据对话记录生成 prompt
     prompt = await gen_poduct_base_prompt(
-        streaming_room_info["streamer_id"], streaming_room_info["status"]["current_product_id"]
+        user_id, streaming_room_info["streamer_id"], streaming_room_info["status"]["current_product_id"]
     )  # system + 获取商品文案prompt
     prompt = combine_history(prompt, conversation_list)
 
@@ -350,7 +338,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
         if rag_res != "":
             prompt[-1]["content"] = rag_res
 
-    # 调取 LLM & 数字人生成视频
+    # 调取 LLM
     streamer_res = await get_llm_res(prompt)
 
     # 生成数字人视频，并更新直播间数字人视频信息
@@ -372,7 +360,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
 
     # 保存直播间信息
-    update_streaming_room_info(room_chat.roomId, streaming_room_info)
+    update_streaming_room_info(streaming_room_info)
 
     logger.info(streaming_room_info["status"]["conversation_id"])
     logger.info(conversation_list)
@@ -488,7 +476,7 @@ async def on_air_live_room_next_product_api(room_info: RoomProductListItem, user
         room_info (RoomProductListItem): 直播间 ID
     """
 
-    res_data = await get_or_init_conversation(room_info.roomId, next_product=True)
+    res_data = await get_or_init_conversation(user_id, room_info.roomId, next_product=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
@@ -500,6 +488,20 @@ async def upload_product_api(delete_info: RoomProductListItem, user_id: int = De
 
     if not process_success_flag:
         return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
+
+
+@router.post("/offline", summary="直播间下播接口")
+async def offline_api(delete_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
+    # 根据直播间 ID 获取信息
+    streaming_room_info = await get_streaming_room_info(user_id, delete_info.roomId)
+    logger.info(streaming_room_info)
+
+    streaming_room_info["status"]["live_status"] = 2  # 标志为下播
+
+    # 保存直播间信息
+    update_streaming_room_info(streaming_room_info)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 

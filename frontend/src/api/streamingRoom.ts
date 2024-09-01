@@ -196,6 +196,18 @@ const genAsrResult = async (roomId_: number, userId_: string, asrFileUrl_: strin
   })
 }
 
+// 下播
+const streamRoomOffline = (roomId_: number) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'POST',
+    url: '/streaming-room/offline',
+    data: { roomId: roomId_ },
+    headers: {
+      Authorization: header_authorization.value
+    }
+  })
+}
+
 export {
   type StreamingRoomInfo,
   type RoomProductItem,
@@ -211,5 +223,6 @@ export {
   onAirRoomNextProductRequest,
   deleteStreamingRoomByIdRequest,
   sendAudioToServer,
+  streamRoomOffline,
   genAsrResult
 }

@@ -13,7 +13,7 @@
 from typing import List
 import yaml
 
-from ..models.streamer_room_model import StreamRoomInfoDatabaseItem
+from ..models.streamer_room_model import OnAirRoomStatusItem, StreamRoomInfoDatabaseItem
 
 from ...web_configs import WEB_CONFIGS
 
@@ -22,6 +22,14 @@ async def get_streaming_room_info(user_id, id=-1) -> List[StreamRoomInfoDatabase
     # 加载直播间数据
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
         streaming_room_info = yaml.safe_load(f)
+
+    if streaming_room_info is None:
+        empty_info = dict(StreamRoomInfoDatabaseItem(status=dict(OnAirRoomStatusItem())))
+        if id == 0:
+            return empty_info
+        else:
+            # 想获取所有，需要返回一个 list
+            return [empty_info]
 
     filter_list = []
     for room in streaming_room_info:
@@ -53,6 +61,9 @@ def update_streaming_room_info(new_info):
     # 加载直播间文件
     with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
         streaming_room_info = yaml.safe_load(f)
+
+    if streaming_room_info is None:
+        streaming_room_info = []
 
     # 选择特定的直播间
     new_room = True

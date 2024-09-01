@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ChatDotRound, Microphone, VideoPause } from '@element-plus/icons-vue'
 
 import VideoComponent from '@/components/VideoComponent.vue'
 import MessageComponent from '@/components/MessageComponent.vue'
 import {
+  streamRoomOffline,
   genAsrResult,
   onAirRoomChatRequest,
   onAirRoomInfoRequest,
@@ -14,6 +16,8 @@ import {
 } from '@/api/streamingRoom'
 import type { ProductItem, StreamerInfo } from '@/api/product'
 import { ElMessage } from 'element-plus'
+
+const router = useRouter()
 
 // 定义传参
 const props = defineProps({
@@ -34,10 +38,16 @@ const getRoomInfo = async () => {
   // 获取主播视频地址
   // 获取商品信息，显示在右下角的商品缩略图
   // 获取后端对话记录 messageList ，进行渲染
-  const { data } = await onAirRoomInfoRequest(Number(props.roomId))
-  if (data.code === 0) {
-    currentStatus.value = data.data
-    console.info(currentStatus.value)
+  try {
+    const { data } = await onAirRoomInfoRequest(Number(props.roomId))
+    if (data.code === 0) {
+      currentStatus.value = data.data
+      console.info(currentStatus.value)
+    } else {
+      ElMessage.error('获取直播间信息失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取直播间信息失败' + error.message)
   }
 }
 
@@ -72,17 +82,23 @@ const handelSendClick = async () => {
 
   // request(roomId, userId, newValue)
   // 将对话记录更新到数据库
-  const { data } = await onAirRoomChatRequest(
-    Number(props.roomId),
-    userInfo.value.userId,
-    inputValue.value
-  )
+  try {
+    const { data } = await onAirRoomChatRequest(
+      Number(props.roomId),
+      userInfo.value.userId,
+      inputValue.value
+    )
 
-  // 取消 loading
-  loadingStreamRes.value = false
-  if (data.code === 0) {
-    // 更新 list
-    await getRoomInfo()
+    // 取消 loading
+    loadingStreamRes.value = false
+    if (data.code === 0) {
+      // 更新 list
+      await getRoomInfo()
+    } else {
+      ElMessage.error('更新对话信息失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('更新对话信息失败' + error.message)
   }
 
   // 启动输入框
@@ -102,16 +118,35 @@ const scrollToBottom = async () => {
 
 // 下一个商品
 const handleNextProductClick = async () => {
-  const { data } = await onAirRoomNextProductRequest(Number(props.roomId))
-  if (data.code === 0) {
-    console.info('Next Product')
-    currentStatus.value = data.data
-    console.info(currentStatus.value)
+  try {
+    const { data } = await onAirRoomNextProductRequest(Number(props.roomId))
+    if (data.code === 0) {
+      console.info('Next Product')
+      currentStatus.value = data.data
+      console.info(currentStatus.value)
+    } else {
+      ElMessage.error('失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('失败' + error.message)
   }
 }
 
 // 结束直播按钮
-const handleOffLineClick = () => {}
+const handleOffLineClick = async () => {
+  try {
+    const { data } = await streamRoomOffline(Number(props.roomId))
+    console.log(data)
+
+    if (data.code === 0) {
+      router.push({ name: 'StreamingOverview' })
+    } else {
+      ElMessage.error('失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('失败' + error.message)
+  }
+}
 
 onMounted(() => {
   // 获取直播间实时信息格信息
@@ -259,8 +294,12 @@ const handleStop = async () => {
               :type="isRecording ? 'danger' : 'primary'"
               @click="handleRecord"
             >
-              <el-icon v-if="!isRecording"><Microphone /></el-icon>
-              <el-icon v-else><VideoPause /></el-icon>
+              <el-icon v-if="!isRecording">
+                <Microphone />
+              </el-icon>
+              <el-icon v-else>
+                <VideoPause />
+              </el-icon>
             </el-button>
             <el-input
               v-model="inputValue"
@@ -272,7 +311,9 @@ const handleStop = async () => {
               size="large"
             />
             <el-button circle @click="handelSendClick" size="large">
-              <el-icon><ChatDotRound /></el-icon>
+              <el-icon>
+                <ChatDotRound />
+              </el-icon>
             </el-button>
           </div>
 

@@ -103,10 +103,13 @@ async def edit_streamer_info_api(streamer_info: StreamerInfoItem, user_id: int =
 
         poster_save_name = Path(streamer_info.base_mp4_path).stem + ".png"
         make_poster_by_video_first_frame(str(video_local_dir.joinpath(Path(streamer_info.base_mp4_path).name)), poster_save_name)
-        all_streamer_info_list[update_index]["poster_image"] = str(
-            Path(streamer_info.base_mp4_path).parent.joinpath(poster_save_name)
-        )
-        streamer_info.poster_image = all_streamer_info_list[update_index]["poster_image"]
+
+        poster_server_url = str(Path(streamer_info.base_mp4_path).parent.joinpath(poster_save_name))
+        if "http://" not in poster_server_url and "http:/" in poster_server_url:
+            poster_server_url = poster_server_url.replace("http:/", "http://")
+
+        all_streamer_info_list[update_index]["poster_image"] = poster_server_url
+        streamer_info.poster_image = poster_server_url
 
     logger.info(streamer_info)
     save_streamer_info(streamer_info)
