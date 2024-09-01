@@ -126,7 +126,7 @@ const route = useRoute()
 /* 侧边栏样式配置 */
 .el-aside {
   background-color: #ffffff;
-  height: 100vh;
+  height: 98.5vh;
   width: auto;
 }
 </style>
