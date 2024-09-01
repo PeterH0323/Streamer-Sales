@@ -14,10 +14,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/pad.md
   product_class: 电子
   product_id: 10
+  product_name: 14英寸平板电脑
   selling_price: 1999.99
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 65英寸OLED电视:
   amount: 68731
   delete: false
@@ -34,12 +34,13 @@
   instruction: http://localhost:8000/files/product_files/instructions/oled_tv.md
   product_class: 家电
   product_id: 11
+  product_name: 65英寸OLED电视
   selling_price: 12999.99
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 不粘煎炒锅:
   amount: 67423
+  delete: false
   delivery_company: 京东
   departure_place: 武汉
   heighlights:
@@ -53,10 +54,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/wok.md
   product_class: 厨具
   product_id: 9
+  product_name: 不粘煎炒锅
   selling_price: 168.6
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 光感润颜面膜:
   amount: 68441
   delete: false
@@ -73,10 +74,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/mask.md
   product_class: 美妆
   product_id: 4
+  product_name: 光感润颜面膜
   selling_price: 299.0
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 唇膏:
   amount: 1068
   delete: false
@@ -93,10 +94,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/lip_stick.md
   product_class: 美妆
   product_id: 2
+  product_name: 唇膏
   selling_price: 399.8
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 墨水钢笔:
   amount: 681684
   delete: false
@@ -113,10 +114,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/pen.md
   product_class: 文具
   product_id: 6
+  product_name: 墨水钢笔
   selling_price: 36.8
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 声波电动牙刷:
   amount: 10000
   delete: true
@@ -133,10 +134,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/elec_toothblush.md
   product_class: 电子
   product_id: 1
+  product_name: 声波电动牙刷
   selling_price: 99.9
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 本草精华洗发露:
   amount: 106999
   delete: false
@@ -153,10 +154,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/shampoo.md
   product_class: 日用品
   product_id: 3
+  product_name: 本草精华洗发露
   selling_price: 60.0
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 瑜伽垫:
   amount: 987913
   delete: false
@@ -173,10 +174,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/yoga_mat.md
   product_class: 运动
   product_id: 7
+  product_name: 瑜伽垫
   selling_price: 16.8
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 薰衣草淡香氛:
   amount: 681321
   delete: false
@@ -193,10 +194,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/perfume.md
   product_class: 家居用品
   product_id: 5
+  product_name: 薰衣草淡香氛
   selling_price: 499.0
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 进口和牛羽下肉:
   amount: 96836
   delete: false
@@ -213,10 +214,10 @@
   instruction: http://localhost:8000/files/product_files/instructions/beef.md
   product_class: 食品
   product_id: 12
+  product_name: 进口和牛羽下肉
   selling_price: 99.68
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
-
 速干运动裤:
   amount: 12435
   delete: false
@@ -233,6 +234,7 @@
   instruction: http://localhost:8000/files/product_files/instructions/pants.md
   product_class: 衣服
   product_id: 8
+  product_name: 速干运动裤
   selling_price: 66.9
   upload_date: '2024-08-18 12:11:53'
   user_id: 1
