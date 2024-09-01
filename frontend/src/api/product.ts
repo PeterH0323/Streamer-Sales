@@ -1,6 +1,3 @@
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
-
 import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import { header_authorization } from '@/api/user'
@@ -40,14 +37,14 @@ interface ProductData {
 
 // 查询接口
 const productListRequest = (params: ProductListType) => {
-  return request_handler<ResultPackage<ProductData>>({
-    method: 'POST',
-    url: '/products/list',
-    data: params,
-    headers: {
-      Authorization: header_authorization.value
-    }
-  })
+    return request_handler<ResultPackage<ProductData>>({
+      method: 'POST',
+      url: '/products/list',
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
 }
 
 // 查询指定商品的信息接口
@@ -102,33 +99,11 @@ const deleteProductByIdRequest = async (productId: number) => {
   })
 }
 
-// 查询 - 条件
-const queryCondition = ref<ProductListType>({
-  currentPage: 1,
-  pageSize: 10
-} as ProductListType)
-
-// 查询 - 结果
-const queriedResult = ref<ProductData>({} as ProductData)
-
-// 查询 - 方法
-const getProductList = async (params: ProductListType = {}) => {
-  Object.assign(queryCondition.value, params) // 用于外部灵活使用，传参的字典更新
-  const { data } = await productListRequest(queryCondition.value)
-  if (data.code === 0) {
-    queriedResult.value = data.data
-  } else {
-    ElMessage.error('商品接口错误')
-    throw new Error('商品接口错误')
-  }
-}
 
 export {
   type ProductItem,
   type StreamerInfo,
-  queryCondition,
-  queriedResult,
-  getProductList,
+  productListRequest,
   productCreadeOrEditRequest,
   getProductByIdRequest,
   genProductInstructionContentRequest,

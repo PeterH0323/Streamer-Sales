@@ -1,22 +1,50 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Delete } from '@element-plus/icons-vue'
+import { Plus, Delete, Edit } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 
-import {
-  queryCondition,
-  queriedResult,
-  getProductList,
-  deleteProductByIdRequest
-} from '@/api/product'
+import { productListRequest, deleteProductByIdRequest, type ProductListType } from '@/api/product'
 
 const router = useRouter()
 
 // 信息弹窗显示标识
 const ShowItemInfo = ref()
+
+// 加载框
+const tableLoading = ref(true)
+
+// 查询 - 条件
+const queryCondition = ref<ProductListType>({
+  currentPage: 1,
+  pageSize: 10
+} as ProductListType)
+
+// 查询 - 结果
+const queriedResult = ref<ProductData>({} as ProductData)
+
+// 查询 - 方法
+const getProductList = async (params: ProductListType = {}) => {
+  tableLoading.value = true
+
+  Object.assign(queryCondition.value, params) // 用于外部灵活使用，传参的字典更新
+
+  try {
+    const { data } = await productListRequest(queryCondition.value)
+    tableLoading.value = false
+
+    if (data.code === 0) {
+      queriedResult.value = data.data
+    } else {
+      ElMessage.error('商品接口错误')
+      throw new Error('商品接口错误')
+    }
+  } catch (error) {
+    ElMessage.error('商品接口失败: ' + error.message)
+  }
+}
 
 onMounted(() => {
   // 获取商品信息
@@ -38,8 +66,8 @@ const DeleteProduct = async (id: number, productName: string) => {
         ElMessage.error('删除失败')
       }
     })
-    .catch(() => {
-      // catch error
+    .catch((error) => {
+      ElMessage.error('删除失败: ' + error.message)
     })
 }
 </script>
@@ -76,7 +104,9 @@ const DeleteProduct = async (id: number, productName: string) => {
           <div>
             <!-- 添加商品 -->
             <el-button type="primary" @click="router.push({ name: 'ProductCreate' })">
-              <el-icon style="margin-right: 5px"><Plus /></el-icon>
+              <el-icon style="margin-right: 5px">
+                <Plus />
+              </el-icon>
               添加商品
             </el-button>
           </div>
@@ -84,7 +114,7 @@ const DeleteProduct = async (id: number, productName: string) => {
       </template>
 
       <!-- 中部表格信息-->
-      <el-table :data="queriedResult.product_list" max-height="1000">
+      <el-table :data="queriedResult.product_list" max-height="1000" v-loading="tableLoading">
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
         <el-table-column prop="image_path" label="图片" align="center">
@@ -107,6 +137,8 @@ const DeleteProduct = async (id: number, productName: string) => {
         <el-table-column label="操作" v-slot="{ row }" align="center" width="250px">
           <div class="control-item">
             <el-button
+              :type="row.instruction !== '' ? 'success' : 'warning'"
+              :disabled="row.instruction === ''"
               @click="
                 ShowItemInfo.showItemInfoDialog(
                   row.product_name,
@@ -119,11 +151,14 @@ const DeleteProduct = async (id: number, productName: string) => {
               说明书
             </el-button>
 
+            <!-- 编辑按钮 -->
             <el-button
+              type="primary"
+              :icon="Edit"
               @click="router.push({ name: 'ProductEdit', params: { productId: row.product_id } })"
-            >
-              编辑
-            </el-button>
+            />
+
+            <!-- 删除按钮 -->
             <el-button
               type="danger"
               @click="DeleteProduct(row.product_id, row.product_name)"
@@ -168,6 +203,7 @@ const DeleteProduct = async (id: number, productName: string) => {
   display: flex;
   justify-content: space-between; // 将两个 div 放置在页面的两侧
   align-items: center;
+
   .el-form-item {
     margin-bottom: 0px; // 查询框和下面的组件间隔大小
   }

@@ -40,7 +40,7 @@ async def get_db_product_info(user_id) -> List[ProductItem]:
     return filter_product_list
 
 
-async def get_product_max_id():
+def get_product_max_id():
     # 读取 yaml 文件
     with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)

@@ -81,16 +81,23 @@ async def upload_product_api(upload_product_item: ProductItem, user_id: int = De
         delete=False,
     )
 
+    rebuild_rag_db_flag = False
     if upload_product_item.product_name in product_info_dict:
         # 有则更新
         new_info_dict.product_id = product_info_dict[upload_product_item.product_name]["product_id"]  # 使用原来的 ID
 
-    # 保存
-    save_product_info(dict(new_info_dict))
+        if product_info_dict[upload_product_item.product_name]["instruction"] != new_info_dict.instruction:
+            # 说明书重新上传，需要重新构建 rag 数据库
+            rebuild_rag_db_flag = True
+    else:
+        rebuild_rag_db_flag = True
 
-    if WEB_CONFIGS.ENABLE_RAG:
+    if WEB_CONFIGS.ENABLE_RAG and rebuild_rag_db_flag:
         # 重新生成 RAG 向量数据库
         rebuild_rag_db()
+
+    # 全部流程走完再保存
+    save_product_info(dict(new_info_dict))
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
@@ -125,5 +132,9 @@ async def upload_product_api(delete_info: DeleteProductItem, user_id: int = Depe
 
     if not process_success_flag:
         return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    if WEB_CONFIGS.ENABLE_RAG:
+        # 重新生成 RAG 向量数据库
+        rebuild_rag_db()
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
