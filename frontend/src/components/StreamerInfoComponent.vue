@@ -59,7 +59,6 @@ const labelPosition = ref('top')
         <el-card shadow="never" v-if="optionList.length >= 1">
           <h2>选择主播</h2>
           <el-divider />
-          <!-- @change="productInfo.streamer_id = streamInfoSelected.id" -->
           <el-select
             v-model="modelSteamerInfo"
             placeholder="选择主播"
@@ -144,13 +143,15 @@ const labelPosition = ref('top')
                 :disabled="props.disableChange"
               />
             </el-form-item>
-            <el-form-item label="TTS 权重" :label-width="formLabelWidth">
+
+            <!-- TODO 支持用户上传自己的权重 -->
+            <!-- <el-form-item label="TTS 权重" :label-width="formLabelWidth">
               <el-input
                 v-model="modelSteamerInfo.tts_weight_tag"
                 size="large"
                 :disabled="props.disableChange"
               />
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
         </el-card>
       </el-col>
