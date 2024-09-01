@@ -133,26 +133,14 @@ const router = createRouter({
         {
           path: '/system',
           name: 'System',
-          redirect: { name: 'SystemModel' },
+          redirect: { name: 'SystemPlugins' },
           meta: { title: '系统配置' },
           children: [
             {
-              path: '/system/model',
-              name: 'SystemModel',
-              component: () => import('@/views/system/SystemView.vue'),
-              meta: { title: '模型配置' }
-            },
-            {
-              path: '/system/word',
-              name: 'SystemWord',
-              component: () => import('@/views/system/SystemView.vue'),
-              meta: { title: '敏感词配置' }
-            },
-            {
-              path: '/system/blacklist-question',
-              name: 'SystemBlacklistQuestion',
-              component: () => import('@/views/system/SystemView.vue'),
-              meta: { title: '疑问黑名单' }
+              path: '/system/plugins',
+              name: 'SystemPlugins',
+              component: () => import('@/views/system/SystemPluginsView.vue'),
+              meta: { title: '组件状态' }
             }
           ]
         }

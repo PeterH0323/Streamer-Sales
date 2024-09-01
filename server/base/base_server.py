@@ -29,9 +29,9 @@ swagger_description = """
 5. 🦸 **数字人生成**
 6. 🌐 **Agent 网络查询**
 7. 🎙️ **ASR 语音转文字**
-8. Vue 搭建的前端
-9. 后端采用 FastAPI 重写，贴近生产
-10. Docker-compose 分布式部署
+8. 🍍 **Vue + pinia + element-plus **搭建的前端，可自由扩展快速开发
+9. 🗝️ 后端采用 FastAPI + Uvicorn，**高性能，高效编码，生产可用，同时具有 JWT 身份验证**
+10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
 
 """
 
@@ -97,7 +97,7 @@ async def validation_exception_handler(request, exc):
 @app.post("/dashboard", tags=["base"], summary="获取主页信息接口")
 async def get_dashboard_info():
     """首页展示数据"""
-    dashboard_data = {
+    fake_dashboard_data = {
         "registeredBrandNum": 98431,  # 入驻品牌方
         "productNum": 49132,  # 商品数
         "dailyActivity": 68431,  # 日活
@@ -115,18 +115,14 @@ async def get_dashboard_info():
         "LiveRoomNum": 5,  # 直播间数量
     }
 
-    return make_return_data(True, ResultCode.SUCCESS, "成功", dashboard_data)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", fake_dashboard_data)
 
 
 @app.get("/plugins_info", tags=["base"], summary="获取组件信息接口")
 async def get_plugins_info():
-    return {
-        "rag": SERVER_PLUGINS_INFO.rag_enabled,
-        "asr": SERVER_PLUGINS_INFO.asr_server_enabled,
-        "tts": SERVER_PLUGINS_INFO.tts_server_enabled,
-        "digital_human": SERVER_PLUGINS_INFO.digital_human_server_enabled,
-        "agent": SERVER_PLUGINS_INFO.agent_enabled,
-    }
+
+    plugins_info = SERVER_PLUGINS_INFO.get_status()
+    return make_return_data(True, ResultCode.SUCCESS, "成功", plugins_info)
 
 
 @app.post("/upload/file", tags=["base"], summary="上传文件接口")

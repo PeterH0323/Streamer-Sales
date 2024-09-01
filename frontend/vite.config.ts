@@ -15,6 +15,7 @@ export default defineConfig({
       '/llm': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/dashboard': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/streaming-room': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
+      '/plugins_info': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL,
       '/digital-human': loadEnv('', process.cwd()).VITE_BASE_SERVER_URL
     }
   },

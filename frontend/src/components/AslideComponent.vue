@@ -57,9 +57,7 @@ const route = useRoute()
           <template #title>
             <el-icon> <setting /> </el-icon><span>系统配置</span>
           </template>
-          <el-menu-item index="/system/model"><span>模型配置</span></el-menu-item>
-          <el-menu-item index="/system/word"><span>敏感词配置</span></el-menu-item>
-          <el-menu-item index="/system/blacklist-question"><span>疑问黑名单</span></el-menu-item>
+          <el-menu-item index="/system/plugins"><span>组件状态</span></el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-aside>
