@@ -28,7 +28,10 @@ const isShowProgress = ref(false)
 
 // 文件上传成功后的 callback
 const handleFileUploadSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-  fileUrl.value = URL.createObjectURL(uploadFile.raw!) // 生成内存地址，方便加载
+  // fileUrl.value = URL.createObjectURL(uploadFile.raw!) // 生成内存地址，方便加载
+  fileUrl.value = response.data
+  console.info(fileUrl.value)
+
   modelFilePath.value = response.data // 更新父组件双向绑定的值
   isShowProgress.value = false
 }
