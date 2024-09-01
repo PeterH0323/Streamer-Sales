@@ -103,7 +103,7 @@
   - [🎫 开源许可证](#-开源许可证)
   - [🔗 引用](#-引用)
   - [🌟 Star History](#-star-history)
-  - [🧾 免责声明/许可](#-免责声明许可)
+  - [🧾 免责声明](#-免责声明)
 
 ## 🛠 架构图
 
@@ -202,62 +202,49 @@ pip install -r requirements.txt
 1. TTS 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001 # tts
+bash deploy.sh tts
 ```
 
 2. 数字人 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+bash deploy.sh dg
 ```
 
 3. ASR 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
+bash deploy.sh asr
 ```
 
 4. LLM 服务
 
 ```bash
-conda activate streamer-sales
-export MODELSCOPE_CACHE="./weights/llm_weights"
-export LMDEPLOY_USE_MODELSCOPE=True
-lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
-                          --server-port 23333 \
-                          --model-name internlm2 \
-                          --session-len 32768 \
-                          --cache-max-entry-count 0.1 \
-                          --model-format hf
+bash deploy.sh llm
 ```
 
 使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署建议使用 40G 显存机器。
 
-如果您的机器是 24G 的显卡，需要换成 4bit 模型，修改命令中的两处地方就行：
+如果您的机器是 24G 的显卡，需要换成 4bit 模型，命令如下：
 
-- `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
-- `--model-format hf` -> `--model-format awq`
+```bash
+bash deploy.sh llm-4bit
+```
 
 5. 中台服务
 
 ```bash
-conda activate streamer-sales
-
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
 export WEATHER_API_KEY="${天气 API key}"
 
-uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000 # base: llm + rag + agent
+bash deploy.sh base
 ```
 
 6. 前端
 
 ```bash
-conda activate streamer-sales
-streamlit run app.py --server.address=0.0.0.0 --server.port 7860
+bash deploy.sh frontend
 ```
 
 </details>
