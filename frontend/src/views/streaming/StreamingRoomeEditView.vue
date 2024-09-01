@@ -39,54 +39,63 @@ const currentPage = ref(1)
 const pageSize = ref(-1)
 
 const getProductInfo = async () => {
-  // 调用接口获取商品缩略图用于抽屉
-  const { data } = await roomPorductAddListRequest(
-    Number(props.roomId),
-    currentPage.value,
-    pageSize.value
-  )
-  if (data.code === 0) {
-    DrawerProductList.value = data.data
+  try {
+    // 调用接口获取商品缩略图用于抽屉
+    const { data } = await roomPorductAddListRequest(
+      RoomDetailInfo.value.room_id,
+      currentPage.value,
+      pageSize.value
+    )
+    if (data.code === 0) {
+      DrawerProductList.value = data.data
 
-    // 分页获取
-    // if (DrawerProductList.value.product.length === 0) {
-    //   DrawerProductList.value = data.data
-    // } else {
-    //   for (let i of data.data.product) {
-    //     // 根据返回数据继续添加商品
-    //     DrawerProductList.value.product.push(i)
-    //   }
-    //   DrawerProductList.value.currentPage = data.data.currentPage
-    //   DrawerProductList.value.pageSize = data.data.pageSize
-    //   DrawerProductList.value.totalSize = data.data.totalSize
-    // }
-    console.info(DrawerProductList.value)
-    ElMessage.success('获取商品成功')
+      // 分页获取
+      // if (DrawerProductList.value.product.length === 0) {
+      //   DrawerProductList.value = data.data
+      // } else {
+      //   for (let i of data.data.product) {
+      //     // 根据返回数据继续添加商品
+      //     DrawerProductList.value.product.push(i)
+      //   }
+      //   DrawerProductList.value.currentPage = data.data.currentPage
+      //   DrawerProductList.value.pageSize = data.data.pageSize
+      //   DrawerProductList.value.totalSize = data.data.totalSize
+      // }
+      console.info(DrawerProductList.value)
+      ElMessage.success('获取商品成功')
+    } else {
+      ElMessage.error('获取商品失败：' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取商品失败：' + error.message)
   }
 }
 
 // 获取商品表格信息
-const RoomProductList = ref({} as RoomDetailItem)
-RoomProductList.value.streamer_info = {} as StreamerInfo
-RoomProductList.value.streamer_info.id = 0
-RoomProductList.value.pageSize = 10
-RoomProductList.value.room_id = 0
-RoomProductList.value.product_list = []
-RoomProductList.value.status = {} as StreamingRoomStatusItem
+const RoomDetailInfo = ref({} as RoomDetailItem)
+RoomDetailInfo.value.streamer_info = {} as StreamerInfo
+RoomDetailInfo.value.streamer_info.id = 0
+RoomDetailInfo.value.pageSize = 10
+RoomDetailInfo.value.room_id = Number(props.roomId)
+RoomDetailInfo.value.product_list = []
+RoomDetailInfo.value.status = {} as StreamingRoomStatusItem
 const EditProductList = ref({} as RoomDetailItem)
 
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
-  let currentRoomId = props.roomId
-  if (currentRoomId === '0') {
-    currentRoomId = String(RoomProductList.value.room_id)
-  }
-
-  console.info('currentRoomId = ', currentRoomId)
-
-  const { data } = await roomDetailRequest(currentRoomId, currentPage, pageSize)
-  if (data.code === 0) {
-    console.info(data.data)
-    RoomProductList.value = data.data
+  try {
+    const { data } = await roomDetailRequest(
+      String(RoomDetailInfo.value.room_id),
+      currentPage,
+      pageSize
+    )
+    if (data.code === 0) {
+      console.info(data.data)
+      RoomDetailInfo.value = data.data
+    } else {
+      ElMessage.error('获取直播间详情失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取直播间详情失败' + error.message)
   }
 }
 
@@ -94,11 +103,17 @@ const getProductListInfo = async (currentPage: number, pageSize: number) => {
 const streamerNameOptions = ref([] as StreamerInfo[])
 
 const getSteramerInfo = async () => {
-  // 获取主播信息
-  const { data } = await streamerInfoListRequest()
-  if (data.code === 0) {
-    streamerNameOptions.value = data.data
-    ElMessage.success('获取主播信息成功')
+  try {
+    // 获取主播信息
+    const { data } = await streamerInfoListRequest()
+    if (data.code === 0) {
+      streamerNameOptions.value = data.data
+      ElMessage.success('获取主播信息成功')
+    } else {
+      ElMessage.error('获取主播信息失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取主播信息失败' + error.message)
   }
 }
 
@@ -122,18 +137,25 @@ function cancelClick() {
 }
 
 async function confirmClick() {
-  EditProductList.value = RoomProductList.value
+  EditProductList.value = RoomDetailInfo.value
   EditProductList.value.product_list = DrawerProductList.value.product_list
-  EditProductList.value.streamer_id = RoomProductList.value.streamer_info.id
+  EditProductList.value.streamer_id = RoomDetailInfo.value.streamer_info.id
 
   console.log(EditProductList.value)
-  // 调用接口更新选择的商品
-  const { data } = await RoomCreadeOrEditRequest(EditProductList.value)
-  if (data.code === 0) {
-    // 新建会返回直播间后台保存 ID
-    RoomProductList.value.room_id = data.data
+  try {
+    // 调用接口更新选择的商品
+    const { data } = await RoomCreadeOrEditRequest(EditProductList.value)
+    if (data.code === 0) {
+      // 新建会返回直播间后台保存 ID
+      RoomDetailInfo.value.room_id = data.data
+      ElMessage.success('操作成功')
+    } else {
+      ElMessage.error('操作失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('操作失败' + error.message)
   }
-  ElMessage.success('操作成功')
+
   drawerShow.value = false
 
   // 重新获取
@@ -142,14 +164,24 @@ async function confirmClick() {
 
 // 保存
 const onSubmit = () => {
-  // 调用接口保存商品
-  RoomCreadeOrEditRequest(RoomProductList.value)
-  ElMessage.success('操作成功')
+  try {
+    // 调用接口保存商品
+    RoomCreadeOrEditRequest(RoomDetailInfo.value)
+    ElMessage.success('操作成功')
+  } catch (error) {
+    ElMessage.error('操作失败' + error.message)
+  }
 }
 
 const handelOnAirClick = () => {
-  // TODO 校验所有数字人视频生成完毕
-  router.push({ name: 'StreamingOnAir', params: { roomId: props.roomId } })
+  for (const entry of RoomDetailInfo.value.product_list) {
+    if (entry.start_video === '') {
+      ElMessage.error('必须将所有的商品都生成数字人视频才可以进行开播')
+      return false
+    }
+  }
+
+  router.push({ name: 'StreamingOnAir', params: { roomId: String(RoomDetailInfo.value.room_id) } })
 }
 
 // 每个物品的点击按钮
@@ -181,7 +213,7 @@ const handelControlClick = (
       <template #content>
         <div class="flex items-center">
           <span class="text-large font-600 mr-3">
-            {{ props.roomId ? '编辑' : '新建' }} 直播间
+            {{ RoomDetailInfo.room_id !== 0 ? '编辑' : '新建' }} 直播间
           </span>
         </div>
       </template>
@@ -241,13 +273,13 @@ const handelControlClick = (
       <h2>直播间名称</h2>
       <el-divider />
 
-      <el-input v-model="RoomProductList.name" size="large" />
+      <el-input v-model="RoomDetailInfo.name" size="large" />
     </el-card>
 
     <el-card shadow="never">
       <StreamerInfoComponent
         disableChange
-        v-model="RoomProductList.streamer_info"
+        v-model="RoomDetailInfo.streamer_info"
         :optionList="streamerNameOptions"
       />
     </el-card>
@@ -260,12 +292,14 @@ const handelControlClick = (
         size="large"
         round
       >
-        <el-icon style="margin-right: 5px"><Edit /></el-icon>
+        <el-icon style="margin-right: 5px">
+          <Edit />
+        </el-icon>
         增删商品
       </el-button>
 
       <!-- TODO 商品表格可以做成 component 组件 -->
-      <el-table :data="RoomProductList.product_list" max-height="1000" border>
+      <el-table :data="RoomDetailInfo.product_list" max-height="1000" border>
         <el-table-column prop="product_id" label="ID" align="center" width="50px" />
 
         <el-table-column prop="image_path" label="图片" align="center">
@@ -297,7 +331,7 @@ const handelControlClick = (
                   'Instruction',
                   row.instruction,
                   row.product_id,
-                  RoomProductList.streamer_info.id,
+                  RoomDetailInfo.streamer_info.id,
                   row.sales_doc
                 )
               "
@@ -316,7 +350,7 @@ const handelControlClick = (
                   'SalesDoc',
                   row.sales_doc,
                   row.product_id,
-                  RoomProductList.streamer_info.id,
+                  RoomDetailInfo.streamer_info.id,
                   row.sales_doc
                 )
               "
@@ -335,7 +369,7 @@ const handelControlClick = (
                   'DigitalHuman',
                   row.start_video,
                   row.product_id,
-                  RoomProductList.streamer_info.id,
+                  RoomDetailInfo.streamer_info.id,
                   row.sales_doc
                 )
               "
@@ -354,30 +388,34 @@ const handelControlClick = (
       </el-table>
 
       <!-- 信息弹窗 -->
-      <InfoDialogComponents ref="ShowItemInfo" v-model="RoomProductList.product_list" />
+      <InfoDialogComponents ref="ShowItemInfo" v-model="RoomDetailInfo.product_list" />
 
       <template #footer>
         <div class="bottom-item">
           <el-pagination
-            v-model:current-page="RoomProductList.currentPage"
-            v-model:page-size="RoomProductList.pageSize"
+            v-model:current-page="RoomDetailInfo.currentPage"
+            v-model:page-size="RoomDetailInfo.pageSize"
             :page-sizes="[5, 10, 15, 20]"
             :background="true"
             layout="total, sizes, prev, pager, next, jumper"
-            :total="RoomProductList.totalSize || 0"
+            :total="RoomDetailInfo.totalSize || 0"
             @size-change="(pageSize: number) => getProductListInfo(1, pageSize)"
             @current-change="
-              (currentPage: number) => getProductListInfo(currentPage, RoomProductList.pageSize)
+              (currentPage: number) => getProductListInfo(currentPage, RoomDetailInfo.pageSize)
             "
           />
           <div>
-            <el-button type="success" @click="handelOnAirClick">
-              {{ RoomProductList.status.live_status === 1 ? '进入' : '开始' }}直播</el-button
+            <el-button
+              type="success"
+              @click="handelOnAirClick"
+              :disable="RoomDetailInfo.room_id === 0"
+            >
+              {{ RoomDetailInfo.status.live_status === 1 ? '进入' : '开始' }}直播</el-button
             >
             <el-button
               type="primary"
               @click="onSubmit"
-              :disabled="RoomProductList.product_list.length === 0"
+              :disabled="RoomDetailInfo.product_list.length === 0"
               >保存</el-button
             >
           </div>
@@ -427,6 +465,7 @@ const handelControlClick = (
   .el-card__body {
     padding: 0px !important;
   }
+
   .el-card {
     margin: 0px;
     width: 450px;

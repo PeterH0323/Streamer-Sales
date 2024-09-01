@@ -34,17 +34,23 @@ const DeleteDigitalHuman = async (id: number, name: string) => {
         ElMessage.error('删除失败')
       }
     })
-    .catch(() => {
-      // catch error
+    .catch((error) => {
+      ElMessage.error('删除失败: ' + error.message)
     })
 }
 
 onMounted(async () => {
   // 获取主播信息
-  const { data } = await streamerInfoListRequest()
-  if (data.code === 0) {
-    streamerNameOptions.value = data.data
-    ElMessage.success('获取主播信息成功')
+  try {
+    const { data } = await streamerInfoListRequest()
+    if (data.code === 0) {
+      streamerNameOptions.value = data.data
+      ElMessage.success('获取主播信息成功')
+    } else {
+      ElMessage.error('获取主播信息失败：' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取主播信息失败：' + error.message)
   }
 })
 
@@ -82,7 +88,9 @@ const makeCharacterString = (characterList: string[]) => {
         size="large"
         @click="ShowItemInfo.showItemInfoDialog(0)"
       >
-        <el-icon style="margin-right: 5px"><Plus /></el-icon>
+        <el-icon style="margin-right: 5px">
+          <Plus />
+        </el-icon>
         新增主播
       </el-button>
     </div>

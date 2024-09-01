@@ -10,30 +10,42 @@ import {
 } from '@/api/streamerInfo'
 
 const dialogInfoVisible = ref(false)
-
+const saveLoading = ref(false)
 // 定义标题
 const steamerInfo = ref({} as StreamerInfo)
 const showItemInfoDialog = async (streamerId: number) => {
   console.log('streamerId = ', streamerId)
   dialogInfoVisible.value = true
 
-  // 请求接口获取主播数据
-  const { data } = await streamerDetailInfoRequest(streamerId)
-  if (data.code === 0) {
-    steamerInfo.value = data.data[0]
-  } else {
-    // ElMessage.error()
+  try {
+    // 请求接口获取主播数据
+    const { data } = await streamerDetailInfoRequest(streamerId)
+    if (data.code === 0) {
+      steamerInfo.value = data.data[0]
+    } else {
+      ElMessage.error('获取主播数据失败: ' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取主播数据失败: ' + error.message)
   }
 }
 
 const handelSaveClick = async () => {
-  const { data } = await streamerEditDetailRequest(steamerInfo.value)
+  try {
+    saveLoading.value = true
+    const { data } = await streamerEditDetailRequest(steamerInfo.value)
 
-  if (data.code === 0) {
-    steamerInfo.value.id = data.data
-    ElMessage.success('保存成功')
-  } else {
-    ElMessage.error(data.message)
+    if (data.code === 0) {
+      steamerInfo.value.id = data.data
+      ElMessage.success('保存成功')
+      saveLoading.value = false
+    } else {
+      saveLoading.value = false
+      ElMessage.error('保存失败: ' + data.message)
+    }
+  } catch (error) {
+    saveLoading.value = false
+    ElMessage.error('保存失败: ' + error.message)
   }
 }
 
@@ -47,8 +59,10 @@ defineExpose({ showItemInfoDialog })
 
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="handelSaveClick"> 保存 </el-button>
-          <el-button @click="dialogInfoVisible = false">关闭</el-button>
+          <el-button type="primary" @click="handelSaveClick" :loading="saveLoading">
+            保存
+          </el-button>
+          <el-button @click="dialogInfoVisible = false" :disabled="saveLoading"> 关闭 </el-button>
         </div>
       </template>
     </el-dialog>

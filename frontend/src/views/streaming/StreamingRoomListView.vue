@@ -15,11 +15,17 @@ const streamingList = ref([] as StreamingRoomInfo[])
 const router = useRouter()
 
 onMounted(async () => {
-  // 获取直播间信息
-  const { data } = await streamerRoomListRequest()
-  if (data.code === 0) {
-    streamingList.value = data.data
-    ElMessage.success('获取直播间信息成功')
+  try {
+    // 获取直播间信息
+    const { data } = await streamerRoomListRequest()
+    if (data.code === 0) {
+      streamingList.value = data.data
+      ElMessage.success('获取直播间信息成功')
+    } else {
+      ElMessage.error('获取直播间信息失败' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取直播间信息失败' + error.message)
   }
 })
 
@@ -44,7 +50,7 @@ const DeleteStreamingRoom = async (id: number, productName: string) => {
       }
     })
     .catch(() => {
-      // catch error
+      ElMessage.error('删除失败')
     })
 }
 
@@ -66,7 +72,9 @@ const tagMap = { 0: '未开播', 1: '直播中', 2: '已下播' }
   <div>
     <div style="margin-bottom: 20px">
       <el-button @click="router.push({ name: 'StreamingCreate' })" type="primary">
-        <el-icon style="margin-right: 5px"><Plus /></el-icon>
+        <el-icon style="margin-right: 5px">
+          <Plus />
+        </el-icon>
 
         新建直播间
       </el-button>
@@ -128,6 +136,7 @@ const tagMap = { 0: '未开播', 1: '直播中', 2: '已下播' }
 .title {
   display: flex;
   justify-content: space-between;
+
   .h3 {
     font-size: 50px;
     font-weight: 600;

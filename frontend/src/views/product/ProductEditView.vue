@@ -23,6 +23,8 @@ const props = defineProps({
 // 步骤条ID
 const currentStep = ref(0)
 
+const saveLoading = ref(false)
+
 // 商品信息
 const productInfo = ref({} as ProductItem)
 productInfo.value.heighlights = [] // 初始化
@@ -56,25 +58,38 @@ const handleHeighlightInputConfirm = () => {
 const onSubmit = async () => {
   const statusInof = props.productId ? '编辑商品' : '新建商品'
 
-  const { data } = await productCreadeOrEditRequest(productInfo.value)
-  if (data.code === 0) {
-    ElMessage.success(`${statusInof}成功!`)
-    router.push({ name: 'Product' })
-  } else {
-    ElMessage.error(`${statusInof}失败, ${data.message}`)
-    throw new Error(`${statusInof}失败, ${data.message}`)
+  try {
+    saveLoading.value = true
+    const { data } = await productCreadeOrEditRequest(productInfo.value)
+    if (data.code === 0) {
+      ElMessage.success(`${statusInof}成功!`)
+      saveLoading.value = false
+
+      router.push({ name: 'Product' })
+    } else {
+      saveLoading.value = false
+      ElMessage.error(`${statusInof}失败, ${data.message}`)
+      throw new Error(`${statusInof}失败, ${data.message}`)
+    }
+  } catch (error) {
+    saveLoading.value = false
+    ElMessage.error('失败:' + error.message)
   }
 }
 
 onMounted(async () => {
   // 获取商品信息
   if (props.productId) {
-    const { data } = await getProductByIdRequest(props.productId)
-    if (data.code === 0) {
-      productInfo.value = data.data
-      ElMessage.success('获取商品信息成功')
-    } else {
-      ElMessage.error(data.message)
+    try {
+      const { data } = await getProductByIdRequest(props.productId)
+      if (data.code === 0) {
+        productInfo.value = data.data
+        ElMessage.success('获取商品信息成功')
+      } else {
+        ElMessage.error(data.message)
+      }
+    } catch (error) {
+      ElMessage.error('失败:' + error.message)
     }
   }
 })
@@ -93,7 +108,9 @@ onMounted(async () => {
       </template>
       <template #extra>
         <div class="flex items-center">
-          <el-button type="primary" class="ml-2" @click="onSubmit">保存</el-button>
+          <el-button type="primary" class="ml-2" @click="onSubmit" :loading="saveLoading"
+            >保存</el-button
+          >
         </div>
       </template>
     </el-page-header>
@@ -192,16 +209,24 @@ onMounted(async () => {
             <el-input v-model="productInfo.delivery_company" maxlength="50" show-word-limit />
           </el-form-item>
           <div class="bottom-gen-btn">
-            <el-button type="success"> AI 生成 </el-button>
+            <el-button type="success" disabled> AI 生成 (comming soon) </el-button>
           </div>
         </div>
       </el-form>
 
       <template #footer>
         <div class="form-bottom-btn">
-          <el-button v-show="currentStep > 0" @click="currentStep--">上一步</el-button>
+          <el-button v-show="currentStep > 0" @click="currentStep--" :disabled="saveLoading"
+            >上一步</el-button
+          >
           <el-button v-show="currentStep < 1" @click="currentStep++">下一步</el-button>
-          <el-button v-show="currentStep === 1" type="primary" @click="onSubmit">保存</el-button>
+          <el-button
+            v-show="currentStep === 1"
+            type="primary"
+            @click="onSubmit"
+            :loading="saveLoading"
+            >保存</el-button
+          >
         </div>
       </template>
     </el-card>
