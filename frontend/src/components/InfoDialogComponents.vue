@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { MdPreview } from 'md-editor-v3'
 
@@ -43,14 +43,23 @@ const showItemInfoDialog = async (
 
   if (itemType_ === 'Instruction') {
     // 请求接口获取说明书数据
-    const { data } = await genProductInstructionContentRequest(itemValue)
-    if (data.code === 0) {
-      infoValue.value = data.data
+    try {
+      const { data } = await genProductInstructionContentRequest(itemValue)
+      if (data.code === 0) {
+        infoValue.value = data.data
+      } else {
+        ElMessage.error('获取说明书失败：' + data.message)
+      }
+    } catch (error) {
+      ElMessage.error('获取说明书失败：' + error.message)
     }
   } else {
     infoValue.value = itemValue
   }
 }
+
+// 是否正在生成文案标识
+const isGenerating = ref(false)
 
 const updateGenValue = (newValue: string) => {
   let index = -1
@@ -70,40 +79,108 @@ const updateGenValue = (newValue: string) => {
   }
 }
 
+// 生成进度条
+const genPercentage = ref(0)
+
+// 定义计时器句柄
+let timerId = null
+let total_gen_sec = 3 * 60 * 1000
+
+// 开始/停止生成进度条
+const startGenProgress = () => {
+  genPercentage.value = 0
+  if (timerId) {
+    // 如果计时器正在运行，则清除计时器
+    clearInterval(timerId)
+  }
+
+  if (itemType.value === 'DigitalHuman') {
+    // 数字人生成时间
+    total_gen_sec = 5 * 60
+  } else {
+    // 文案生成时间
+    total_gen_sec = 10
+  }
+
+  // 启动计时器
+  timerId = setInterval(() => {
+    if (genPercentage.value < 99) {
+      genPercentage.value += parseFloat((100 / total_gen_sec).toFixed(2))
+    }
+
+    if (genPercentage.value > 99) {
+      genPercentage.value = 99
+    }
+  }, 1000)
+}
+
+const stopGenProgress = () => {
+  if (timerId) {
+    // 如果计时器正在运行，则清除计时器
+    clearInterval(timerId)
+  }
+}
+
 // 生成数据人视频
 const getDigitalHumanVideo = async () => {
   if (salesDoc.value === '') {
-    ElMessage.error('需要先生成文案')
+    ElMessage.error('需先生成文案')
     return
   }
 
   isGenerating.value = true
-  ElMessage.success('正在生成，请稍候')
-  const { data } = await genDigitalHuamnVideoRequest(streamerId.value, salesDoc.value)
-  console.log(data)
-  if (data.code === 0) {
-    infoValue.value = data.data
-    updateGenValue(infoValue.value)
-    ElMessage.success('生成数字人视频成功')
+  ElMessage.success('正在生成，预计 3 分钟，请稍候')
+  ElMessage.warning('若未生成完成，请不要离开页面！')
+
+  startGenProgress()
+  try {
+    const { data } = await genDigitalHuamnVideoRequest(streamerId.value, salesDoc.value)
+    console.log(data)
+    if (data.code === 0) {
+      infoValue.value = data.data
+      updateGenValue(infoValue.value)
+      genPercentage.value = 100
+      ElMessage.success('生成数字人视频成功')
+    } else {
+      ElMessage.error('生成数字人视频失败：' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('生成数字人视频失败：' + error.message)
   }
   isGenerating.value = false
+  stopGenProgress()
 }
 
-// 是否正在生成文案标识
-const isGenerating = ref(false)
 // 生成解说文案
 const handleGenSalesDocClick = async () => {
   isGenerating.value = true
   ElMessage.success('正在生成，请稍候')
-  const { data } = await genSalesDocRequest(Number(productId.value), Number(streamerId.value))
-  console.log(data)
-  if (data.code === 0) {
-    infoValue.value = data.data
-    updateGenValue(infoValue.value) // 更新与父组件双向绑定的值
-    ElMessage.success('生成文案成功')
+  ElMessage.warning('若未生成完成，请不要离开页面！')
+  try {
+    startGenProgress()
+
+    const { data } = await genSalesDocRequest(Number(productId.value), Number(streamerId.value))
+    console.log(data)
+    if (data.code === 0) {
+      infoValue.value = data.data
+      updateGenValue(infoValue.value) // 更新与父组件双向绑定的值
+      ElMessage.success('生成文案成功')
+    } else {
+      ElMessage.error('生成文案失败：' + data.message)
+    }
+  } catch (error) {
+    ElMessage.error('生成文案失败：' + error.message)
   }
   isGenerating.value = false
+  stopGenProgress()
 }
+
+// 在组件卸载前确保计时器被清除
+onBeforeUnmount(() => {
+  if (timerId) {
+    clearInterval(timerId)
+  }
+})
 
 defineExpose({ showItemInfoDialog })
 </script>
@@ -111,9 +188,23 @@ defineExpose({ showItemInfoDialog })
 <template>
   <div>
     <!-- 显示说明书 or 文案 or 数字人视频-->
-    <el-dialog v-model="dialogFormVisible" :title="titleName + title" width="1000" top="5vh">
+    <el-dialog
+      v-model="dialogFormVisible"
+      :title="titleName + title"
+      width="1000"
+      top="5vh"
+      :close-on-press-escape="false"
+      :show-close="false"
+    >
+      <!-- 说明书 -->
+      <template v-if="itemType === 'Instruction'">
+        <div style="text-align: left">
+          <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
+        </div>
+      </template>
+
       <!-- 主播文案  -->
-      <template v-if="itemType === 'SalesDoc'">
+      <template v-else-if="itemType === 'SalesDoc'">
         <div>
           <el-input
             type="textarea"
@@ -122,6 +213,9 @@ defineExpose({ showItemInfoDialog })
             :autosize="{ minRows: 20 }"
             show-word-limit
           />
+          <div class="progress-item">
+            <el-progress v-show="isGenerating" :text-inside="true" :percentage="genPercentage" />
+          </div>
           <div class="bottom-gen-btn">
             <el-button @click="handleGenSalesDocClick" :loading="isGenerating" type="primary">
               AI 生成
@@ -130,17 +224,14 @@ defineExpose({ showItemInfoDialog })
         </div>
       </template>
 
-      <!-- 说明书 -->
-      <template v-else-if="itemType === 'Instruction'">
-        <div style="text-align: left">
-          <MdPreview editorId="preview-SalesDoc" :modelValue="infoValue" />
-        </div>
-      </template>
-
       <!-- 数字人视频 -->
       <template v-else-if="itemType === 'DigitalHuman'">
         <div class="make-center">
           <VideoComponent :src="infoValue" :key="infoValue" :height="600" />
+        </div>
+
+        <div class="progress-item">
+          <el-progress v-show="isGenerating" :text-inside="true" :percentage="genPercentage" />
         </div>
 
         <div class="bottom-gen-btn">
@@ -157,10 +248,11 @@ defineExpose({ showItemInfoDialog })
             v-show="itemType !== 'Instruction'"
             @click="dialogFormVisible = false"
             type="success"
+            :disabled="isGenerating"
           >
             保存
           </el-button>
-          <el-button @click="dialogFormVisible = false">关闭</el-button>
+          <el-button @click="dialogFormVisible = false" :disabled="isGenerating">关闭</el-button>
         </div>
       </template>
     </el-dialog>
@@ -174,6 +266,23 @@ defineExpose({ showItemInfoDialog })
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+// 进度条
+.progress-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  ::v-deep(.el-progress) {
+    height: 30px;
+    width: 80%;
+    margin: 10px;
+  }
+
+  ::v-deep(.el-progress-bar__outer) {
+    height: 16px !important;
+  }
 }
 
 .make-center {
