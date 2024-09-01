@@ -67,7 +67,7 @@ def save_streamer_info(new_streamer_info: StreamerInfoItem):
     Args:
         new_streamer_info (StreamerInfoItem): 新的主播信息，如果 ID 匹配则更新，如果不匹配现有的则更新
     """
-    
+
     new_streamer_info = dict(new_streamer_info)
 
     with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
@@ -77,14 +77,14 @@ def save_streamer_info(new_streamer_info: StreamerInfoItem):
     match_indx = -1
     for idx, sreamer in enumerate(all_streamer_info_list):
 
-        if sreamer["id"] == new_streamer_info['id']:
+        if sreamer["id"] == new_streamer_info["id"]:
             # 匹配成功则更新
             all_streamer_info_list[idx] = dict(new_streamer_info)
             match_indx = idx
             break
 
     # 匹配不成功，直接加入
-    if match_indx <= 0:
+    if match_indx < 0:
         all_streamer_info_list.append(dict(new_streamer_info))
 
     # 保存
