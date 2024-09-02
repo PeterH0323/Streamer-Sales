@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://github.com/PeterH0323/Streamer-Sales/">
-    <img src="assets/logo.png" alt="Logo" width="30%">
+    <img src="./frontend/src/assets/logo.png" alt="Logo" width="30%">
   </a>
 
 <h3 align="center">Streamer-Sales</h3>
@@ -25,13 +25,16 @@
 
 **功能点总结：**
 
-- 📜 主播文案一键生成
-- 🚀 KV cache + Turbomind  推理加速
-- 📚 RAG 检索增强生成
-- 🎙️ ASR 语音转文字输入
-- 🔊 TTS 文字转语音输出
-- 🦸 数字人解说视频生成
-- 🌐 Agent 使用网络查询实时快递等信息
+1. 📜 **主播文案一键生成**
+2. 🚀 KV cache + Turbomind **推理加速**
+3. 📚 RAG **检索增强生成**
+4. 🔊 TTS **文字转语音**
+5. 🦸 **数字人生成**
+6. 🌐 **Agent 网络查询**
+7. 🎙️ **ASR 语音转文字**
+8. 🍍 **Vue + pinia + element-plus** 搭建的前端，可自由扩展快速开发
+9. 🗝️ 后端采用 **FastAPI + Uvicorn，高性能，高效编码，生产可用，同时具有 JWT 身份验证**
+10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
 
 无论是线上直播销售，还是线下门店推广，这款卖货主播大模型都能成为您不可或缺的得力助手。它不仅能够提升销售效率，还能增强用户体验，为您的品牌形象加分。
 
@@ -45,6 +48,7 @@
 
 ## 🎉 NEWS
 
+- [2024.09.01] 💥💥💥**重磅发布：【 AI 卖货主播后台系统 】** ❗❗❗： **前端使用 Vue 重写，后端使用 FastAPI 进一步扩充接口**，更加贴近生产，功能添加更为自由灵活，详见[架构图](#-架构图)
 - [2024.07.23] **支持 Docker-Compose 一键部署**，再也不用担心环境问题，服务可以自由编排，一键部署更加丝滑！
 - [2024.07.10] **前后端分离**，可以定义服务数量做到负载均衡啦！
 - [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
@@ -93,7 +97,6 @@
       - [Docker-Compose（推荐）](#docker-compose推荐-1)
       - [宿主机直接部署](#宿主机直接部署-1)
   - [🔧 自定义](#-自定义)
-    - [如何添加商品](#如何添加商品)
     - [如何自定义数字人](#如何自定义数字人)
     - [如何替换自己的 TTS](#如何替换自己的-tts)
   - [📧 后记](#-后记)
@@ -101,9 +104,9 @@
   - [🥳 加群讨论](#-加群讨论)
   - [💕 致谢](#-致谢)
   - [🎫 开源许可证](#-开源许可证)
+  - [🧾 免责声明](#-免责声明)
   - [🔗 引用](#-引用)
   - [🌟 Star History](#-star-history)
-  - [🧾 免责声明](#-免责声明)
 
 ## 🛠 架构图
 
@@ -223,7 +226,7 @@ bash deploy.sh asr
 bash deploy.sh llm
 ```
 
-使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署建议使用 40G 显存机器。
+默认使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，建议使用 40G 显存机器。
 
 如果您的机器是 24G 的显卡，需要换成 4bit 模型，命令如下：
 
@@ -253,7 +256,6 @@ bash deploy.sh frontend
 <summary><b>前后端融合版本 ( <= v0.7.1 )</b>：适合初学者或者只是想部署玩玩的用户</summary>
 
 ```bash
-
 git checkout v0.7.1
 
 # Agent Key (如果没有请忽略)
@@ -373,9 +375,9 @@ export WEATHER_API_KEY="${和风天气 API key}"
 2. [微调数据集准备](#二微调数据集准备)
 3. [训练](#三训练)
 4. [说明书生成](#四说明书生成)
-5. [RAG 向量数据库](#五RAG向量数据库)
-6. [部署](#六部署)
-7. [如何添加商品](#七如何添加商品)
+5. [RAG 向量数据库](#五rag-向量数据库)
+6. [模型合并 + 量化](#六模型合并--量化)
+7. [启动 Web APP](#七启动-web-app)
 
 ### 一、环境搭建
 
@@ -869,38 +871,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ## 🔧 自定义
 
-### 如何添加商品
-
-使用网页端可以直接添加，这里介绍下后台是如何实现的。
-
-商品文件都放置在 `./product_info` 目录中，其中
-
-- `images`: 存放商品图片
-- `instructions`: 存放商品说明书
-- `product_info.yaml`: 商品信息表
-
-`product_info.yaml` 解析：
-
-```yaml
-商品名:
-  heighlights: [亮点1, 亮点2, 亮点3]
-  images: 商品图片路径，必须位于 product_info/images/ 中
-  instruction: 商品说明书路径，必须位于 product_info/instructions/ 中，说明书需要时 markdown 格式
-  departure_place: 发货地点（城市名）
-  delivery_company_name: 快递公司名称
-  id: int 数字，用于排序，越小越靠前
-
-# 例子：
-
-唇膏:
-  heighlights: [丰富色号, 滋润保湿, 显色度高, 持久不脱色, 易于涂抹, 便携包装]
-  images: "./product_info/images/lip_stick.png"
-  instruction: "./product_info/instructions/lip_stick.md"
-  departure_place: "杭州"
-  delivery_company_name: "圆通"
-  id: 1
-```
-
 ### 如何自定义数字人
 
 本项目支持自定义数字人，支持两种情况：
@@ -999,6 +969,10 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 
 3. `其他开源模型`：使用的其他开源模型必须遵守他们的许可证，如 `InternLM2`、`GPT-SoVITS`、`ft-mse-vae` 等。
 
+## 🧾 免责声明
+
+本项目旨在积极影响基于人工智能的文字、语音、视频生成领域。用户被授予使用此工具创建文字、语音、视频的自由，但他们应该遵守当地法律，并负责任地使用。开发人员不对用户可能的不当使用承担任何责任。
+
 ## 🔗 引用
 
 如果本项目对您的工作有所帮助，请使用以下格式引用：
@@ -1015,7 +989,3 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 ## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=PeterH0323/Streamer-Sales&type=Date)](https://star-history.com/#PeterH0323/Streamer-Sales&Date)
-
-## 🧾 免责声明
-
-本项目旨在积极影响基于人工智能的文字、语音、视频生成领域。用户被授予使用此工具创建文字、语音、视频的自由，但他们应该遵守当地法律，并负责任地使用。开发人员不对用户可能的不当使用承担任何责任。
