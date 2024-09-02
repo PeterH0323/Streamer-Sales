@@ -32,7 +32,7 @@ class RoomChatItem(BaseModel):
 
 class MessageItem(BaseModel):
     role: str
-    userId: str
+    userId: int
     userName: str
     message: str
     avater: str
