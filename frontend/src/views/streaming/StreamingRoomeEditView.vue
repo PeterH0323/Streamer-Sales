@@ -127,6 +127,9 @@ onMounted(() => {
 
 // 新增商品
 const handelAddProductClick = async () => {
+  // 先保存商品，防止文案 or 数字人视频丢失
+  onSubmit()
+
   drawerShow.value = true
   getProductInfo()
 }
@@ -167,9 +170,9 @@ const onSubmit = () => {
   try {
     // 调用接口保存商品
     RoomCreadeOrEditRequest(RoomDetailInfo.value)
-    ElMessage.success('操作成功')
+    ElMessage.success('保存成功')
   } catch (error) {
-    ElMessage.error('操作失败' + error.message)
+    ElMessage.error('保存失败' + error.message)
   }
 }
 
