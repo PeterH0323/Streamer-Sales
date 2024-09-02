@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@File    :   server_info.py
+@Time    :   2024/09/02
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   组件信息获取逻辑
+"""
+
+
 import random
 import requests
 from loguru import logger
@@ -46,9 +58,10 @@ class ServerPluginsInfo:
             return True
         else:
             return False
+
     @staticmethod
     def _make_color_list(color_num):
-        
+
         color_list = [
             "#FF3838",
             "#FF9D97",
@@ -71,10 +84,8 @@ class ServerPluginsInfo:
             "#FF95C8",
             "#FF37C7",
         ]
-        
-        return random.sample(color_list,color_num)
-        
-        
+
+        return random.sample(color_list, color_num)
 
     def get_status(self):
         self.update_info()

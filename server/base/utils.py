@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@File    :   utils.py
+@Time    :   2024/09/02
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   工具集合文件
+"""
+
+
 import asyncio
 import json
 import wave

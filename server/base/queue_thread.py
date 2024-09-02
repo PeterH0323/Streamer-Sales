@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@File    :   queue_thread.py
+@Time    :   2024/09/02
+@Project :   https://github.com/PeterH0323/Streamer-Sales
+@Author  :   HinGwenWong
+@Version :   1.0
+@Desc    :   队列调取相关逻辑(半废弃状态)
+"""
+
+
 from loguru import logger
 import requests
 import multiprocessing
