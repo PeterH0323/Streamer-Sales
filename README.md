@@ -73,10 +73,10 @@
   - [📌 目录](#-目录)
   - [🛠 架构图](#-架构图)
   - [📺️ 讲解视频](#️-讲解视频)
-  - [🖼 演示](#-演示)
-  - [⚙ Model Zoo](#-model-zoo)
-  - [🏆 获奖信息](#-获奖信息)
   - [📰 媒体转载](#-媒体转载)
+  - [🏆 获奖信息](#-获奖信息)
+  - [🖼 项目展示](#-项目展示)
+  - [⚙ Model Zoo](#-model-zoo)
   - [🎨 快速体验](#-快速体验)
     - [在线体验](#在线体验)
     - [本地部署](#本地部署)
@@ -120,9 +120,17 @@
 | :-: | :-------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | 🌟  | [爆肝 1 个月，我做了个【AI 卖货主播大模型】，文案+语音+本地部署一键启动！干货满满！](https://www.bilibili.com/video/BV1ZJ4m1w75P) | [![Link](https://i0.hdslb.com/bfs/archive/bfbbc6158ffb5ca4b03738cd8bd25524ecf16336.jpg@320w_200h_1c_!web-space-index-myvideo.webp)](https://www.bilibili.com/video/BV1ZJ4m1w75P) [![bilibili](https://img.shields.io/badge/dynamic/json?label=views&style=social&logo=bilibili&query=data.stat.view&url=https%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Fbvid%3DBV1ZJ4m1w75P)](https://www.bilibili.com/video/BV1ZJ4m1w75P) |
 
-## 🖼 演示
+## 📰 媒体转载
 
-**在线体验地址**：<https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales>
+<p align="center">
+  <img src="doc/doc_images/media_cited.gif" alt="media cited gif" width="80%">
+</p>
+
+## 🏆 获奖信息
+
+- [2024 浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
+
+## 🖼 项目展示
 
 <p align="center">
   <img src="doc/doc_images/admin-demo_gif.gif" alt="Demo gif" width="65%">
@@ -145,6 +153,7 @@
   <img src="doc/doc_images/admin-demo6.png" alt="Demo" width="45%">
 </p>
 
+---
 
 下面是 v0.8.0 的演示图：
 
@@ -152,23 +161,12 @@
   <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
 </p>
 
-
 ## ⚙ Model Zoo
 
 | 模型                            | 基座             | 数据量           | ModelScope(HF)                                                                          | OpenXLab(HF)                                                                                                                                                            |
 | ------------------------------- | ---------------- | ---------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | streamer-sales-lelemiao-7b      | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b)      | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao--7b/)    |
 | streamer-sales-lelemiao-7b-4bit | interlm2-chat-7b | about 40w Toeken | [ModelScope](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b-4bit) | [![Open in OpenXLab](https://cdn-static.openxlab.org.cn/header/openxlab_models.svg)](https://openxlab.org.cn/models/detail/HinGwenWong/streamer-sales-lelemiao-7b-4bit) |
-
-## 🏆 获奖信息
-
-- [2024 浦源大模型挑战赛（夏季赛）](https://www.shlab.org.cn/event/detail/59) - **创新创意赛道 TOP 1** 🥇
-
-## 📰 媒体转载
-
-<p align="center">
-  <img src="doc/doc_images/media_cited.gif" alt="media cited gif" width="80%">
-</p>
 
 ## 🎨 快速体验
 
