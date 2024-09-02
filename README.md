@@ -48,7 +48,7 @@
 
 ## 🎉 NEWS
 
-- [2024.09.01] 💥💥💥**重磅发布：【 AI 卖货主播后台系统 】** ❗❗❗： **前端使用 Vue 重写，后端使用 FastAPI 进一步扩充接口**，更加贴近生产，功能添加更为自由灵活，详见[架构图](#-架构图)
+- [2024.09.02] 💥💥💥**重磅发布：【 AI 卖货主播后台系统 】** ❗❗❗： **前端使用 Vue 重写，后端使用 FastAPI 进一步扩充接口**，更加贴近生产，功能添加更为自由灵活，详见[架构图](#-架构图)
 - [2024.07.23] **支持 Docker-Compose 一键部署**，再也不用担心环境问题，服务可以自由编排，一键部署更加丝滑！
 - [2024.07.10] **前后端分离**，可以定义服务数量做到负载均衡啦！
 - [2024.06.17] **支持 ASR**，可以语音输入和主播互动啦！
@@ -80,8 +80,8 @@
   - [🎨 快速体验](#-快速体验)
     - [在线体验](#在线体验)
     - [本地部署](#本地部署)
-      - [Docker-Compose（推荐）](#docker-compose推荐)
       - [宿主机直接部署](#宿主机直接部署)
+      - [Docker-Compose](#docker-compose)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
   - [🌐 Agent](#-agent)
@@ -94,7 +94,7 @@
     - [五、RAG 向量数据库](#五rag-向量数据库)
     - [六、模型合并 + 量化](#六模型合并--量化)
     - [七、启动 Web APP](#七启动-web-app)
-      - [Docker-Compose（推荐）](#docker-compose推荐-1)
+      - [Docker-Compose（推荐）](#docker-compose推荐)
       - [宿主机直接部署](#宿主机直接部署-1)
   - [🔧 自定义](#-自定义)
     - [如何自定义数字人](#如何自定义数字人)
@@ -125,15 +125,33 @@
 **在线体验地址**：<https://openxlab.org.cn/apps/detail/HinGwenWong/Streamer-Sales>
 
 <p align="center">
-  <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
+  <img src="doc/doc_images/admin-demo_gif.gif" alt="Demo gif" width="65%">
 </p>
 
 <p align="center">
-  <img src="doc/doc_images/demo2.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo3.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo4.png" alt="Demo" width="45%">
-  <img src="doc/doc_images/demo5.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo0.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo2.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo2-1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo3.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo3-1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-0.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-1.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-2.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-3.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-5.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo4-4.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo5.png" alt="Demo" width="45%">
+  <img src="doc/doc_images/admin-demo6.png" alt="Demo" width="45%">
 </p>
+
+
+下面是 v0.8.0 的演示图：
+
+<p align="center">
+  <img src="doc/doc_images/demo_gif.gif" alt="Demo gif" >
+</p>
+
 
 ## ⚙ Model Zoo
 
@@ -161,24 +179,6 @@
 因为 Agent API 需要计费的关系和显存大小的关系，上面失能了 Agent 和 ASR，但项目本身是支持的，可以自行购买 API 服务和本地部署来体验。
 
 ### 本地部署
-
-#### Docker-Compose（推荐）
-
-```bash
-git clone https://github.com/PeterH0323/Streamer-Sales.git
-
-cd Streamer-Sales
-docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
-
-docker-compose up
-```
-
-> [!NOTE]
-> 如果出现错误：
->
-> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
->
-> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
 
 #### 宿主机直接部署
 
@@ -266,6 +266,25 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 </details>
+
+#### Docker-Compose
+
+```bash
+git clone https://github.com/PeterH0323/Streamer-Sales.git
+
+cd Streamer-Sales
+docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
+
+docker-compose up
+```
+
+> [!NOTE]
+> 如果出现错误：
+>
+> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
+>
+> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
+
 
 ## 🖥️ 配置需求
 
