@@ -66,7 +66,7 @@ case $1 in
     frontend)
         echo "正在启动 前端 服务..."
         cd frontend
-        npm install
+        # npm install
         npm run dev
         ;;
 

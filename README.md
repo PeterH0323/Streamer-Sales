@@ -246,6 +246,8 @@ bash deploy.sh base
 
 6. 前端
 
+需要先搭建前端的环境，详见 [搭建前端环境文档](./doc/frontend/README.md)
+
 ```bash
 bash deploy.sh frontend
 ```
