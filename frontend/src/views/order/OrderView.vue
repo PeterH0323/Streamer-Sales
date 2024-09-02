@@ -2,7 +2,7 @@
 const tableData = [
   {
     id: 1,
-    date: '2016-05-03',
+    date: '2024-05-03',
     name: '电动牙刷',
     amount: 1,
     address: '广东省广州市********',
@@ -10,7 +10,7 @@ const tableData = [
   },
   {
     id: 2,
-    date: '2016-05-02',
+    date: '2024-05-02',
     name: '平板电脑',
     amount: 1,
     address: '北京市朝阳区********',
@@ -18,7 +18,7 @@ const tableData = [
   },
   {
     id: 3,
-    date: '2016-05-04',
+    date: '2024-05-01',
     name: '唇膏',
     amount: 1,
     address: '浙江省杭州市********',
@@ -26,7 +26,7 @@ const tableData = [
   },
   {
     id: 4,
-    date: '2016-05-01',
+    date: '2024-05-02',
     name: '洗发露',
     amount: 2,
     address: '上海市黄浦区********',
