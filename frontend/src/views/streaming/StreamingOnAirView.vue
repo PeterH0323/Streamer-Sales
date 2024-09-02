@@ -16,6 +16,7 @@ import {
 } from '@/api/streamingRoom'
 import type { ProductItem, StreamerInfo } from '@/api/product'
 import { ElMessage } from 'element-plus'
+import { AxiosError } from 'axios'
 
 const router = useRouter()
 
@@ -46,8 +47,12 @@ const getRoomInfo = async () => {
     } else {
       ElMessage.error('获取直播间信息失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取直播间信息失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取直播间信息失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -97,8 +102,12 @@ const handelSendClick = async () => {
     } else {
       ElMessage.error('更新对话信息失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('更新对话信息失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('更新对话信息失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 
   // 启动输入框
@@ -113,7 +122,10 @@ const scrollbarRef = ref<HTMLElement | null>(null)
 const scrollToBottom = async () => {
   // 注意：需要通过 nextTick 以等待 DOM 更新完成
   await nextTick()
-  scrollbarRef.value.setScrollTop(10000) // TODO 先设置一个比较大的值，后续需要获取控件的高度进行赋值
+  if (scrollbarRef.value) {
+    // scrollbarRef.value.setScrollTop(10000) // TODO 先设置一个比较大的值，后续需要获取控件的高度进行赋值
+    scrollbarRef.value.scrollTop = 10000 // TODO 先设置一个比较大的值，后续需要获取控件的高度进行赋值
+  }
 }
 
 // 下一个商品
@@ -127,8 +139,12 @@ const handleNextProductClick = async () => {
     } else {
       ElMessage.error('失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -143,8 +159,12 @@ const handleOffLineClick = async () => {
     } else {
       ElMessage.error('失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -156,9 +176,9 @@ onMounted(() => {
 // 录音
 // 状态管理
 const isRecording = ref(false)
-let mediaRecorder = null
-let chunks = []
-let stream = null
+let mediaRecorder: MediaRecorder | null = null
+let chunks: Blob[] = []
+let stream: MediaStream | null = null
 
 // 开始录音
 const startRecording = () => {
@@ -197,7 +217,7 @@ const handleRecord = () => {
 }
 
 // 处理录音数据
-const handleDataAvailable = (e) => {
+const handleDataAvailable = (e: BlobEvent) => {
   chunks.push(e.data)
 }
 
@@ -225,8 +245,12 @@ const handleStop = async () => {
         handelSendClick()
       }
     }
-  } catch (error) {
-    ElMessage.error('语音转文字失败: ' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('语音转文字失败: ' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
   chunks = []
 }

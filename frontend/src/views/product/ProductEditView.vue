@@ -9,6 +9,7 @@ import { Plus } from '@element-plus/icons-vue'
 import FileUpload from '@/components/FileUpload.vue'
 
 import { type ProductItem, getProductByIdRequest, productCreadeOrEditRequest } from '@/api/product'
+import { AxiosError } from 'axios'
 
 const router = useRouter()
 
@@ -71,9 +72,13 @@ const onSubmit = async () => {
       ElMessage.error(`${statusInof}失败, ${data.message}`)
       throw new Error(`${statusInof}失败, ${data.message}`)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     saveLoading.value = false
-    ElMessage.error('失败:' + error.message)
+    if (error instanceof AxiosError) {
+      ElMessage.error('失败:' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -88,8 +93,12 @@ onMounted(async () => {
       } else {
         ElMessage.error(data.message)
       }
-    } catch (error) {
-      ElMessage.error('失败:' + error.message)
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        ElMessage.error('失败:' + error.message)
+      } else {
+        ElMessage.error('未知错误：' + error)
+      }
     }
   }
 })

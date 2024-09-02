@@ -6,7 +6,13 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 
-import { productListRequest, deleteProductByIdRequest, type ProductListType } from '@/api/product'
+import {
+  productListRequest,
+  deleteProductByIdRequest,
+  type ProductListType,
+  type ProductData
+} from '@/api/product'
+import { AxiosError } from 'axios'
 
 const router = useRouter()
 
@@ -41,8 +47,12 @@ const getProductList = async (params: ProductListType = {}) => {
       ElMessage.error('商品接口错误')
       throw new Error('商品接口错误')
     }
-  } catch (error) {
-    ElMessage.error('商品接口失败: ' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('商品接口失败: ' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -51,13 +61,17 @@ onMounted(() => {
   getProductList()
 })
 
+const isDelecting = ref(false)
 const DeleteProduct = async (id: number, productName: string) => {
   ElMessageBox.confirm(`确定要删除 "${productName}" 吗？`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    type: 'warning'
+    type: 'warning',
+    showClose: false
   })
     .then(async () => {
+      ElMessage.success(`正在删除 ${productName}，请稍候`)
+      isDelecting.value = true
       const { data } = await deleteProductByIdRequest(id)
       if (data.code === 0) {
         ElMessage.success('删除成功')
@@ -65,9 +79,13 @@ const DeleteProduct = async (id: number, productName: string) => {
       } else {
         ElMessage.error('删除失败')
       }
+      isDelecting.value = false
     })
-    .catch((error) => {
-      ElMessage.error('删除失败: ' + error.message)
+    .catch(() => {
+      // ElMessage({
+      //   type: 'info',
+      //   message: 'Input canceled'
+      // })
     })
 }
 </script>
@@ -163,6 +181,8 @@ const DeleteProduct = async (id: number, productName: string) => {
               type="danger"
               @click="DeleteProduct(row.product_id, row.product_name)"
               :icon="Delete"
+              :id="row.product_id"
+              :disabled="isDelecting"
             />
           </div>
         </el-table-column>

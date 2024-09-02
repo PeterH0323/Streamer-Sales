@@ -9,6 +9,7 @@ import {
   streamerRoomListRequest,
   deleteStreamingRoomByIdRequest
 } from '@/api/streamingRoom'
+import { AxiosError } from 'axios'
 
 // 获取主播信息
 const streamingList = ref([] as StreamingRoomInfo[])
@@ -24,8 +25,12 @@ onMounted(async () => {
     } else {
       ElMessage.error('获取直播间信息失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取直播间信息失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取直播间信息失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 })
 
@@ -86,7 +91,9 @@ const tagMap = { 0: '未开播', 1: '直播中', 2: '已下播' }
             <img :src="item.room_poster" style="width: 100%" />
             <div class="title">
               <h3>{{ item.name }}</h3>
-              <el-tag type="success" effect="light"> {{ tagMap[item.status.live_status] }}</el-tag>
+              <el-tag type="success" effect="light">
+                {{ tagMap[item.status.live_status as keyof typeof tagMap] }}
+              </el-tag>
             </div>
             <div>
               <p>主播：{{ item.streamer_info.name }}</p>

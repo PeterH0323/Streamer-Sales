@@ -9,11 +9,15 @@ import { genProductInstructionContentRequest } from '@/api/product'
 import { genSalesDocRequest } from '@/api/llm'
 import VideoComponent from '@/components/VideoComponent.vue'
 import { genDigitalHuamnVideoRequest } from '@/api/digitalHuman'
+import { type StreamingRoomProductList } from '@/api/streamingRoom'
+import { AxiosError } from 'axios'
 
 const dialogFormVisible = ref(false)
 
 // AI 生成后的 文案 or 数字人视频 值双向绑定
-const modelGenValue = defineModel({ default: '' })
+const modelGenValue = defineModel<StreamingRoomProductList[]>({
+  default: [] as StreamingRoomProductList[]
+})
 
 // 定义标题
 const titleMap = { SalesDoc: '主播文案', Instruction: '说明书', DigitalHuman: '数字人视频' }
@@ -26,7 +30,7 @@ const streamerId = ref(0)
 const salesDoc = ref('')
 const showItemInfoDialog = async (
   titleName_: string,
-  itemType_: string,
+  itemType_: keyof typeof titleMap,
   itemValue: string,
   productId_: number,
   streamerId_: number = 0,
@@ -50,8 +54,12 @@ const showItemInfoDialog = async (
       } else {
         ElMessage.error('获取说明书失败：' + data.message)
       }
-    } catch (error) {
-      ElMessage.error('获取说明书失败：' + error.message)
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        ElMessage.error('获取说明书失败：' + error.message)
+      } else {
+        ElMessage.error('未知错误：' + error)
+      }
     }
   } else {
     infoValue.value = itemValue
@@ -83,8 +91,8 @@ const updateGenValue = (newValue: string) => {
 const genPercentage = ref(0)
 
 // 定义计时器句柄
-let timerId = null
-let total_gen_sec = 3 * 60 * 1000
+let timerId: number | null = null
+let totalGenSec: number = 1 // 生成时间
 
 // 开始/停止生成进度条
 const startGenProgress = () => {
@@ -96,16 +104,16 @@ const startGenProgress = () => {
 
   if (itemType.value === 'DigitalHuman') {
     // 数字人生成时间
-    total_gen_sec = 5 * 60
+    totalGenSec = 5 * 60
   } else {
     // 文案生成时间
-    total_gen_sec = 10
+    totalGenSec = 10
   }
 
   // 启动计时器
-  timerId = setInterval(() => {
+  timerId = window.setInterval(() => {
     if (genPercentage.value < 99) {
-      genPercentage.value += parseFloat((100 / total_gen_sec).toFixed(2))
+      genPercentage.value += parseFloat((100 / totalGenSec).toFixed(2))
     }
 
     if (genPercentage.value > 99) {
@@ -144,8 +152,12 @@ const getDigitalHumanVideo = async () => {
     } else {
       ElMessage.error('生成数字人视频失败：' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('生成数字人视频失败：' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('生成数字人视频失败：' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
   isGenerating.value = false
   stopGenProgress()
@@ -168,8 +180,12 @@ const handleGenSalesDocClick = async () => {
     } else {
       ElMessage.error('生成文案失败：' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('生成文案失败：' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('生成文案失败：' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
   isGenerating.value = false
   stopGenProgress()

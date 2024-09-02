@@ -1,28 +1,16 @@
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, type RouteRecordNormalized, type RouteLocationRaw } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 
-const handleLink = (item) => {
+const handleLink = (item: RouteRecordNormalized) => {
   const { redirect, name, path } = item
   if (redirect) {
-    router.push(redirect as any)
+    router.push(redirect as RouteLocationRaw)
   } else {
     if (name) {
-      if (item.query) {
-        router.push({
-          name,
-          query: item.query
-        })
-      } else if (item.params) {
-        router.push({
-          name,
-          params: item.params
-        })
-      } else {
-        router.push({ name })
-      }
+      router.push({ name })
     } else {
       router.push({ path })
     }

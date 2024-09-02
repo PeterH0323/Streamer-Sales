@@ -114,7 +114,7 @@ onMounted(async () => {
             :totalSalesList="systemInfo.totalSalesList"
             :newUserList="systemInfo.newUserList"
             :activityUserList="systemInfo.activityUserList"
-            :key="systemInfo.orderNumList"
+            :key="systemInfo.registeredBrandNum"
           />
         </el-card>
       </el-col>

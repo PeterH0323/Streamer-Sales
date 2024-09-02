@@ -8,6 +8,7 @@ import {
   streamerEditDetailRequest,
   type StreamerInfo
 } from '@/api/streamerInfo'
+import { AxiosError } from 'axios'
 
 const dialogInfoVisible = ref(false)
 const saveLoading = ref(false)
@@ -25,8 +26,12 @@ const showItemInfoDialog = async (streamerId: number) => {
     } else {
       ElMessage.error('获取主播数据失败: ' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取主播数据失败: ' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取主播数据失败: ' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -43,9 +48,13 @@ const handelSaveClick = async () => {
       saveLoading.value = false
       ElMessage.error('保存失败: ' + data.message)
     }
-  } catch (error) {
+  } catch (error: unknown) {
     saveLoading.value = false
-    ElMessage.error('保存失败: ' + error.message)
+    if (error instanceof AxiosError) {
+      ElMessage.error('保存失败: ' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 

@@ -37,14 +37,14 @@ interface ProductData {
 
 // 查询接口
 const productListRequest = (params: ProductListType) => {
-    return request_handler<ResultPackage<ProductData>>({
-      method: 'POST',
-      url: '/products/list',
-      data: params,
-      headers: {
-        Authorization: header_authorization.value
-      }
-    })
+  return request_handler<ResultPackage<ProductData>>({
+    method: 'POST',
+    url: '/products/list',
+    data: params,
+    headers: {
+      Authorization: header_authorization.value
+    }
+  })
 }
 
 // 查询指定商品的信息接口
@@ -99,10 +99,11 @@ const deleteProductByIdRequest = async (productId: number) => {
   })
 }
 
-
 export {
   type ProductItem,
   type StreamerInfo,
+  type ProductListType,
+  type ProductData,
   productListRequest,
   productCreadeOrEditRequest,
   getProductByIdRequest,

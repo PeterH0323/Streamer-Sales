@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import Player from 'xgplayer'
+import type PresetPlayer from 'xgplayer'
+import Player, { type IPlayerOptions } from 'xgplayer'
 
 // 定义组件入参
 const props = defineProps({
@@ -30,9 +31,9 @@ const props = defineProps({
   }
 })
 
-const player_id = ref(props.src)
+const player_id = ref(props.src !== '' ? props.src : 'video_player')
 
-const playerOpts = {
+const playerOpts: IPlayerOptions = {
   id: player_id.value, //元素id
   url: props.src, //视频地址
   width: props.width, // 播放器宽度
@@ -48,13 +49,22 @@ const playerOpts = {
   pip: false, //是否使用画中画插件,
   closeVideoDblclick: true, // 是否关闭双击播放器进入全屏的能力
   volume: 1, //音量 0 -  1
-  playbackRate: false, // [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
+  // playbackRate: [0.5, 0.75, 1, 1.5, 2], //传入倍速可选数组
   // 删除插件，插件文档: https://h5player.bytedance.com/plugins/internalplugins/controls.html
-  ignores: ['volume', 'cssFullScreen', 'fullscreen', 'enter', 'play', 'replay', 'start']
+  ignores: [
+    'volume',
+    'cssFullScreen',
+    'fullscreen',
+    'enter',
+    'play',
+    'replay',
+    'start',
+    'playbackrate'
+  ]
 }
 
 //  播放器
-let player = null
+let player: Player | null = null
 
 // 必须在onMounted 或 nextTick实例Xgplayer播放器
 onMounted(() => {
@@ -71,7 +81,9 @@ onMounted(() => {
       playerOpts.url = props.videoAfterEnd // 新的视频地址
 
       // player.playNext(playerOpts) // 使用 playnext 之后不能触发 loop ，需要重新实例化
-      player.destroy()
+      if (player) {
+        player.destroy()
+      }
       player = null
       player = new Player(playerOpts)
     }

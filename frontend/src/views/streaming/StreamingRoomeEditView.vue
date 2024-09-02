@@ -10,12 +10,14 @@ import {
   RoomCreadeOrEditRequest,
   type RoomProductData,
   type RoomDetailItem,
-  type StreamingRoomStatusItem
+  type StreamingRoomStatusItem,
+  type StreamingRoomProductList
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
 import { streamerInfoListRequest } from '@/api/streamerInfo'
 import StreamerInfoComponent from '@/components/StreamerInfoComponent.vue'
+import { AxiosError } from 'axios'
 
 const router = useRouter()
 
@@ -66,8 +68,12 @@ const getProductInfo = async () => {
     } else {
       ElMessage.error('获取商品失败：' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取商品失败：' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取商品失败：' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -77,7 +83,7 @@ RoomDetailInfo.value.streamer_info = {} as StreamerInfo
 RoomDetailInfo.value.streamer_info.id = 0
 RoomDetailInfo.value.pageSize = 10
 RoomDetailInfo.value.room_id = Number(props.roomId)
-RoomDetailInfo.value.product_list = []
+RoomDetailInfo.value.product_list = [] as StreamingRoomProductList[]
 RoomDetailInfo.value.status = {} as StreamingRoomStatusItem
 const EditProductList = ref({} as RoomDetailItem)
 
@@ -94,8 +100,12 @@ const getProductListInfo = async (currentPage: number, pageSize: number) => {
     } else {
       ElMessage.error('获取直播间详情失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取直播间详情失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取直播间详情失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -112,8 +122,12 @@ const getSteramerInfo = async () => {
     } else {
       ElMessage.error('获取主播信息失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取主播信息失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取主播信息失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -155,8 +169,12 @@ async function confirmClick() {
     } else {
       ElMessage.error('操作失败' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('操作失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('操作失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 
   drawerShow.value = false
@@ -171,8 +189,12 @@ const onSubmit = () => {
     // 调用接口保存商品
     RoomCreadeOrEditRequest(RoomDetailInfo.value)
     ElMessage.success('保存成功')
-  } catch (error) {
-    ElMessage.error('保存失败' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('保存失败' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 }
 
@@ -183,7 +205,7 @@ const handelOnAirClick = () => {
       return false
     }
   }
-
+  onSubmit()
   router.push({ name: 'StreamingOnAir', params: { roomId: String(RoomDetailInfo.value.room_id) } })
 }
 
@@ -232,7 +254,7 @@ const handelControlClick = (
           <ul class="product-list">
             <li
               v-for="item in DrawerProductList.product_list"
-              :key="item.id"
+              :key="item.product_id"
               style="margin-bottom: 10px"
             >
               <el-checkbox-button
@@ -252,7 +274,7 @@ const handelControlClick = (
                     </el-col>
                     <el-col :span="18">
                       <div class="product-info">
-                        <p class="title">{{ item.name }}</p>
+                        <p class="title">{{ item.product_name }}</p>
                         <p class="content">{{ item.heighlights }}</p>
                         <p class="price">￥{{ item.selling_price }}</p>
                       </div>

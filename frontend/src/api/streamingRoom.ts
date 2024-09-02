@@ -2,11 +2,12 @@ import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo, ProductItem } from '@/api/product'
 import { header_authorization } from '@/api/user'
 
-interface StreamingRoomProductList {
+interface StreamingRoomProductList extends ProductItem {
   product_id: number
   start_time: string
   sales_doc: string
   start_video: string
+  selected: boolean
 }
 
 interface messageItem {
@@ -24,14 +25,14 @@ interface StreamingRoomStatusItem {
   currentProductInfo: ProductItem
   currentStreamerVideo: string
   currentProductIndex: number
-  startTime: string
+  start_time: string
   currentPoductStartTime: string
   finalProduct: boolean
   live_status: number
 }
 
 interface StreamingRoomInfo {
-  roomId: number
+  room_id: number
   room_poster: string
   name: string
   streamer_id: number
@@ -46,29 +47,31 @@ interface RoomProductData {
   currentPage: number
   pageSize: number
   totalSize: number
-  product_list: RoomProductItem[]
+  product_list: StreamingRoomProductList[]
 }
 
 interface RoomProductItem {
   name: string
   id: number
-  image: string
+  image_path: string
   sales_doc: string
   start_video: string
   start_time: string
   selected: boolean
+  heighlights: string
+  selling_price: number
 }
 
 interface RoomDetailItem {
   currentPage: number
   pageSize: number
   totalSize: number
-  product_list: []
+  product_list: StreamingRoomProductList[]
   streamer_info: StreamerInfo
   room_id: number
   name: string
   room_poster: string
-  streamer_id: string
+  streamer_id: number
   background_image: string
   prohibited_words_id: number
   status: StreamingRoomStatusItem
@@ -147,7 +150,7 @@ const onAirRoomChatRequest = async (roomId_: number, userId_: string, message_: 
 
 // 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
 const onAirRoomNextProductRequest = async (roomId_: number) => {
-  return request_handler<ResultPackage<messageItem>>({
+  return request_handler<ResultPackage<StreamingRoomStatusItem>>({
     method: 'POST',
     url: '/streaming-room/next-product',
     data: { roomId: roomId_ },
@@ -170,7 +173,7 @@ const deleteStreamingRoomByIdRequest = (roomId_: number) => {
 }
 
 // 发送音频文件到服务器
-const sendAudioToServer = async (blob) => {
+const sendAudioToServer = async (blob: Blob) => {
   const formData = new FormData()
   formData.append('file', blob, 'recording.webm')
 
@@ -214,6 +217,7 @@ export {
   type RoomProductData,
   type RoomDetailItem,
   type StreamingRoomStatusItem,
+  type StreamingRoomProductList,
   streamerRoomListRequest,
   roomDetailRequest,
   roomPorductAddListRequest,

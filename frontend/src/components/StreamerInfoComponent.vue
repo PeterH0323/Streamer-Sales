@@ -11,16 +11,15 @@ import FileUpload from '@/components/FileUpload.vue'
 // 定义 和父组件通信的双向绑定 model
 const modelSteamerInfo = defineModel({ default: {} as StreamerInfo })
 
-// 定义组件入参
-const props = defineProps({
-  disableChange: {
-    type: Boolean,
-    default: false
-  },
-  optionList: {
-    type: Array,
-    default: () => [] as StreamerInfo[]
-  }
+// 定义组件入参类型以及默认值
+export interface Props {
+  disableChange: boolean
+  optionList: StreamerInfo[]
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  disableChange: false,
+  optionList: () => [] as StreamerInfo[]
 })
 
 // 性格操作
@@ -56,7 +55,7 @@ const labelPosition = ref('top')
   <div>
     <el-row :gutter="20">
       <el-col :span="12">
-        <el-card shadow="never" v-if="optionList.length >= 1">
+        <el-card shadow="never" v-if="props.optionList.length >= 1">
           <h2>选择主播</h2>
           <el-divider />
           <el-select
@@ -65,7 +64,12 @@ const labelPosition = ref('top')
             size="large"
             style="width: 240px"
           >
-            <el-option v-for="item in optionList" :key="item.id" :label="item.name" :value="item" />
+            <el-option
+              v-for="item in props.optionList"
+              :key="item.id"
+              :label="item.name"
+              :value="item"
+            />
           </el-select>
         </el-card>
 

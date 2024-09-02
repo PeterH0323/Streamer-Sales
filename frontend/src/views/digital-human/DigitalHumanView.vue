@@ -10,6 +10,7 @@ import {
 } from '@/api/streamerInfo'
 
 import showItemInfoDialog from '@/views/digital-human/DigitalHumanEditDialogView.vue'
+import { AxiosError } from 'axios'
 
 // 获取主播信息
 const streamerNameOptions = ref([] as StreamerInfo[])
@@ -49,8 +50,12 @@ onMounted(async () => {
     } else {
       ElMessage.error('获取主播信息失败：' + data.message)
     }
-  } catch (error) {
-    ElMessage.error('获取主播信息失败：' + error.message)
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取主播信息失败：' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
   }
 })
 
