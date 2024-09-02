@@ -74,6 +74,11 @@ def gen_rag_db(force_gen=False):
     with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
         product_info_dict = yaml.safe_load(f)
     for _, info in product_info_dict.items():
+
+        if info["delete"]:
+            # 去掉删除的商品
+            continue
+
         shutil.copyfile(
             Path(
                 WEB_CONFIGS.SERVER_FILE_ROOT,
