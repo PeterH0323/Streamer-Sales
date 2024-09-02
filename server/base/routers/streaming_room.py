@@ -301,7 +301,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
 
     user_msg = MessageItem(
         role="user",
-        userId=room_chat.userId,
+        userId=user_id,
         userName=user_info["username"],
         message=room_chat.message,
         avater=user_info["avater"],

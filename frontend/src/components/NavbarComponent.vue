@@ -1,17 +1,32 @@
 <script lang="ts" setup>
 import { Fold, Expand } from '@element-plus/icons-vue'
-import { ref, reactive, toRefs } from 'vue'
+import { ref, onMounted } from 'vue'
 import { isCollapse } from '@/utils/navbar'
 
 import BreadCrumb from '@/components/BreadCrumb.vue'
+import { getUserInfoRequest, type UserInfo } from '@/api/user'
+import { ElMessage } from 'element-plus'
+import { AxiosError } from 'axios'
 
-const username = ref('hingwen.wong')
+const userInfoItem = ref({} as UserInfo)
 
-const state = reactive({
-  circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+onMounted(async () => {
+  try {
+    const { data } = await getUserInfoRequest()
+
+    if (data.code === 0) {
+      userInfoItem.value = data.data
+    } else {
+      ElMessage.error('获取用户信息失败: ' + data.message)
+    }
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取用户信息失败: ' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
+  }
 })
-
-const { circleUrl } = toRefs(state)
 </script>
 
 <template>
@@ -30,14 +45,10 @@ const { circleUrl } = toRefs(state)
     <!-- 导航栏右边 -->
     <!-- 退出登录 -->
     <el-dropdown trigger="click">
-      <!-- <span class="el-dropdown-link navbar-bg-hover">
-        <img :src="userAvatar" :style="avatarsStyle" />
-        <p v-if="username" class="dark:text-white">{{ username }}</p>
-      </span> -->
-      <el-avatar :size="40" :src="circleUrl" />
+        <el-avatar :src="userInfoItem.avater" />
       <template #dropdown>
         <el-dropdown-menu class="logout">
-          <el-dropdown-item>{{ username }}</el-dropdown-item>
+          <el-dropdown-item>{{ userInfoItem.username }}</el-dropdown-item>
           <el-dropdown-item>用户配置</el-dropdown-item>
           <el-dropdown-item>
             <!-- <el-dropdown-item @click="logout"> -->

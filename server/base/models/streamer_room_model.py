@@ -26,7 +26,6 @@ class RoomProductListItem(BaseModel):
 
 class RoomChatItem(BaseModel):
     roomId: int
-    userId: str
     message: str = ""
     asrFileUrl: str = ""
 

@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { request_handler } from '@/api/base'
+import { request_handler, type ResultPackage } from '@/api/base'
 import { type TokenItem, useTokenStore } from '@/stores/userToken'
 
 // 调用登录接口数据结构定义
@@ -9,14 +9,27 @@ type loginFormType = {
   vertify_code?: string
 }
 
+interface UserInfo {
+  username: string
+  user_id: number
+  ip_adress: string
+  full_name: string
+  avater: string
+  email: string
+  hashed_password: string
+  disabled: boolean
+}
+
 // pinia 保存的 token
 const tokenStore = useTokenStore()
 
+// jwt
 const header_authorization = computed(() => {
   console.log('Update token')
   return `${tokenStore.token.token_type} ${tokenStore.token.access_token}`
 })
 
+// 登录接口
 const loginRequest = (loginForm: loginFormType) => {
   const formData = new FormData()
   formData.append('username', loginForm.username)
@@ -32,4 +45,15 @@ const loginRequest = (loginForm: loginFormType) => {
   })
 }
 
-export { loginRequest, header_authorization }
+// 获取用户信息接口
+const getUserInfoRequest = async () => {
+  return request_handler<ResultPackage<UserInfo>>({
+    method: 'POST',
+    url: '/user/me',
+    headers: {
+      Authorization: header_authorization.value
+    }
+  })
+}
+
+export { loginRequest, header_authorization, getUserInfoRequest, type UserInfo }

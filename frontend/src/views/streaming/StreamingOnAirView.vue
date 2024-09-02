@@ -17,6 +17,7 @@ import {
 import type { ProductItem, StreamerInfo } from '@/api/product'
 import { ElMessage } from 'element-plus'
 import { AxiosError } from 'axios'
+import { getUserInfoRequest, type UserInfo } from '@/api/user'
 
 const router = useRouter()
 
@@ -27,6 +28,27 @@ const props = defineProps({
     default: '0'
   }
 })
+
+// 用户信息
+const userInfoItem = ref({} as UserInfo)
+
+const getUserInfo = async () => {
+  try {
+    const { data } = await getUserInfoRequest()
+
+    if (data.code === 0) {
+      userInfoItem.value = data.data
+    } else {
+      ElMessage.error('获取用户信息失败: ' + data.message)
+    }
+  } catch (error: unknown) {
+    if (error instanceof AxiosError) {
+      ElMessage.error('获取用户信息失败: ' + error.message)
+    } else {
+      ElMessage.error('未知错误：' + error)
+    }
+  }
+}
 
 // 输入框
 const inputValue = ref('')
@@ -56,12 +78,6 @@ const getRoomInfo = async () => {
   }
 }
 
-const userInfo = ref({
-  userId: '123',
-  userName: 'no1-user',
-  avater: 'xxxx'
-})
-
 // 主播回答提示符
 const loadingStreamRes = ref(false)
 
@@ -74,9 +90,9 @@ const handelSendClick = async () => {
   // 显示在对话框-用户
   currentStatus.value.conversation.push({
     role: 'user',
-    userId: userInfo.value.userId,
-    userName: userInfo.value.userName,
-    avater: userInfo.value.avater,
+    userId: userInfoItem.value.user_id,
+    userName: userInfoItem.value.username,
+    avater: userInfoItem.value.avater,
     message: inputValue.value,
     datetime: ''
   })
@@ -88,11 +104,7 @@ const handelSendClick = async () => {
   // request(roomId, userId, newValue)
   // 将对话记录更新到数据库
   try {
-    const { data } = await onAirRoomChatRequest(
-      Number(props.roomId),
-      userInfo.value.userId,
-      inputValue.value
-    )
+    const { data } = await onAirRoomChatRequest(Number(props.roomId), inputValue.value)
 
     // 取消 loading
     loadingStreamRes.value = false
@@ -169,6 +181,9 @@ const handleOffLineClick = async () => {
 }
 
 onMounted(() => {
+  // 获取用户信息
+  getUserInfo()
+
   // 获取直播间实时信息格信息
   getRoomInfo()
 })
@@ -232,11 +247,7 @@ const handleStop = async () => {
       // 调取接口开始进行 asr 识别
 
       console.info(data)
-      const { data: asr_data } = await genAsrResult(
-        Number(props.roomId),
-        userInfo.value.userId,
-        data.data
-      )
+      const { data: asr_data } = await genAsrResult(Number(props.roomId), data.data)
       ElMessage.success('语音转文字成功！')
 
       // 自动进行对话

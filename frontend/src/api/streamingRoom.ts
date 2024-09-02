@@ -12,7 +12,7 @@ interface StreamingRoomProductList extends ProductItem {
 
 interface messageItem {
   role: string
-  userId: string
+  userId: number
   userName: string
   avater: string
   message: string
@@ -137,11 +137,11 @@ const onAirRoomInfoRequest = (roomId_: number) => {
 }
 
 // 用户发起对话
-const onAirRoomChatRequest = async (roomId_: number, userId_: string, message_: string) => {
+const onAirRoomChatRequest = async (roomId_: number, message_: string) => {
   return request_handler<ResultPackage<messageItem>>({
     method: 'POST',
     url: '/streaming-room/chat',
-    data: { roomId: roomId_, userId: userId_, message: message_ },
+    data: { roomId: roomId_, message: message_ },
     headers: {
       Authorization: header_authorization.value
     }
@@ -188,11 +188,11 @@ const sendAudioToServer = async (blob: Blob) => {
 }
 
 // 获取 ASR 结果
-const genAsrResult = async (roomId_: number, userId_: string, asrFileUrl_: string) => {
+const genAsrResult = async (roomId_: number, asrFileUrl_: string) => {
   return request_handler<ResultPackage<string>>({
     method: 'POST',
     url: '/streaming-room/asr',
-    data: { roomId: roomId_, userId: userId_, asrFileUrl: asrFileUrl_ },
+    data: { roomId: roomId_, asrFileUrl: asrFileUrl_ },
     headers: {
       Authorization: header_authorization.value
     }

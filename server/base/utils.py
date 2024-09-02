@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Dict, List
 
 import cv2
-import yaml
 from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
 from pydantic import BaseModel

@@ -17,10 +17,10 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from loguru import logger
 from passlib.context import CryptContext
 
-
 from ...web_configs import WEB_CONFIGS
-from ..models.user_model import UserInfo, TokenItem
 from ..database.user_db import fake_users_db
+from ..models.user_model import TokenItem, UserInfo
+from ..utils import ResultCode, make_return_data
 
 router = APIRouter(
     prefix="/user",
@@ -43,8 +43,16 @@ def get_password_hash(password):
     return PWD_CONTEXT.hash(password)
 
 
-def get_user(db, username: str):
-    if username in db:
+def get_user(db: dict, username: str = "", user_id: int = -1):
+
+    if user_id > 0:
+        # 使用 ID 查询
+        for _, user_info in db.items():
+            if user_id == user_info["user_id"]:
+                return user_info
+
+    if username != "" and username in db:
+        # 使用用户名查询
         user_dict = db[username]
         return UserInfo(**user_dict)
     return None
@@ -52,7 +60,7 @@ def get_user(db, username: str):
 
 def authenticate_user(db_name, username: str, password: str):
     # 获取用户信息
-    user_info = get_user(db_name, username)
+    user_info = get_user(db_name, username=username)
     if not user_info:
         # 没有找到用户名
         logger.info(f"Cannot find username = {username}")
@@ -117,3 +125,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     logger.info(f"Got token info = {res_json}")
     # return make_return_data(True, ResultCode.SUCCESS, "成功", content)
     return res_json
+
+
+@router.post("/me", summary="获取用户信息")
+async def get_streaming_room_api(user_id: int = Depends(get_current_user_info)):
+    """获取用户信息"""
+    user_info = get_user(fake_users_db, user_id=user_id)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", user_info)
