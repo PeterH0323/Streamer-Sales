@@ -13,6 +13,7 @@ faiss-gpu==1.7.2
 # Agent
 lagent==0.2.2
 jionlp==1.5.14
+griffe==0.46.0
 
 # Web app 2.0
 fastapi[all]==0.111.0
