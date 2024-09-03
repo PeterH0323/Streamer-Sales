@@ -304,7 +304,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
         userId=user_id,
         userName=user_info["username"],
         message=room_chat.message,
-        avater=user_info["avater"],
+        avatar=user_info["avatar"],
         messageIndex=conversation_list[-1]["messageIndex"] + 1,
     )
     conversation_list.append(dict(user_msg))
@@ -350,7 +350,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
         userId=stream_info["userId"],
         userName=stream_info["userName"],
         message=streamer_res,
-        avater=stream_info["avater"],
+        avatar=stream_info["avatar"],
         messageIndex=conversation_list[-1]["messageIndex"] + 1,
     )
     conversation_list.append(dict(streamer_msg))
@@ -406,7 +406,7 @@ async def get_or_init_conversation(user_id, room_id: int, next_product=False):
             userId=str(streaming_room_info["streamer_id"]),
             userName=streamer_info["name"],
             message=product_info["sales_doc"],
-            avater=streamer_info["avater"],
+            avatar=streamer_info["avatar"],
             messageIndex=0,
         )
         conversation_list.append(dict(streamer_msg))

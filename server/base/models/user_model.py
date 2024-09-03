@@ -22,7 +22,7 @@ class UserInfo(BaseModel):
     user_id: int
     ip_adress: str = ""
     full_name: str = ""
-    avater: str = ""
+    avatar: str = ""
     email: str = ""
     hashed_password: str = ""
     disabled: bool = False

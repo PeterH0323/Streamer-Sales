@@ -35,7 +35,7 @@ class MessageItem(BaseModel):
     userId: int
     userName: str
     message: str
-    avater: str
+    avatar: str
     messageIndex: int
     datetime: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 

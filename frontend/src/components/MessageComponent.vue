@@ -4,7 +4,7 @@ import 'md-editor-v3/lib/preview.css'
 
 // 定义组件入参
 const props = defineProps({
-  avater: {
+  avatar: {
     type: String,
     default: ''
   },
@@ -32,8 +32,7 @@ const props = defineProps({
     <el-row :gutter="0">
       <el-col :span="2">
         <div>
-          <!-- 头像: {{ props.avater }} -->
-          <el-avatar :src="props.avater" />
+          <el-avatar :src="props.avatar" />
         </div>
       </el-col>
       <el-col :span="22">

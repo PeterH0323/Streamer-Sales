@@ -18,7 +18,7 @@ fake_users_db = {
         "ip_address": "127.0.0.1",
         "email": "peterhuang0323@qq.com",
         "hashed_password": "$2b$12$zXXveodjipHZMoSxJz5ODul7Z9YeRJd0GeSBjpwHdqEtBbAFvEdre",
-        "avater": "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
+        "avatar": "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
         "disabled": False,
     }
 }

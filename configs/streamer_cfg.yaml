@@ -1,4 +1,4 @@
-- avater: http://localhost:8000/files/digital_human/streamer_info_files/lelemiao.png
+- avatar: http://localhost:8000/files/digital_human/streamer_info_files/lelemiao.png
   base_mp4_path: http://localhost:8000/files/digital_human/streamer_info_files/lelemiao.mp4
   character:
   - 甜美

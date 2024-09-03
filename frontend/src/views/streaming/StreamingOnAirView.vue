@@ -92,7 +92,7 @@ const handelSendClick = async () => {
     role: 'user',
     userId: userInfoItem.value.user_id,
     userName: userInfoItem.value.username,
-    avater: userInfoItem.value.avater,
+    avatar: userInfoItem.value.avatar,
     message: inputValue.value,
     datetime: ''
   })
@@ -290,7 +290,7 @@ const handleStop = async () => {
               v-for="(item, index) in currentStatus.conversation"
               :key="index"
               :role="item.role"
-              :avater="item.avater"
+              :avatar="item.avatar"
               :userName="item.userName"
               :message="item.message"
               :datetime="item.datetime"

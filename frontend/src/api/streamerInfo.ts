@@ -8,7 +8,7 @@ interface StreamerInfo {
   name: string
   value: string
   character: string[]
-  avater: string
+  avatar: string
 
   tts_weight_tag: string
   tts_reference_audio: string

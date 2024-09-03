@@ -14,7 +14,7 @@ interface UserInfo {
   user_id: number
   ip_adress: string
   full_name: string
-  avater: string
+  avatar: string
   email: string
   hashed_password: string
   disabled: boolean

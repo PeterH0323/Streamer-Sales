@@ -14,7 +14,7 @@ interface messageItem {
   role: string
   userId: number
   userName: string
-  avater: string
+  avatar: string
   message: string
   datetime: string
 }

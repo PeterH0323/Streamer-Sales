@@ -21,7 +21,7 @@ class StreamerInfoItem(BaseModel):
     name: str = ""
     character: List[str] = None
     value: str = ""
-    avater: str = ""  # 头像
+    avatar: str = ""  # 头像
 
     tts_weight_tag: str = ""  # 艾丝妲
     tts_reference_sentence: str = ""
