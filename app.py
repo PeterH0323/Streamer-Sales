@@ -277,7 +277,8 @@ def init_digital_human():
     if WEB_CONFIGS.ENABLE_DIGITAL_HUMAN:
         # 清除 1 小时之前的所有视频
         Path(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH).mkdir(parents=True, exist_ok=True)
-        delete_old_files(st.session_state.digital_human_root)
+        Path(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH + "/vid_output").mkdir(exist_ok=True, parents=True)
+        delete_old_files(WEB_CONFIGS.DIGITAL_HUMAN_GEN_PATH + "/vid_output")
 
 
 def init_asr():
