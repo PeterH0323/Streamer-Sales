@@ -63,61 +63,21 @@ async def get_product_id_info_api(productId: int, user_id: int = Depends(get_cur
 
 @router.post("/create", summary="新增商品接口")
 async def upload_product_api(upload_product_item: ProductInfo, user_id: int = Depends(get_current_user_info)):
-    """新增 or 编辑商品
 
-    Args:
-        upload_product_item (UploadProductItem): _description_
+    upload_product_item.user_id = user_id
+    upload_product_item.product_id = None
 
-    Returns:
-        _type_: _description_
-    """
-
-    # TODO 后续直接插入到数据库就行，无需自行将 id + 1
-    # 获取现有数据
-    product_info_dict = await get_db_product_info(user_id)
-
-    # 排序防止乱序
-    product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"]))
-
-    new_info_dict = ProductInfo(
-        user_id=user_id,
-        product_name=upload_product_item.product_name,
-        heighlights=upload_product_item.heighlights,
-        image_path=str(upload_product_item.image_path),
-        instruction=str(upload_product_item.instruction),
-        departure_place=upload_product_item.departure_place,
-        delivery_company=upload_product_item.delivery_company,
-        selling_price=upload_product_item.selling_price,
-        amount=upload_product_item.amount,
-        upload_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        product_id=get_product_max_id() + 1,
-        product_class=upload_product_item.product_class,
-        delete=False,
-    )
-
-    rebuild_rag_db_flag = False
-    if upload_product_item.product_name in product_info_dict:
-        # 有则更新
-        new_info_dict.product_id = product_info_dict[upload_product_item.product_name]["product_id"]  # 使用原来的 ID
-
-        if product_info_dict[upload_product_item.product_name]["instruction"] != new_info_dict.instruction:
-            # 说明书重新上传，需要重新构建 rag 数据库
-            rebuild_rag_db_flag = True
-    else:
-        rebuild_rag_db_flag = True
+    rebuild_rag_db_flag = create_or_update_db_product_by_id(0, upload_product_item)
 
     if WEB_CONFIGS.ENABLE_RAG and rebuild_rag_db_flag:
         # 重新生成 RAG 向量数据库
         rebuild_rag_db()
 
-    # 全部流程走完再保存
-    save_product_info(dict(new_info_dict))
-
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.put("/edit/{product_id}", summary="编辑商品接口")
-async def upload_product_api(product_id: int, upload_product_item: ProductInfo, user_id: int = Depends(get_current_user_info)):
+@router.put("/edit/{product_id}", summary="编辑商品接口", dependencies=[Depends(get_current_user_info)])
+async def upload_product_api(product_id: int, upload_product_item: ProductInfo):
 
     rebuild_rag_db_flag = create_or_update_db_product_by_id(product_id, upload_product_item)
 
@@ -128,8 +88,8 @@ async def upload_product_api(product_id: int, upload_product_item: ProductInfo, 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.delete("/delete/{productId}", summary="删除特定商品 ID 接口")
-async def upload_product_api(productId: int, user_id: int = Depends(get_current_user_info)):
+@router.delete("/delete/{productId}", summary="删除特定商品 ID 接口", dependencies=[Depends(get_current_user_info)])
+async def upload_product_api(productId: int):
 
     process_success_flag = await delete_product_id(productId)
 
@@ -143,8 +103,8 @@ async def upload_product_api(productId: int, user_id: int = Depends(get_current_
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.post("/instruction", summary="获取对应商品的说明书内容接口")
-async def get_product_instruction_info_api(instruction_path: ProductQueryItem, user_id: int = Depends(get_current_user_info)):
+@router.post("/instruction", summary="获取对应商品的说明书内容接口", dependencies=[Depends(get_current_user_info)])
+async def get_product_instruction_info_api(instruction_path: ProductQueryItem):
     """获取对应商品的说明书
 
     Args:

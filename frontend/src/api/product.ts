@@ -17,7 +17,7 @@ interface ProductItem {
   product_id: number
   product_name: string
   product_class: string
-  heighlights: string[]
+  heighlights: string
   image_path: string
   instruction: string
   departure_place: string
@@ -59,11 +59,35 @@ const getProductByIdRequest = async (productId: string) => {
 }
 
 // 添加或者更新商品接口
-const productCreadeOrEditRequest = (params: ProductListType) => {
-  return request_handler<ResultPackage<ProductData>>({
-    method: 'POST',
-    url: '/products/upload/form',
-    data: params,
+const productCreadeOrEditRequest = (params: ProductItem) => {
+  if (params.product_id === 0) {
+    // 新增商品
+    return request_handler<ResultPackage<ProductData>>({
+      method: 'POST', // 新增
+      url: '/products/create',
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  } else {
+    // 修改商品
+    return request_handler<ResultPackage<ProductData>>({
+      method: 'PUT', // 新增
+      url: `/products/edit/${params.product_id}`,
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  }
+}
+
+// 删除商品接口
+const deleteProductByIdRequest = async (productId: number) => {
+  return request_handler<ResultPackage<string>>({
+    method: 'DELETE',
+    url: `/products/delete/${productId}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -72,21 +96,11 @@ const productCreadeOrEditRequest = (params: ProductListType) => {
 
 // 根据 ID 获取说明书内容
 const genProductInstructionContentRequest = (instructionPath_: string) => {
+  // TODO 后续直接使用 axios 获取
   return request_handler({
     method: 'POST',
     url: '/products/instruction',
     data: { instructionPath: instructionPath_ },
-    headers: {
-      Authorization: header_authorization.value
-    }
-  })
-}
-
-// 删除商品接口
-const deleteProductByIdRequest = async (productId: number) => {
-  return request_handler<ResultPackage<string>>({
-    method: 'DELETE',
-    url: `/products/delete/${productId}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -101,6 +115,6 @@ export {
   productListRequest,
   productCreadeOrEditRequest,
   getProductByIdRequest,
-  genProductInstructionContentRequest,
-  deleteProductByIdRequest
+  deleteProductByIdRequest,
+  genProductInstructionContentRequest
 }
