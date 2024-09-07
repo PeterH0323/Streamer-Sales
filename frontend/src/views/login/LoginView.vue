@@ -6,6 +6,7 @@ import { ElMessage, ElNotification, type FormInstance, type FormRules } from 'el
 
 import { loginRequest } from '@/api/user'
 import { useTokenStore, type TokenItem } from '@/stores/userToken'
+import { AxiosError } from 'axios'
 
 const router = useRouter()
 const route = useRoute()
@@ -67,14 +68,28 @@ const onSubmit = async () => {
         isLogining.value = false
         throw new Error('账号名或密码错误') // 抛出异常
       }
+
+      // 弹窗提示
+      ElNotification({
+        title: '登录成功',
+        message: '欢迎',
+        type: 'success'
+      })
+
       return res.data
     })
     .catch((error) => {
       console.error(error)
+      isLogining.value = false
       if (error.response && error.response.status === 401) {
         ElMessage.error('账号名或密码错误')
-        isLogining.value = false
         throw new Error('账号名或密码错误') // 抛出异常
+      } else if (error instanceof AxiosError) {
+        ElMessage.error('登录失败：' + error.message)
+        throw new Error('登录失败：' + error.message) // 抛出异常
+      } else {
+        ElMessage.error('未知错误：' + error)
+        throw new Error('未知错误：' + error) // 抛出异常
       }
     })
 
@@ -85,13 +100,6 @@ const onSubmit = async () => {
 
   // 设置已经完成登录
   isLogining.value = false
-
-  // 弹窗提示
-  ElNotification({
-    title: '登录成功',
-    message: '欢迎',
-    type: 'success'
-  })
 
   router.push((route.query.redirect as string) || '/') // 页面跳转，如果是被未登录拦截的话，登录成功后跳转会目标页面
 }
