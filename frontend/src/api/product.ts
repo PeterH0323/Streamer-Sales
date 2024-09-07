@@ -36,11 +36,11 @@ interface ProductData {
 }
 
 // 查询接口
-const productListRequest = (params: ProductListType) => {
+const productListRequest = (params_: ProductListType) => {
   return request_handler<ResultPackage<ProductData>>({
-    method: 'POST',
+    method: 'GET',
     url: '/products/list',
-    data: params,
+    params: params_,
     headers: {
       Authorization: header_authorization.value
     }
@@ -51,10 +51,7 @@ const productListRequest = (params: ProductListType) => {
 const getProductByIdRequest = async (productId: string) => {
   return request_handler<ResultPackage<ProductItem>>({
     method: 'GET',
-    url: '/products/info',
-    params: {
-      productId
-    },
+    url: `/products/info/${productId}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -63,8 +60,6 @@ const getProductByIdRequest = async (productId: string) => {
 
 // 添加或者更新商品接口
 const productCreadeOrEditRequest = (params: ProductListType) => {
-  console.info(params)
-
   return request_handler<ResultPackage<ProductData>>({
     method: 'POST',
     url: '/products/upload/form',
@@ -90,9 +85,8 @@ const genProductInstructionContentRequest = (instructionPath_: string) => {
 // 删除商品接口
 const deleteProductByIdRequest = async (productId: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
-    url: '/products/delete',
-    data: { product_id: productId },
+    method: 'DELETE',
+    url: `/products/delete/${productId}`,
     headers: {
       Authorization: header_authorization.value
     }

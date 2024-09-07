@@ -16,8 +16,8 @@ from fastapi import APIRouter, Depends
 from loguru import logger
 
 from ...web_configs import WEB_CONFIGS
-from ..database.product_db import get_db_product_info, get_prduct_by_page, get_product_list, get_product_max_id, save_product_info
-from ..models.product_model import DeleteProductItem, ProductItem, ProductQueryItem
+from ..database.product_db import get_db_product_info, get_product_list, get_product_max_id, save_product_info
+from ..models.product_model import DeleteProductItem, ProductInfo, ProductPageItem, ProductQueryItem
 from ..modules.rag.rag_worker import rebuild_rag_db
 from ..utils import ResultCode, delete_item_by_id, make_return_data
 from .users import get_current_user_info
@@ -29,26 +29,37 @@ router = APIRouter(
 )
 
 
-@router.post("/list", summary="获取分页商品信息接口")
-async def get_product_info_api(product_query_item: ProductQueryItem, user_id: int = Depends(get_current_user_info)):
-
-    logger.info(f"Got product_query_item = {product_query_item}")
-    res_data = await get_prduct_by_page(
-        user_id, product_query_item.currentPage, product_query_item.pageSize, product_query_item.productName
+@router.get("/list", summary="获取分页商品信息接口")
+async def get_product_info_api(
+    currentPage: int = 1, pageSize: int = 5, productName: str | None = None, user_id: int = Depends(get_current_user_info)
+):
+    product_list, db_product_size = await get_db_product_info(
+        user_id=user_id,
+        current_page=currentPage,
+        page_size=pageSize,
+        product_name=productName,
     )
+
+    logger.info(product_list)
+    logger.info(f"len {len(product_list)}")
+
+    res_data = ProductPageItem(product_list=product_list, currentPage=currentPage, pageSize=pageSize, totalSize=db_product_size)
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.get("/info", summary="获取特定商品 ID 的详细信息接口")
-async def get_product_info_api(productId: str, user_id: int = Depends(get_current_user_info)):
-    product_list, _ = await get_product_list(user_id, id=int(productId))
+@router.get("/info/{productId}", summary="获取特定商品 ID 的详细信息接口")
+async def get_product_info_api(productId: int, user_id: int = Depends(get_current_user_info)):
+    product_list, _ = await get_db_product_info(
+        user_id=user_id,
+        product_id=productId,
+    )
 
     logger.info(product_list)
     return make_return_data(True, ResultCode.SUCCESS, "成功", product_list[0])
 
 
 @router.post("/upload/form", summary="新增 or 编辑商品接口")
-async def upload_product_api(upload_product_item: ProductItem, user_id: int = Depends(get_current_user_info)):
+async def upload_product_api(upload_product_item: ProductInfo, user_id: int = Depends(get_current_user_info)):
     """新增 or 编辑商品
 
     Args:
@@ -65,7 +76,7 @@ async def upload_product_api(upload_product_item: ProductItem, user_id: int = De
     # 排序防止乱序
     product_info_dict = dict(sorted(product_info_dict.items(), key=lambda item: item[1]["product_id"]))
 
-    new_info_dict = ProductItem(
+    new_info_dict = ProductInfo(
         user_id=user_id,
         product_name=upload_product_item.product_name,
         heighlights=upload_product_item.heighlights,
@@ -107,7 +118,7 @@ async def get_product_info_api(instruction_path: ProductQueryItem, user_id: int 
     """获取对应商品的说明书
 
     Args:
-        instruction_path (ProductInstructionItem): _description_
+        instruction_path (ProductInstructionItem): 说明书路径
 
     """
 
@@ -125,10 +136,10 @@ async def get_product_info_api(instruction_path: ProductQueryItem, user_id: int 
     return make_return_data(True, ResultCode.SUCCESS, "成功", instruction_content)
 
 
-@router.post("/delete", summary="删除特定商品 ID 接口")
-async def upload_product_api(delete_info: DeleteProductItem, user_id: int = Depends(get_current_user_info)):
+@router.delete("/delete/{productId}", summary="删除特定商品 ID 接口")
+async def upload_product_api(productId: int, user_id: int = Depends(get_current_user_info)):
 
-    process_success_flag = await delete_item_by_id("product", delete_info.product_id, user_id)
+    process_success_flag = await delete_item_by_id("product", productId, user_id)
 
     if not process_success_flag:
         return make_return_data(False, ResultCode.FAIL, "失败", "")

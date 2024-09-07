@@ -9,29 +9,37 @@
 @Desc    :   商品数据类型定义
 """
 
+from datetime import datetime
 from typing import List
 from pydantic import BaseModel
-from fastapi import File
+from sqlmodel import Field, SQLModel
 
 
-class ProductItem(BaseModel):
+# =======================================================
+#                      数据库模型
+# =======================================================
+class ProductInfo(SQLModel, table=True):
     """商品信息"""
 
-    user_id: int = 0
-    product_id: int = 0
-    product_name: str = ""
+    product_id: int | None = Field(default=None, primary_key=True, unique=True)
+    product_name: str = Field(index=True, unique=True)
     product_class: str
-    heighlights: List[str]
+    heighlights: str
     image_path: str
     instruction: str
     departure_place: str
     delivery_company: str
     selling_price: float
     amount: int
-    upload_date: str = ""
+    upload_date: datetime = datetime.now()
     delete: bool = False
 
+    user_id: int | None = Field(default=None, foreign_key="userinfo.user_id")
 
+
+# =======================================================
+#                      基本模型
+# =======================================================
 class PageItem(BaseModel):
     currentPage: int = 0  # 当前页数
     pageSize: int = 0  # 页面的组件数量
@@ -39,7 +47,7 @@ class PageItem(BaseModel):
 
 
 class ProductPageItem(PageItem):
-    product_list: List[ProductItem] = []
+    product_list: List[ProductInfo] = []
 
 
 class ProductQueryItem(PageItem):

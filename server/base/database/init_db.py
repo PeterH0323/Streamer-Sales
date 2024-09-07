@@ -14,9 +14,7 @@ from pydantic import PostgresDsn
 from pydantic_core import MultiHostUrl
 from sqlmodel import SQLModel, create_engine
 
-from ..models.user_model import *
 from ...web_configs import WEB_CONFIGS
-
 
 ECHO_DB_MESG = True  # 数据库执行中是否回显，用户 Debug
 
