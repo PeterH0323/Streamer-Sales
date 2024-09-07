@@ -11,12 +11,11 @@
 
 from typing import List, Tuple
 
-import yaml
 from loguru import logger
 from sqlalchemy import func
 from sqlmodel import Session, and_, select
 
-from ...web_configs import API_CONFIG, WEB_CONFIGS
+from ...web_configs import API_CONFIG
 from ..models.product_model import ProductInfo, ProductPageItem
 from .init_db import DB_ENGINE
 
@@ -102,39 +101,67 @@ async def delete_product_id(product_id: int) -> bool:
     try:
         # 获取总数
         with Session(DB_ENGINE) as session:
-
             # 查找特定 ID
             product_info = session.exec(select(ProductInfo).where(ProductInfo.product_id == product_id)).one()
-
-            # 设置为删除
-            product_info.delete = True
-
-            # 提交
+            product_info.delete = True  # 设置为删除
             session.add(product_info)
-            session.commit()
-
+            session.commit()  # 提交
     except Exception:
         delete_success = False
 
     return delete_success
 
 
-def save_product_info(new_product_info_dict: ProductInfo):
-    """保存商品信息
+def create_or_update_db_product_by_id(product_id: int, new_info: ProductInfo) -> bool:
+    """新增 or 编辑商品信息
 
     Args:
-        product_info_dict (Dict[ProductInfo]): 所有的商品信息
+        product_id (int): 商品 ID
+        new_info (ProductInfo): 新的信息
+
+    Returns:
+        bool: 说明书是否变化
     """
-    # 读取
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
 
-    # 更新对应字段
-    product_info_dict.update({new_product_info_dict["product_name"]: dict(new_product_info_dict)})
+    instruction_updated = False
 
-    # 保存
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(product_info_dict, f, allow_unicode=True)
+    # 去掉服务器地址
+    new_info.image_path = new_info.image_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
+    new_info.instruction = new_info.instruction.replace(API_CONFIG.REQUEST_FILES_URL, "")
+
+    with Session(DB_ENGINE) as session:
+
+        if product_id > 0:
+            # 更新特定 ID
+            product_info = session.exec(select(ProductInfo).where(ProductInfo.product_id == product_id)).one()
+
+            if product_info.instruction != new_info.instruction:
+                # 判断说明书是否变化了
+                instruction_updated = True
+
+            # 更新对应的值
+            product_info.product_name = new_info.product_name
+            product_info.product_class = new_info.product_class
+            product_info.heighlights = new_info.heighlights
+            product_info.image_path = new_info.image_path
+            product_info.instruction = new_info.instruction
+            product_info.departure_place = new_info.departure_place
+            product_info.delivery_company = new_info.delivery_company
+            product_info.selling_price = new_info.selling_price
+            product_info.amount = new_info.amount
+
+            session.add(product_info)
+        else:
+            # 新增，直接添加即可
+            session.add(new_info)
+
+        session.commit()  # 提交
+    return instruction_updated
+
+
+def save_product_info(new_product_info_dict: ProductInfo):
+    # TODO 删除
+    raise NotImplemented("using get_db_product_info instead")
 
 
 def get_product_max_id():

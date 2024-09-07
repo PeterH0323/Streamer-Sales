@@ -291,7 +291,7 @@ def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
 
 async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
     """根据类型删除某个ID的信息"""
-
+    #TODO 删除
     logger.info(delete_id)
 
     assert item_type in ["product", "streamer", "room"]

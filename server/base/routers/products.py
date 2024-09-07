@@ -16,10 +16,16 @@ from fastapi import APIRouter, Depends
 from loguru import logger
 
 from ...web_configs import WEB_CONFIGS
-from ..database.product_db import get_db_product_info, get_product_list, get_product_max_id, save_product_info
-from ..models.product_model import DeleteProductItem, ProductInfo, ProductPageItem, ProductQueryItem
+from ..database.product_db import (
+    create_or_update_db_product_by_id,
+    delete_product_id,
+    get_db_product_info,
+    get_product_max_id,
+    save_product_info,
+)
+from ..models.product_model import ProductInfo, ProductPageItem, ProductQueryItem
 from ..modules.rag.rag_worker import rebuild_rag_db
-from ..utils import ResultCode, delete_item_by_id, make_return_data
+from ..utils import ResultCode, make_return_data
 from .users import get_current_user_info
 
 router = APIRouter(
@@ -40,25 +46,22 @@ async def get_product_info_api(
         product_name=productName,
     )
 
-    logger.info(product_list)
-    logger.info(f"len {len(product_list)}")
-
     res_data = ProductPageItem(product_list=product_list, currentPage=currentPage, pageSize=pageSize, totalSize=db_product_size)
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
 @router.get("/info/{productId}", summary="获取特定商品 ID 的详细信息接口")
-async def get_product_info_api(productId: int, user_id: int = Depends(get_current_user_info)):
-    product_list, _ = await get_db_product_info(
-        user_id=user_id,
-        product_id=productId,
-    )
+async def get_product_id_info_api(productId: int, user_id: int = Depends(get_current_user_info)):
+    product_list, _ = await get_db_product_info(user_id=user_id, product_id=productId)
 
-    logger.info(product_list)
-    return make_return_data(True, ResultCode.SUCCESS, "成功", product_list[0])
+    if product_list is None:
+        res_product = []
+    else:
+        res_product = product_list[0]
+    return make_return_data(True, ResultCode.SUCCESS, "成功", res_product)
 
 
-@router.post("/upload/form", summary="新增 or 编辑商品接口")
+@router.post("/create", summary="新增商品接口")
 async def upload_product_api(upload_product_item: ProductInfo, user_id: int = Depends(get_current_user_info)):
     """新增 or 编辑商品
 
@@ -113,33 +116,22 @@ async def upload_product_api(upload_product_item: ProductInfo, user_id: int = De
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.post("/instruction", summary="获取对应商品的说明书内容接口")
-async def get_product_info_api(instruction_path: ProductQueryItem, user_id: int = Depends(get_current_user_info)):
-    """获取对应商品的说明书
+@router.put("/edit/{product_id}", summary="编辑商品接口")
+async def upload_product_api(product_id: int, upload_product_item: ProductInfo, user_id: int = Depends(get_current_user_info)):
 
-    Args:
-        instruction_path (ProductInstructionItem): 说明书路径
+    rebuild_rag_db_flag = create_or_update_db_product_by_id(product_id, upload_product_item)
 
-    """
+    if WEB_CONFIGS.ENABLE_RAG and rebuild_rag_db_flag:
+        # 重新生成 RAG 向量数据库
+        rebuild_rag_db()
 
-    loacl_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(
-        WEB_CONFIGS.PRODUCT_FILE_DIR, WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name
-    )
-    if not loacl_path.exists():
-        return make_return_data(False, ResultCode.FAIL, "文件不存在", "")
-
-    # TODO 根据 user id 检查文件归属
-
-    with open(loacl_path, "r") as f:
-        instruction_content = f.read()
-
-    return make_return_data(True, ResultCode.SUCCESS, "成功", instruction_content)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
 @router.delete("/delete/{productId}", summary="删除特定商品 ID 接口")
 async def upload_product_api(productId: int, user_id: int = Depends(get_current_user_info)):
 
-    process_success_flag = await delete_item_by_id("product", productId, user_id)
+    process_success_flag = await delete_product_id(productId)
 
     if not process_success_flag:
         return make_return_data(False, ResultCode.FAIL, "失败", "")
@@ -149,3 +141,24 @@ async def upload_product_api(productId: int, user_id: int = Depends(get_current_
         rebuild_rag_db()
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
+
+
+@router.post("/instruction", summary="获取对应商品的说明书内容接口")
+async def get_product_instruction_info_api(instruction_path: ProductQueryItem, user_id: int = Depends(get_current_user_info)):
+    """获取对应商品的说明书
+
+    Args:
+        instruction_path (ProductInstructionItem): 说明书路径
+
+    """
+    # TODO 后续改为前端 axios 直接获取
+    loacl_path = Path(WEB_CONFIGS.SERVER_FILE_ROOT).joinpath(
+        WEB_CONFIGS.PRODUCT_FILE_DIR, WEB_CONFIGS.INSTRUCTIONS_DIR, Path(instruction_path.instructionPath).name
+    )
+    if not loacl_path.exists():
+        return make_return_data(False, ResultCode.FAIL, "文件不存在", "")
+
+    with open(loacl_path, "r") as f:
+        instruction_content = f.read()
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", instruction_content)
