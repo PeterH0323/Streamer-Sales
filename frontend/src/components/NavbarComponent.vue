@@ -45,7 +45,7 @@ onMounted(async () => {
     <!-- 导航栏右边 -->
     <!-- 退出登录 -->
     <el-dropdown trigger="click">
-        <el-avatar :src="userInfoItem.avatar" />
+      <el-avatar :src="userInfoItem.avatar" />
       <template #dropdown>
         <el-dropdown-menu class="logout">
           <el-dropdown-item>{{ userInfoItem.username }}</el-dropdown-item>
