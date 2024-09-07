@@ -28,7 +28,10 @@ const saveLoading = ref(false)
 
 // 商品信息
 const productInfo = ref({} as ProductItem)
-productInfo.value.heighlights = [] // 初始化
+productInfo.value.heighlights = '' // 初始化
+productInfo.value.product_id = 0 // 初始化
+
+const heighlights_list = ref([] as string[])
 
 // 商品亮点操作
 const inputHeighlightValue = ref('')
@@ -37,7 +40,7 @@ const InputHeighlightRef = ref<InputInstance>()
 
 const handleHeighlightClose = (tag: string) => {
   // 删除性格操作
-  productInfo.value.heighlights.splice(productInfo.value.heighlights.indexOf(tag), 1)
+  heighlights_list.value.splice(heighlights_list.value.indexOf(tag), 1)
 }
 
 const showHeighlightInput = () => {
@@ -49,7 +52,7 @@ const showHeighlightInput = () => {
 
 const handleHeighlightInputConfirm = () => {
   if (inputHeighlightValue.value) {
-    productInfo.value.heighlights.push(inputHeighlightValue.value)
+    heighlights_list.value.push(inputHeighlightValue.value)
   }
   inputHeighlightVisible.value = false
   inputHeighlightValue.value = ''
@@ -61,6 +64,10 @@ const onSubmit = async () => {
 
   try {
     saveLoading.value = true
+
+    // 将 亮点 数组变成 ; 分割的字符串
+    productInfo.value.heighlights = heighlights_list.value.join(';')
+
     const { data } = await productCreadeOrEditRequest(productInfo.value)
     if (data.code === 0) {
       ElMessage.success(`${statusInof}成功!`)
@@ -89,6 +96,7 @@ onMounted(async () => {
       const { data } = await getProductByIdRequest(props.productId)
       if (data.code === 0) {
         productInfo.value = data.data
+        heighlights_list.value = productInfo.value.heighlights.split(';')
         ElMessage.success('获取商品信息成功')
       } else {
         ElMessage.error(data.message)
@@ -157,7 +165,7 @@ onMounted(async () => {
           </el-form-item>
           <el-form-item label="商品亮点">
             <el-tag
-              v-for="(heighlights, index) in productInfo.heighlights"
+              v-for="(heighlights, index) in heighlights_list"
               :key="index"
               :disable-transitions="false"
               closable
@@ -186,7 +194,7 @@ onMounted(async () => {
               type="primary"
               plain
               size="small"
-              :disabled="productInfo.heighlights.length > 7"
+              :disabled="heighlights_list.length > 7"
             >
             </el-button>
           </el-form-item>

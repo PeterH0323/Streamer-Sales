@@ -54,7 +54,3 @@ class ProductQueryItem(PageItem):
     productName: str = ""  # 商品名，用于指定查询
     productId: str = "-1"  # 商品ID，用于指定查询
     instructionPath: str = ""  # 商品说明书路径，用于获取说明书内容
-
-
-class DeleteProductItem(BaseModel):
-    product_id: int
