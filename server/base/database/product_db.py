@@ -68,18 +68,55 @@ async def get_db_product_info(
         # 查询获取商品
         if current_page < 0:
             # 全部查询
-            product_list = session.exec(select(ProductInfo).where(query_condiction)).all()
+            product_list = session.exec(select(ProductInfo).where(query_condiction).order_by(ProductInfo.product_id)).all()
         else:
             # 分页查询
             offset_idx = (current_page - 1) * page_size
-            product_list = session.exec(select(ProductInfo).where(query_condiction).offset(offset_idx).limit(page_size)).all()
+            product_list = session.exec(
+                select(ProductInfo).where(query_condiction).offset(offset_idx).limit(page_size).order_by(ProductInfo.product_id)
+            ).all()
 
     # 将路径换成服务器路径
     for product in product_list:
         product.image_path = API_CONFIG.REQUEST_FILES_URL + product.image_path
         product.instruction = API_CONFIG.REQUEST_FILES_URL + product.instruction
 
+    logger.info(product_list)
+    logger.info(f"len {len(product_list)}")
+
     return product_list, total_product_num
+
+
+async def delete_product_id(product_id: int) -> bool:
+    """删除特定的商品 ID
+
+    Args:
+        product_id (int): 商品 ID
+
+    Returns:
+        bool: 是否删除成功
+    """
+
+    delete_success = True
+
+    try:
+        # 获取总数
+        with Session(DB_ENGINE) as session:
+
+            # 查找特定 ID
+            product_info = session.exec(select(ProductInfo).where(ProductInfo.product_id == product_id)).one()
+
+            # 设置为删除
+            product_info.delete = True
+
+            # 提交
+            session.add(product_info)
+            session.commit()
+
+    except Exception:
+        delete_success = False
+
+    return delete_success
 
 
 def save_product_info(new_product_info_dict: ProductInfo):
