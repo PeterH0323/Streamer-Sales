@@ -86,11 +86,12 @@ async def get_db_product_info(
     return product_list, total_product_num
 
 
-async def delete_product_id(product_id: int) -> bool:
+async def delete_product_id(product_id: int, user_id: int) -> bool:
     """删除特定的商品 ID
 
     Args:
         product_id (int): 商品 ID
+        user_id (int): 用户 ID，用于防止其他用户恶意删除
 
     Returns:
         bool: 是否删除成功
@@ -102,7 +103,14 @@ async def delete_product_id(product_id: int) -> bool:
         # 获取总数
         with Session(DB_ENGINE) as session:
             # 查找特定 ID
-            product_info = session.exec(select(ProductInfo).where(ProductInfo.product_id == product_id)).one()
+            product_info = session.exec(
+                select(ProductInfo).where(and_(ProductInfo.product_id == product_id, ProductInfo.user_id == user_id))
+            ).one()
+
+            if product_info is None:
+                logger.error("Delete by other ID !!!")
+                return False
+
             product_info.delete = True  # 设置为删除
             session.add(product_info)
             session.commit()  # 提交
@@ -112,12 +120,13 @@ async def delete_product_id(product_id: int) -> bool:
     return delete_success
 
 
-def create_or_update_db_product_by_id(product_id: int, new_info: ProductInfo) -> bool:
+def create_or_update_db_product_by_id(product_id: int, new_info: ProductInfo, user_id: int) -> bool:
     """新增 or 编辑商品信息
 
     Args:
         product_id (int): 商品 ID
         new_info (ProductInfo): 新的信息
+        user_id (int): 用户 ID，用于防止其他用户恶意修改
 
     Returns:
         bool: 说明书是否变化
@@ -133,7 +142,13 @@ def create_or_update_db_product_by_id(product_id: int, new_info: ProductInfo) ->
 
         if product_id > 0:
             # 更新特定 ID
-            product_info = session.exec(select(ProductInfo).where(ProductInfo.product_id == product_id)).one()
+            product_info = session.exec(
+                select(ProductInfo).where(and_(ProductInfo.product_id == product_id, ProductInfo.user_id == user_id))
+            ).one()
+
+            if product_info is None:
+                logger.error("Edit by other ID !!!")
+                return False
 
             if product_info.instruction != new_info.instruction:
                 # 判断说明书是否变化了

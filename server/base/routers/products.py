@@ -76,10 +76,10 @@ async def upload_product_api(upload_product_item: ProductInfo, user_id: int = De
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.put("/edit/{product_id}", summary="编辑商品接口", dependencies=[Depends(get_current_user_info)])
-async def upload_product_api(product_id: int, upload_product_item: ProductInfo):
+@router.put("/edit/{product_id}", summary="编辑商品接口")
+async def upload_product_api(product_id: int, upload_product_item: ProductInfo, user_id: int = Depends(get_current_user_info)):
 
-    rebuild_rag_db_flag = create_or_update_db_product_by_id(product_id, upload_product_item)
+    rebuild_rag_db_flag = create_or_update_db_product_by_id(product_id, upload_product_item, user_id)
 
     if WEB_CONFIGS.ENABLE_RAG and rebuild_rag_db_flag:
         # 重新生成 RAG 向量数据库
@@ -88,10 +88,10 @@ async def upload_product_api(product_id: int, upload_product_item: ProductInfo):
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.delete("/delete/{productId}", summary="删除特定商品 ID 接口", dependencies=[Depends(get_current_user_info)])
-async def upload_product_api(productId: int):
+@router.delete("/delete/{productId}", summary="删除特定商品 ID 接口")
+async def upload_product_api(productId: int, user_id: int = Depends(get_current_user_info)):
 
-    process_success_flag = await delete_product_id(productId)
+    process_success_flag = await delete_product_id(productId, user_id)
 
     if not process_success_flag:
         return make_return_data(False, ResultCode.FAIL, "失败", "")
