@@ -21,7 +21,7 @@ interface DashboardItem {
 // 获取主控大屏信息
 const getDashboardInfoRequest = () => {
   return request_handler<ResultPackage<DashboardItem>>({
-    method: 'POST',
+    method: 'GET',
     url: '/dashboard'
   })
 }

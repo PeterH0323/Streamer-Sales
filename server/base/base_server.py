@@ -105,7 +105,7 @@ async def validation_exception_handler(request, exc):
     return PlainTextResponse(str(exc), status_code=400)
 
 
-@app.post("/dashboard", tags=["base"], summary="获取主页信息接口")
+@app.get("/dashboard", tags=["base"], summary="获取主页信息接口")
 async def get_dashboard_info():
     """首页展示数据"""
     fake_dashboard_data = {
