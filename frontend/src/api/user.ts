@@ -10,14 +10,11 @@ type loginFormType = {
 }
 
 interface UserInfo {
-  username: string
   user_id: number
-  ip_adress: string
-  full_name: string
+  username: string
   avatar: string
   email: string
-  hashed_password: string
-  disabled: boolean
+  create_time: string
 }
 
 // pinia 保存的 token
@@ -48,7 +45,7 @@ const loginRequest = (loginForm: loginFormType) => {
 // 获取用户信息接口
 const getUserInfoRequest = async () => {
   return request_handler<ResultPackage<UserInfo>>({
-    method: 'POST',
+    method: 'GET',
     url: '/user/me',
     headers: {
       Authorization: header_authorization.value

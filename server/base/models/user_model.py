@@ -9,20 +9,31 @@
 @Desc    :   用户信息数据结构
 """
 
+from datetime import datetime
 from pydantic import BaseModel
+from sqlmodel import Field, SQLModel
 
 
+# =======================================================
+#                      基本模型
+# =======================================================
 class TokenItem(BaseModel):
     access_token: str
     token_type: str
 
 
-class UserInfo(BaseModel):
-    username: str
-    user_id: int
-    ip_adress: str = ""
-    full_name: str = ""
-    avatar: str = ""
-    email: str = ""
-    hashed_password: str = ""
-    disabled: bool = False
+class UserBaseInfo(BaseModel):
+    user_id: int | None = Field(default=None, primary_key=True, unique=True)
+    username: str = Field(index=True, unique=True)
+    email: str | None = None
+    avatar: str | None = None
+    create_time: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+# =======================================================
+#                      数据库模型
+# =======================================================
+class UserInfo(UserBaseInfo, SQLModel, table=True):
+    hashed_password: str
+    ip_address: str | None = None
+    delete: bool = False
