@@ -10,6 +10,7 @@
 """
 
 from datetime import datetime
+from ipaddress import IPv4Address
 from pydantic import BaseModel
 from sqlmodel import Field, SQLModel
 
@@ -27,7 +28,7 @@ class UserBaseInfo(BaseModel):
     username: str = Field(index=True, unique=True)
     email: str | None = None
     avatar: str | None = None
-    create_time: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    create_time: datetime =datetime.now()
 
 
 # =======================================================
@@ -35,5 +36,5 @@ class UserBaseInfo(BaseModel):
 # =======================================================
 class UserInfo(UserBaseInfo, SQLModel, table=True):
     hashed_password: str
-    ip_address: str | None = None
+    ip_address: IPv4Address | None = None
     delete: bool = False

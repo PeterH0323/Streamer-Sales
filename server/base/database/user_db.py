@@ -9,6 +9,8 @@
 @Desc    :   用户信息数据库操作
 """
 
+from ipaddress import IPv4Address
+
 from loguru import logger
 from sqlmodel import Session, select
 
@@ -20,7 +22,7 @@ def create_default_user():
     """创建默认用户"""
     admin_user = UserInfo(
         username="hingwen.wong",
-        ip_address="127.0.0.1",
+        ip_address=IPv4Address("127.0.0.1"),
         email="peterhuang0323@qq.com",
         hashed_password="$2b$12$zXXveodjipHZMoSxJz5ODul7Z9YeRJd0GeSBjpwHdqEtBbAFvEdre",  # 123456 -> 用 get_password_hash 加密后的字符串
         avatar="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
@@ -31,8 +33,12 @@ def create_default_user():
         session.commit()
 
 
-def init_user():
-    """判断是否需要创建默认用户"""
+def init_user() -> bool:
+    """判断是否需要创建默认用户
+
+    Returns:
+        bool: 是否执行创建默认用户
+    """
     with Session(DB_ENGINE) as session:
         results = session.exec(select(UserInfo).where(UserInfo.user_id == 1)).first()
 
@@ -40,6 +46,9 @@ def init_user():
         # 如果数据库为空，创建初始用户
         create_default_user()
         logger.info("created default user info")
+        return True
+
+    return False
 
 
 def get_db_user_info(id: int = -1, username: str = "", all_info: bool = False) -> UserBaseInfo | UserInfo | None:
