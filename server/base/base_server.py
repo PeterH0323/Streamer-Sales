@@ -70,6 +70,7 @@ app = FastAPI(
         "name": "AGPL-3.0 license",
         "url": "https://github.com/PeterH0323/Streamer-Sales/blob/main/LICENSE",
     },
+    root_path=API_CONFIG.API_V1_STR,
     lifespan=lifespan,
 )
 
