@@ -17,7 +17,7 @@ from fastapi import APIRouter, Depends
 from loguru import logger
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
-from ..database.streamer_info_db import create_or_update_db_streamer_by_id, delete_streamer_id, get_db_steamer_info
+from ..database.streamer_info_db import create_or_update_db_streamer_by_id, delete_streamer_id, get_db_streamer_info
 from ..models.streamer_info_model import StreamerInfo
 from ..utils import ResultCode, make_poster_by_video_first_frame, make_return_data
 from .users import get_current_user_info
@@ -41,7 +41,7 @@ async def gen_digital_human(user_id, streamer_id: int, new_streamer_info: Stream
         str: 新的数字人信息
     """
 
-    streamer_info_db = await get_db_steamer_info(user_id, streamer_id)
+    streamer_info_db = await get_db_streamer_info(user_id, streamer_id)
     streamer_info_db = streamer_info_db[0]
 
     new_base_mp4_path = new_streamer_info.base_mp4_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
@@ -82,7 +82,7 @@ async def gen_digital_human(user_id, streamer_id: int, new_streamer_info: Stream
 @router.get("/list", summary="获取所有主播信息接口，用于用户进行主播的选择")
 async def get_streamer_info_api(user_id: int = Depends(get_current_user_info)):
     """获取所有主播信息，用于用户进行主播的选择"""
-    streamer_list = await get_db_steamer_info(user_id)
+    streamer_list = await get_db_streamer_info(user_id)
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_list)
 
 
@@ -90,7 +90,7 @@ async def get_streamer_info_api(user_id: int = Depends(get_current_user_info)):
 async def get_streamer_info_api(streamerId: int, user_id: int = Depends(get_current_user_info)):
     """用于获取特定主播的信息"""
 
-    streamer_list = await get_db_steamer_info(user_id, streamerId)
+    streamer_list = await get_db_streamer_info(user_id, streamerId)
     if len(streamer_list) == 1:
         streamer_list = streamer_list[0]
 
@@ -125,9 +125,7 @@ async def create_streamer_info_api(streamer_info: StreamerInfo, user_id: int = D
 
 
 @router.put("/edit/{streamer_id}", summary="修改主播信息接口")
-async def edit_streamer_info_api(
-    streamer_id: int, streamer_info: StreamerInfo, user_id: int = Depends(get_current_user_info)
-):
+async def edit_streamer_info_api(streamer_id: int, streamer_info: StreamerInfo, user_id: int = Depends(get_current_user_info)):
     """修改主播信息"""
 
     # 如果更新了数字人视频对其进行初始化，同时生成头图

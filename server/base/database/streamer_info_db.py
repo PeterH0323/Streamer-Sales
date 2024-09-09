@@ -20,7 +20,7 @@ from ..models.streamer_info_model import StreamerInfo
 from .init_db import DB_ENGINE
 
 
-async def get_db_steamer_info(user_id: int, streamer_id: int | None = None) -> List[StreamerInfo] | None:
+async def get_db_streamer_info(user_id: int, streamer_id: int | None = None) -> List[StreamerInfo] | None:
     """查询数据库中的商品信息
 
     Args:
@@ -46,23 +46,23 @@ async def get_db_steamer_info(user_id: int, streamer_id: int | None = None) -> L
             )
 
         # 查询获取商品
-        steamer_list = session.exec(select(StreamerInfo).where(query_condiction).order_by(StreamerInfo.streamer_id)).all()
+        streamer_list = session.exec(select(StreamerInfo).where(query_condiction).order_by(StreamerInfo.streamer_id)).all()
 
-    if steamer_list is None:
+    if streamer_list is None:
         logger.warning("nothing to find in db...")
-        steamer_list = []
+        streamer_list = []
 
     # 将路径换成服务器路径
-    for streamer in steamer_list:
+    for streamer in streamer_list:
         streamer.avatar = API_CONFIG.REQUEST_FILES_URL + streamer.avatar
         streamer.tts_reference_audio = API_CONFIG.REQUEST_FILES_URL + streamer.tts_reference_audio
         streamer.poster_image = API_CONFIG.REQUEST_FILES_URL + streamer.poster_image
         streamer.base_mp4_path = API_CONFIG.REQUEST_FILES_URL + streamer.base_mp4_path
 
-    logger.info(steamer_list)
-    logger.info(f"len {len(steamer_list)}")
+    logger.info(streamer_list)
+    logger.info(f"len {len(streamer_list)}")
 
-    return steamer_list
+    return streamer_list
 
 
 async def delete_streamer_id(streamer_id: int, user_id: int) -> bool:
