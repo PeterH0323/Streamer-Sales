@@ -16,7 +16,7 @@ from sqlmodel import SQLModel, create_engine
 
 from ...web_configs import WEB_CONFIGS
 
-ECHO_DB_MESG = True  # 数据库执行中是否回显，用户 Debug
+ECHO_DB_MESG = True  # 数据库执行中是否回显，for debug
 
 
 def sqlalchemy_db_url() -> PostgresDsn:

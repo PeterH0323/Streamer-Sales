@@ -35,6 +35,9 @@ class UserBaseInfo(BaseModel):
 #                      数据库模型
 # =======================================================
 class UserInfo(UserBaseInfo, SQLModel, table=True):
+    
+    __tablename__ = "user_info"
+    
     hashed_password: str
     ip_address: IPv4Address | None = None
     delete: bool = False

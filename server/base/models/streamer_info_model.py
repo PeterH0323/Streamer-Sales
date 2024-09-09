@@ -16,6 +16,7 @@ from sqlmodel import Field, SQLModel
 #                      数据库模型
 # =======================================================
 class StreamerInfo(SQLModel, table=True):
+    __tablename__ = 'streamer_info'
 
     streamer_id: int | None = Field(default=None, primary_key=True, unique=True)
     name: str = Field(index=True, unique=True)
@@ -31,4 +32,4 @@ class StreamerInfo(SQLModel, table=True):
 
     delete: bool = False
 
-    user_id: int | None = Field(default=None, foreign_key="userinfo.user_id")
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")

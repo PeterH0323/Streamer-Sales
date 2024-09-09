@@ -12,14 +12,26 @@
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 
 # =======================================================
 #                      数据库模型
 # =======================================================
+
+
+class ProductStreamRoomLink(SQLModel, table=True):
+    """商品 & 直播间多对多链接表"""
+    __tablename__ = "product_stream_room_link"
+
+    product_id: int | None = Field(default=None, foreign_key="product_info.product_id", primary_key=True)
+    room_id: int | None = Field(default=None, foreign_key="stream_room_info.room_id", primary_key=True)
+
+
 class ProductInfo(SQLModel, table=True):
     """商品信息"""
+
+    __tablename__ = "product_info"
 
     product_id: int | None = Field(default=None, primary_key=True, unique=True)
     product_name: str = Field(index=True, unique=True)
@@ -34,7 +46,8 @@ class ProductInfo(SQLModel, table=True):
     upload_date: datetime = datetime.now()
     delete: bool = False
 
-    user_id: int | None = Field(default=None, foreign_key="userinfo.user_id")
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
+    stream_room: list["StreamRoomInfo"] = Relationship(back_populates="product_list", link_model=ProductStreamRoomLink)
 
 
 # =======================================================
