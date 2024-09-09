@@ -16,7 +16,7 @@ from loguru import logger
 
 from ..database.llm_db import get_llm_product_prompt_base_info
 from ..database.product_db import get_db_product_info
-from ..database.streamer_info_db import get_db_steamer_info
+from ..database.streamer_info_db import get_db_streamer_info
 from ..models.llm_model import GenProductItem, GenSalesDocItem
 from ..modules.agent.agent_worker import get_agent_result
 from ..server_info import SERVER_PLUGINS_INFO
@@ -74,7 +74,7 @@ async def gen_poduct_base_prompt(user_id, streamer_id, product_id) -> List[Dict[
     product_info_struct_template = dataset_yaml["product_info_struct"]
 
     # 根据 ID 获取主播信息
-    streamer_info = await get_db_steamer_info(streamer_id)
+    streamer_info = await get_db_streamer_info(streamer_id)
     streamer_info = streamer_info[0]
 
     # 将销售角色名和角色信息插入到 system prompt
