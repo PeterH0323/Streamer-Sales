@@ -9,19 +9,15 @@
 @Desc    :   商品信息接口
 """
 
-from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends
-from loguru import logger
 
 from ...web_configs import WEB_CONFIGS
 from ..database.product_db import (
     create_or_update_db_product_by_id,
     delete_product_id,
     get_db_product_info,
-    get_product_max_id,
-    save_product_info,
 )
 from ..models.product_model import ProductInfo, ProductPageItem, ProductQueryItem
 from ..modules.rag.rag_worker import rebuild_rag_db
@@ -54,11 +50,10 @@ async def get_product_info_api(
 async def get_product_id_info_api(productId: int, user_id: int = Depends(get_current_user_info)):
     product_list, _ = await get_db_product_info(user_id=user_id, product_id=productId)
 
-    if product_list is None:
-        res_product = []
-    else:
-        res_product = product_list[0]
-    return make_return_data(True, ResultCode.SUCCESS, "成功", res_product)
+    if len(product_list) == 1:
+        product_list = product_list[0]
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", product_list)
 
 
 @router.post("/create", summary="新增商品接口")

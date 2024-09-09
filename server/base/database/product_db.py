@@ -16,7 +16,7 @@ from sqlalchemy import func
 from sqlmodel import Session, and_, select
 
 from ...web_configs import API_CONFIG
-from ..models.product_model import ProductInfo, ProductPageItem
+from ..models.product_model import ProductInfo
 from .init_db import DB_ENGINE
 
 
@@ -74,6 +74,10 @@ async def get_db_product_info(
             product_list = session.exec(
                 select(ProductInfo).where(query_condiction).offset(offset_idx).limit(page_size).order_by(ProductInfo.product_id)
             ).all()
+
+    if product_list is None:
+        logger.warning("nothing to find in db...")
+        product_list = []
 
     # 将路径换成服务器路径
     for product in product_list:
@@ -169,26 +173,7 @@ def create_or_update_db_product_by_id(product_id: int, new_info: ProductInfo, us
         else:
             # 新增，直接添加即可
             session.add(new_info)
+            instruction_updated = True
 
         session.commit()  # 提交
     return instruction_updated
-
-
-def save_product_info(new_product_info_dict: ProductInfo):
-    # TODO 删除
-    raise NotImplemented("using get_db_product_info instead")
-
-
-def get_product_max_id():
-    # TODO 删除
-    raise NotImplemented("using get_db_product_info instead")
-
-
-async def get_product_list(user_id, product_name="", id=-1) -> Tuple[List[ProductInfo], int]:
-    # TODO 删除
-    raise NotImplemented("using get_db_product_info instead")
-
-
-async def get_prduct_by_page(user_id, currentPage, pageSize, productName: str | None = None) -> ProductPageItem:
-    # TODO 删除
-    raise NotImplemented("using get_db_product_info instead")
