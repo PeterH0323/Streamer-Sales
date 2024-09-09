@@ -30,7 +30,7 @@ from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .database.init_db import DB_ENGINE
 from .models.product_model import ProductInfo
-from .models.streamer_info_model import StreamerInfoItem
+from .models.streamer_info_model import StreamerInfo
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -396,7 +396,7 @@ def gen_default_data():
     def create_default_streamer():
 
         with Session(DB_ENGINE) as session:
-            steamer_item = StreamerInfoItem(
+            steamer_item = StreamerInfo(
                 name="乐乐喵",
                 character="甜美;可爱;熟练使用各种网络热门梗造句;称呼客户为[家人们]",
                 avatar=f"/{WEB_CONFIGS.STREAMER_FILE_DIR}/{WEB_CONFIGS.STREAMER_INFO_FILES_DIR}/lelemiao.png",

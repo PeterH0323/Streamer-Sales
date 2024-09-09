@@ -16,11 +16,11 @@ from loguru import logger
 from sqlmodel import Session, and_, select
 
 from ...web_configs import API_CONFIG
-from ..models.streamer_info_model import StreamerInfoItem
+from ..models.streamer_info_model import StreamerInfo
 from .init_db import DB_ENGINE
 
 
-async def get_db_steamer_info(user_id: int, streamer_id: int | None = None) -> List[StreamerInfoItem] | None:
+async def get_db_steamer_info(user_id: int, streamer_id: int | None = None) -> List[StreamerInfo] | None:
     """查询数据库中的商品信息
 
     Args:
@@ -28,25 +28,25 @@ async def get_db_steamer_info(user_id: int, streamer_id: int | None = None) -> L
         streamer_id (int | None, optional): 主播 ID，用户获取特定主播信息. Defaults to None.
 
     Returns:
-        List[StreamerInfoItem] | StreamerInfoItem | None: 主播信息，如果获取全部则返回 list，如果获取单个则返回单个，如果查不到返回 None
+        List[StreamerInfo] | StreamerInfo | None: 主播信息，如果获取全部则返回 list，如果获取单个则返回单个，如果查不到返回 None
     """
 
     # 查询条件
-    query_condiction = and_(StreamerInfoItem.user_id == user_id, StreamerInfoItem.delete == False)
+    query_condiction = and_(StreamerInfo.user_id == user_id, StreamerInfo.delete == False)
 
     # 获取总数
     with Session(DB_ENGINE) as session:
         # 获得该用户所有主播的总数
-        # total_product_num = session.scalar(select(func.count(StreamerInfoItem.product_id)).where(query_condiction))
+        # total_product_num = session.scalar(select(func.count(StreamerInfo.product_id)).where(query_condiction))
 
         if streamer_id is not None:
             # 查询条件更改为查找特定 ID
             query_condiction = and_(
-                StreamerInfoItem.user_id == user_id, StreamerInfoItem.delete == False, StreamerInfoItem.streamer_id == streamer_id
+                StreamerInfo.user_id == user_id, StreamerInfo.delete == False, StreamerInfo.streamer_id == streamer_id
             )
 
         # 查询获取商品
-        steamer_list = session.exec(select(StreamerInfoItem).where(query_condiction).order_by(StreamerInfoItem.streamer_id)).all()
+        steamer_list = session.exec(select(StreamerInfo).where(query_condiction).order_by(StreamerInfo.streamer_id)).all()
 
     if steamer_list is None:
         logger.warning("nothing to find in db...")
@@ -83,8 +83,8 @@ async def delete_streamer_id(streamer_id: int, user_id: int) -> bool:
         with Session(DB_ENGINE) as session:
             # 查找特定 ID
             streamer_info = session.exec(
-                select(StreamerInfoItem).where(
-                    and_(StreamerInfoItem.streamer_id == streamer_id, StreamerInfoItem.user_id == user_id)
+                select(StreamerInfo).where(
+                    and_(StreamerInfo.streamer_id == streamer_id, StreamerInfo.user_id == user_id)
                 )
             ).one()
 
@@ -101,7 +101,7 @@ async def delete_streamer_id(streamer_id: int, user_id: int) -> bool:
     return delete_success
 
 
-def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfoItem, user_id: int) -> int:
+def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfo, user_id: int) -> int:
     """新增 or 编辑主播信息
 
     Args:
@@ -124,8 +124,8 @@ def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfoI
         if streamer_id > 0:
             # 更新特定 ID
             streamer_info = session.exec(
-                select(StreamerInfoItem).where(
-                    and_(StreamerInfoItem.streamer_id == streamer_id, StreamerInfoItem.user_id == user_id)
+                select(StreamerInfo).where(
+                    and_(StreamerInfo.streamer_id == streamer_id, StreamerInfo.user_id == user_id)
                 )
             ).one()
 
@@ -154,6 +154,6 @@ def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfoI
         return new_info.streamer_id
 
 
-async def get_streamers_info(user_id: int, stream_id: int = -1) -> List[StreamerInfoItem]:
+async def get_streamers_info(user_id: int, stream_id: int = -1) -> List[StreamerInfo]:
     # TODO 删除
     raise NotImplemented("Delete")

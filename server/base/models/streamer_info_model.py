@@ -15,7 +15,7 @@ from sqlmodel import Field, SQLModel
 # =======================================================
 #                      数据库模型
 # =======================================================
-class StreamerInfoItem(SQLModel, table=True):
+class StreamerInfo(SQLModel, table=True):
 
     streamer_id: int | None = Field(default=None, primary_key=True, unique=True)
     name: str = Field(index=True, unique=True)
