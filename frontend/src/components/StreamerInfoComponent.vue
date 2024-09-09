@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { nextTick, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { ElInput } from 'element-plus'
 import type { InputInstance } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -23,13 +23,16 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 // 性格操作
+modelSteamerInfo.value.character = ''
+const characterList = computed(() => modelSteamerInfo.value.character.split(';'))
 const inputCharacterValue = ref('')
 const inputCharacterVisible = ref(false)
 const InputCharacterRef = ref<InputInstance>()
 
 const handleCharacterClose = (tag: string) => {
   // 删除性格操作
-  modelSteamerInfo.value.character.splice(modelSteamerInfo.value.character.indexOf(tag), 1)
+  characterList.value.splice(characterList.value.indexOf(tag), 1)
+  modelSteamerInfo.value.character = characterList.value.join(';')
 }
 
 const showCharacterInput = () => {
@@ -41,7 +44,8 @@ const showCharacterInput = () => {
 
 const handleCharacterInputConfirm = () => {
   if (inputCharacterValue.value) {
-    modelSteamerInfo.value.character.push(inputCharacterValue.value)
+    characterList.value.push(inputCharacterValue.value)
+    modelSteamerInfo.value.character = characterList.value.join(';')
   }
   inputCharacterVisible.value = false
   inputCharacterValue.value = ''
@@ -66,7 +70,7 @@ const labelPosition = ref('top')
           >
             <el-option
               v-for="item in props.optionList"
-              :key="item.id"
+              :key="item.streamer_id"
               :label="item.name"
               :value="item"
             />
@@ -86,7 +90,7 @@ const labelPosition = ref('top')
             </el-form-item>
             <el-form-item label="主播性格">
               <el-tag
-                v-for="(characterItem, index) in modelSteamerInfo.character"
+                v-for="(characterItem, index) in characterList"
                 :key="index"
                 :closable="!props.disableChange"
                 :disable-transitions="false"

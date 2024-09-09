@@ -157,13 +157,3 @@ def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfoI
 async def get_streamers_info(user_id: int, stream_id: int = -1) -> List[StreamerInfoItem]:
     # TODO 删除
     raise NotImplemented("Delete")
-
-
-def get_max_streamer_id() -> int:
-    # TODO 删除
-    raise NotImplemented("Delete")
-
-
-def save_streamer_info(new_streamer_info: StreamerInfoItem):
-    # TODO 删除
-    raise NotImplemented("Delete")

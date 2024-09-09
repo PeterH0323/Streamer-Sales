@@ -29,9 +29,6 @@ from tqdm import tqdm
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .database.init_db import DB_ENGINE
-from .database.product_db import get_db_product_info, save_product_info
-from .database.streamer_info_db import get_streamers_info, save_streamer_info
-from .database.streamer_room_db import get_streaming_room_info, update_streaming_room_info
 from .models.product_model import ProductInfo
 from .models.streamer_info_model import StreamerInfoItem
 from .modules.agent.agent_worker import get_agent_result
@@ -290,59 +287,6 @@ def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
     return poster_save_path
 
 
-async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
-    """根据类型删除某个ID的信息"""
-    # TODO 删除
-    logger.info(delete_id)
-
-    assert item_type in ["product", "streamer", "room"]
-
-    get_func_map = {
-        "product": get_db_product_info,
-        "streamer": get_streamers_info,
-        "room": get_streaming_room_info,
-    }
-
-    save_func_map = {"product": save_product_info, "streamer": save_streamer_info, "room": update_streaming_room_info}
-
-    id_name_map = {
-        "product": "product_id",
-        "streamer": "id",
-        "room": "room_id",
-    }
-
-    item_list = await get_func_map[item_type](user_id)
-    logger.info(item_list)
-
-    process_success_flag = False
-
-    save_info = None
-    if item_type == "product":
-        for product_name, product_info in item_list.items():
-            if product_info[id_name_map[item_type]] != delete_id:
-                continue
-
-            item_list[product_name]["delete"] = True
-            item_list[product_name].update({"product_name": product_name})
-            save_info = item_list[product_name]
-            process_success_flag = True
-            break
-    else:
-        for idx, item in enumerate(item_list):
-            if item[id_name_map[item_type]] != delete_id:
-                continue
-
-            item_list[idx]["delete"] = True
-            save_info = item_list[idx]
-            process_success_flag = True
-            break
-
-    # 保存
-    save_func_map[item_type](save_info)
-
-    return process_success_flag
-
-
 @dataclass
 class ResultCode:
     SUCCESS: int = 0000  # 成功
@@ -468,3 +412,9 @@ def gen_default_data():
 
     create_default_product_item()  # 商品信息
     create_default_streamer()  # 主播信息
+
+
+async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
+    """根据类型删除某个ID的信息"""
+    # TODO 删除
+    raise NotImplemented("this func will be remove")
