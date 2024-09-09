@@ -4,10 +4,10 @@ import { header_authorization } from '@/api/user'
 interface StreamerInfo {
   user_id: number
 
-  id: number
+  streamer_id: number
   name: string
   value: string
-  character: string[]
+  character: string
   avatar: string
 
   tts_weight_tag: string
@@ -23,7 +23,7 @@ interface StreamerInfo {
 // 获取后端主播信息
 const streamerInfoListRequest = () => {
   return request_handler<ResultPackage<StreamerInfo[]>>({
-    method: 'POST',
+    method: 'GET',
     url: '/streamer/list',
     headers: {
       Authorization: header_authorization.value
@@ -33,12 +33,9 @@ const streamerInfoListRequest = () => {
 
 // 获取特定主播信息
 const streamerDetailInfoRequest = (streamerId: number) => {
-  return request_handler<ResultPackage<StreamerInfo[]>>({
+  return request_handler<ResultPackage<StreamerInfo>>({
     method: 'GET',
-    url: '/streamer/info',
-    params: {
-      streamerId
-    },
+    url: `/streamer/info/${streamerId}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -47,22 +44,33 @@ const streamerDetailInfoRequest = (streamerId: number) => {
 
 // 更新特定主播信息
 const streamerEditDetailRequest = async (streamerItem: StreamerInfo) => {
-  return request_handler<ResultPackage<number>>({
-    method: 'POST',
-    url: '/streamer/edit',
-    data: streamerItem,
-    headers: {
-      Authorization: header_authorization.value
-    }
-  })
+  if (streamerItem.streamer_id == 0) {
+    // 新建
+    return request_handler<ResultPackage<number>>({
+      method: 'POST',
+      url: '/streamer/create',
+      data: streamerItem,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  } else {
+    return request_handler<ResultPackage<number>>({
+      method: 'PUT',
+      url: `/streamer/edit/${streamerItem.streamer_id}`,
+      data: streamerItem,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  }
 }
 
 // 删除特定主播信息
-const deleteStreamerByIdRequest = (streamerId_: number) => {
+const deleteStreamerByIdRequest = (streamerId: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
-    url: '/streamer/delete',
-    data: { streamerId: streamerId_ },
+    method: 'DELETE',
+    url: `/streamer/delete/${streamerId}`,
     headers: {
       Authorization: header_authorization.value
     }
