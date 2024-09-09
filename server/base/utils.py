@@ -33,6 +33,7 @@ from .database.product_db import get_db_product_info, save_product_info
 from .database.streamer_info_db import get_streamers_info, save_streamer_info
 from .database.streamer_room_db import get_streaming_room_info, update_streaming_room_info
 from .models.product_model import ProductInfo
+from .models.streamer_info_model import StreamerInfoItem
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -291,7 +292,7 @@ def make_poster_by_video_first_frame(video_path: str, image_output_name: str):
 
 async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
     """根据类型删除某个ID的信息"""
-    #TODO 删除
+    # TODO 删除
     logger.info(delete_id)
 
     assert item_type in ["product", "streamer", "room"]
@@ -449,7 +450,21 @@ def gen_default_data():
         logger.info("created default product info done!")
 
     def create_default_streamer():
-        pass
+
+        with Session(DB_ENGINE) as session:
+            steamer_item = StreamerInfoItem(
+                name="乐乐喵",
+                character="甜美;可爱;熟练使用各种网络热门梗造句;称呼客户为[家人们]",
+                avatar=f"/{WEB_CONFIGS.STREAMER_FILE_DIR}/{WEB_CONFIGS.STREAMER_INFO_FILES_DIR}/lelemiao.png",
+                base_mp4_path=f"/{WEB_CONFIGS.STREAMER_FILE_DIR}/{WEB_CONFIGS.STREAMER_INFO_FILES_DIR}/lelemiao.mp4",
+                poster_image=f"/{WEB_CONFIGS.STREAMER_FILE_DIR}/{WEB_CONFIGS.STREAMER_INFO_FILES_DIR}/lelemiao.png",
+                tts_reference_audio=f"/{WEB_CONFIGS.STREAMER_FILE_DIR}/{WEB_CONFIGS.STREAMER_INFO_FILES_DIR}/lelemiao.wav",
+                tts_reference_sentence="列车巡游银河，我不一定都能帮上忙，但只要是花钱能解决的事，尽管和我说吧。",
+                tts_weight_tag="艾丝妲",
+                user_id=1,
+            )
+            session.add(steamer_item)
+            session.commit()
 
     create_default_product_item()  # 商品信息
     create_default_streamer()  # 主播信息

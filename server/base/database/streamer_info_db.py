@@ -11,82 +11,159 @@
 
 
 from typing import List
-import yaml
 
+from loguru import logger
+from sqlmodel import Session, and_, select
+
+from ...web_configs import API_CONFIG
 from ..models.streamer_info_model import StreamerInfoItem
-from ...web_configs import WEB_CONFIGS
+from .init_db import DB_ENGINE
+
+
+async def get_db_steamer_info(user_id: int, streamer_id: int | None = None) -> List[StreamerInfoItem] | None:
+    """查询数据库中的商品信息
+
+    Args:
+        user_id (int): 用户 ID
+        streamer_id (int | None, optional): 主播 ID，用户获取特定主播信息. Defaults to None.
+
+    Returns:
+        List[StreamerInfoItem] | StreamerInfoItem | None: 主播信息，如果获取全部则返回 list，如果获取单个则返回单个，如果查不到返回 None
+    """
+
+    # 查询条件
+    query_condiction = and_(StreamerInfoItem.user_id == user_id, StreamerInfoItem.delete == False)
+
+    # 获取总数
+    with Session(DB_ENGINE) as session:
+        # 获得该用户所有主播的总数
+        # total_product_num = session.scalar(select(func.count(StreamerInfoItem.product_id)).where(query_condiction))
+
+        if streamer_id is not None:
+            # 查询条件更改为查找特定 ID
+            query_condiction = and_(
+                StreamerInfoItem.user_id == user_id, StreamerInfoItem.delete == False, StreamerInfoItem.streamer_id == streamer_id
+            )
+
+        # 查询获取商品
+        steamer_list = session.exec(select(StreamerInfoItem).where(query_condiction).order_by(StreamerInfoItem.streamer_id)).all()
+
+    if steamer_list is None:
+        logger.warning("nothing to find in db...")
+        steamer_list = []
+
+    # 将路径换成服务器路径
+    for streamer in steamer_list:
+        streamer.avatar = API_CONFIG.REQUEST_FILES_URL + streamer.avatar
+        streamer.tts_reference_audio = API_CONFIG.REQUEST_FILES_URL + streamer.tts_reference_audio
+        streamer.poster_image = API_CONFIG.REQUEST_FILES_URL + streamer.poster_image
+        streamer.base_mp4_path = API_CONFIG.REQUEST_FILES_URL + streamer.base_mp4_path
+
+    logger.info(steamer_list)
+    logger.info(f"len {len(steamer_list)}")
+
+    return steamer_list
+
+
+async def delete_streamer_id(streamer_id: int, user_id: int) -> bool:
+    """删除特定的主播 ID
+
+    Args:
+        streamer_id (int): 主播 ID
+        user_id (int): 用户 ID，用于防止其他用户恶意删除
+
+    Returns:
+        bool: 是否删除成功
+    """
+
+    delete_success = True
+
+    try:
+        # 获取总数
+        with Session(DB_ENGINE) as session:
+            # 查找特定 ID
+            streamer_info = session.exec(
+                select(StreamerInfoItem).where(
+                    and_(StreamerInfoItem.streamer_id == streamer_id, StreamerInfoItem.user_id == user_id)
+                )
+            ).one()
+
+            if streamer_info is None:
+                logger.error("Delete by other ID !!!")
+                return False
+
+            streamer_info.delete = True  # 设置为删除
+            session.add(streamer_info)
+            session.commit()  # 提交
+    except Exception:
+        delete_success = False
+
+    return delete_success
+
+
+def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfoItem, user_id: int) -> int:
+    """新增 or 编辑主播信息
+
+    Args:
+        product_id (int): 商品 ID
+        new_info (ProductInfo): 新的信息
+        user_id (int): 用户 ID，用于防止其他用户恶意修改
+
+    Returns:
+        int: 主播 ID
+    """
+
+    # 去掉服务器地址
+    new_info.avatar = new_info.avatar.replace(API_CONFIG.REQUEST_FILES_URL, "")
+    new_info.tts_reference_audio = new_info.tts_reference_audio.replace(API_CONFIG.REQUEST_FILES_URL, "")
+    new_info.poster_image = new_info.poster_image.replace(API_CONFIG.REQUEST_FILES_URL, "")
+    new_info.base_mp4_path = new_info.base_mp4_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
+
+    with Session(DB_ENGINE) as session:
+
+        if streamer_id > 0:
+            # 更新特定 ID
+            streamer_info = session.exec(
+                select(StreamerInfoItem).where(
+                    and_(StreamerInfoItem.streamer_id == streamer_id, StreamerInfoItem.user_id == user_id)
+                )
+            ).one()
+
+            if streamer_info is None:
+                logger.error("Edit by other ID !!!")
+                return -1
+
+            # 更新对应的值
+            streamer_info.name = new_info.name
+            streamer_info.character = new_info.character
+            streamer_info.avatar = new_info.avatar
+            streamer_info.tts_weight_tag = new_info.tts_weight_tag
+            streamer_info.tts_reference_sentence = new_info.tts_reference_sentence
+            streamer_info.tts_reference_audio = new_info.tts_reference_audio
+            streamer_info.poster_image = new_info.poster_image
+            streamer_info.base_mp4_path = new_info.base_mp4_path
+
+            session.add(streamer_info)
+        else:
+            # 新增，直接添加即可
+            session.add(new_info)
+
+        session.commit()  # 提交
+        session.refresh(new_info)
+
+        return new_info.streamer_id
 
 
 async def get_streamers_info(user_id: int, stream_id: int = -1) -> List[StreamerInfoItem]:
-    # 加载数据库文件
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streamer_info = yaml.safe_load(f)
-
-    # 过滤掉 其他 ID 主播，并进一步过滤被删除的主播
-    filter_streamer_list = []
-    for streamer in streamer_info:
-
-        # 过滤 ID
-        if streamer["user_id"] != user_id:
-            continue
-
-        # 过滤删除的
-        if streamer["delete"]:
-            continue
-
-        if stream_id > 0 and streamer["id"] == stream_id:
-            # 根据 ID 获取，直接返回
-            return [streamer]
-        else:
-            # 全部获取
-            filter_streamer_list.append(streamer)
-
-    return filter_streamer_list
+    # TODO 删除
+    raise NotImplemented("Delete")
 
 
 def get_max_streamer_id() -> int:
-    """获取目前数据库中最大的 ID
-
-    Returns:
-        int: 最大 ID
-    """
-
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streamer_info = yaml.safe_load(f)
-
-    max_streamer_id = -1
-    for item in streamer_info:
-        max_streamer_id = max(item["id"], max_streamer_id)
-
-    return max_streamer_id
+    # TODO 删除
+    raise NotImplemented("Delete")
 
 
 def save_streamer_info(new_streamer_info: StreamerInfoItem):
-    """更新 or 新增数据库信息
-
-    Args:
-        new_streamer_info (StreamerInfoItem): 新的主播信息，如果 ID 匹配则更新，如果不匹配现有的则更新
-    """
-
-    new_streamer_info = dict(new_streamer_info)
-
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "r", encoding="utf-8") as f:
-        all_streamer_info_list = yaml.safe_load(f)
-
-    # 根据 ID 进行匹配
-    match_indx = -1
-    for idx, sreamer in enumerate(all_streamer_info_list):
-
-        if sreamer["id"] == new_streamer_info["id"]:
-            # 匹配成功则更新
-            all_streamer_info_list[idx] = dict(new_streamer_info)
-            match_indx = idx
-            break
-
-    # 匹配不成功，直接加入
-    if match_indx < 0:
-        all_streamer_info_list.append(dict(new_streamer_info))
-
-    # 保存
-    with open(WEB_CONFIGS.STREAMER_CONFIG_PATH, "w", encoding="utf-8") as f:
-        yaml.dump(all_streamer_info_list, f, allow_unicode=True)
+    # TODO 删除
+    raise NotImplemented("Delete")
