@@ -44,9 +44,7 @@ async def get_db_streaming_room_info(user_id: int, room_id: int | None = None) -
             )
 
         # 查询获取直播间信息
-        stream_room_list = session.exec(
-            select(StreamRoomInfo).where(query_condiction).order_by(StreamRoomInfo.room_id)
-        ).all()
+        stream_room_list = session.exec(select(StreamRoomInfo).where(query_condiction).order_by(StreamRoomInfo.room_id)).all()
 
     if stream_room_list is None:
         logger.warning("nothing to find in db...")
@@ -65,12 +63,48 @@ async def get_db_streaming_room_info(user_id: int, room_id: int | None = None) -
         # 商品信息
         for idx, product in enumerate(stream_room.product_list):
             stream_room.product_list[idx].product_info.image_path = API_CONFIG.REQUEST_FILES_URL + product.product_info.image_path
-            stream_room.product_list[idx].product_info.instruction = API_CONFIG.REQUEST_FILES_URL + product.product_info.instruction
+            stream_room.product_list[idx].product_info.instruction = (
+                API_CONFIG.REQUEST_FILES_URL + product.product_info.instruction
+            )
 
     logger.info(stream_room_list)
     logger.info(f"len {len(stream_room_list)}")
 
     return stream_room_list
+
+
+async def delete_room_id(room_id: int, user_id: int) -> bool:
+    """删除特定的主播间 ID
+
+    Args:
+        room_id (int): 直播间 ID
+        user_id (int): 用户 ID，用于防止其他用户恶意删除
+
+    Returns:
+        bool: 是否删除成功
+    """
+
+    delete_success = True
+
+    try:
+        # 获取总数
+        with Session(DB_ENGINE) as session:
+            # 查找特定 ID
+            room_info = session.exec(
+                select(StreamRoomInfo).where(and_(StreamRoomInfo.room_id == room_id, StreamRoomInfo.user_id == user_id))
+            ).one()
+
+            if room_info is None:
+                logger.error("Delete by other ID !!!")
+                return False
+
+            room_info.delete = True  # 设置为删除
+            session.add(room_info)
+            session.commit()  # 提交
+    except Exception:
+        delete_success = False
+
+    return delete_success
 
 
 def update_streaming_room_info(new_info):

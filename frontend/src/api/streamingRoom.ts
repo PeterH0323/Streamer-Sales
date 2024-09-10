@@ -162,11 +162,10 @@ const onAirRoomNextProductRequest = async (roomId_: number) => {
 }
 
 // 删除特定直播间信息
-const deleteStreamingRoomByIdRequest = (roomId_: number) => {
+const deleteStreamingRoomByIdRequest = (roomId: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
-    url: '/streaming-room/delete',
-    data: { roomId: roomId_ },
+    method: 'DELETE',
+    url: `/streaming-room/delete/${roomId}`,
     headers: {
       Authorization: header_authorization.value
     }

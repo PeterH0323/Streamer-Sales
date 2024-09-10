@@ -21,6 +21,7 @@ from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..database.product_db import get_db_product_info
 from ..database.streamer_info_db import get_streamers_info
 from ..database.streamer_room_db import (
+    delete_room_id,
     get_conversation_list,
     get_db_streaming_room_info,
     update_conversation_message_info,
@@ -33,7 +34,6 @@ from ..models.streamer_room_model import (
     OnAirRoomStatusItem,
     RoomChatItem,
     RoomProductListItem,
-    StreamRoomDetailItem,
     StreamRoomInfo,
     StreamRoomProductDatabaseItem,
     StreamRoomProductItem,
@@ -41,7 +41,7 @@ from ..models.streamer_room_model import (
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..routers.users import get_current_user_info
 from ..server_info import SERVER_PLUGINS_INFO
-from ..utils import ResultCode, delete_item_by_id, make_return_data
+from ..utils import ResultCode, make_return_data
 from .digital_human import gen_tts_and_digital_human_video_app
 from .llm import combine_history, gen_poduct_base_prompt, get_agent_res, get_llm_res
 
@@ -82,11 +82,22 @@ async def get_streaming_room_api(
         for db_product in streaming_room_list[0].product_list:
             format_product_list.append(dict(db_product))
         streaming_room_list = dict(streaming_room_list[0])
-        streaming_room_list['product_list'] = format_product_list
+        streaming_room_list["product_list"] = format_product_list
     else:
         streaming_room_list = []
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", streaming_room_list)
+
+
+@router.delete("/delete/{roomId}", summary="删除直播间接口")
+async def upload_product_api(roomId: int, user_id: int = Depends(get_current_user_info)):
+
+    process_success_flag = await delete_room_id(roomId, user_id)
+
+    if not process_success_flag:
+        return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
 @router.post("/product-add", summary="直播间编辑or添加商品接口")
@@ -418,17 +429,6 @@ async def on_air_live_room_next_product_api(room_info: RoomProductListItem, user
     res_data = await get_or_init_conversation(user_id, room_info.roomId, next_product=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
-
-
-@router.post("/delete", summary="删除直播间接口")
-async def upload_product_api(delete_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
-
-    process_success_flag = await delete_item_by_id("room", delete_info.roomId, user_id)
-
-    if not process_success_flag:
-        return make_return_data(False, ResultCode.FAIL, "失败", "")
-
-    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
 @router.post("/offline", summary="直播间下播接口")

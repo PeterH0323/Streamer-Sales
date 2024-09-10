@@ -32,6 +32,7 @@ from .database.init_db import DB_ENGINE
 from .models.product_model import ProductInfo
 from .models.streamer_info_model import StreamerInfo
 from .models.streamer_room_model import OnAirRoomStatusItem, SalesDocAndVideoInfo, StreamRoomInfo
+
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -444,9 +445,3 @@ def gen_default_data():
     create_default_product_item()  # 商品信息
     create_default_streamer()  # 主播信息
     create_default_room()  # 直播间信息
-
-
-async def delete_item_by_id(item_type: str, delete_id: int, user_id: int = 0):
-    """根据类型删除某个ID的信息"""
-    # TODO 删除
-    raise NotImplemented("this func will be remove")
