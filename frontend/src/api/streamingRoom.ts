@@ -2,8 +2,9 @@ import { request_handler, type ResultPackage } from '@/api/base'
 import type { StreamerInfo, ProductItem } from '@/api/product'
 import { header_authorization } from '@/api/user'
 
-interface StreamingRoomProductList extends ProductItem {
+interface StreamingRoomProductList {
   product_id: number
+  product_info: ProductItem
   start_time: string
   sales_doc: string
   start_video: string
@@ -80,7 +81,7 @@ interface RoomDetailItem {
 // 获取后端主播信息
 const streamerRoomListRequest = () => {
   return request_handler<ResultPackage<StreamingRoomInfo[]>>({
-    method: 'POST',
+    method: 'GET',
     url: '/streaming-room/list',
     headers: {
       Authorization: header_authorization.value
@@ -91,9 +92,9 @@ const streamerRoomListRequest = () => {
 // 获取特定直播间的详情
 const roomDetailRequest = (roomId_: string, currentPage_: number, pageSize_: number) => {
   return request_handler<ResultPackage<RoomDetailItem>>({
-    method: 'POST',
-    url: '/streaming-room/detail',
-    data: { roomId: roomId_, currentPage: currentPage_, pageSize: pageSize_ },
+    method: 'GET',
+    url: `/streaming-room/info/${roomId_}`,
+    params: { currentPage: currentPage_, pageSize: pageSize_ },
     headers: {
       Authorization: header_authorization.value
     }

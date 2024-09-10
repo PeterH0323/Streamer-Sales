@@ -9,14 +9,15 @@
 @Desc    :   主播信息数据结构
 """
 
-from sqlmodel import Field, SQLModel
+from typing import Optional
+from sqlmodel import Field, Relationship, SQLModel
 
 
 # =======================================================
 #                      数据库模型
 # =======================================================
 class StreamerInfo(SQLModel, table=True):
-    __tablename__ = 'streamer_info'
+    __tablename__ = "streamer_info"
 
     streamer_id: int | None = Field(default=None, primary_key=True, unique=True)
     name: str = Field(index=True, unique=True)
@@ -33,3 +34,7 @@ class StreamerInfo(SQLModel, table=True):
     delete: bool = False
 
     user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
+
+    room_info: Optional["StreamRoomInfo"] | None = Relationship(
+        back_populates="streamer_info", sa_relationship_kwargs={"lazy": "selectin"}
+    )

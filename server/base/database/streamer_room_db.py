@@ -11,47 +11,66 @@
 
 
 from typing import List
+
 import yaml
+from loguru import logger
+from sqlmodel import Session, and_, select
 
-from ..models.streamer_room_model import OnAirRoomStatusItem, StreamRoomInfoDatabaseItem
+from ...web_configs import API_CONFIG, WEB_CONFIGS
+from ..models.streamer_room_model import StreamRoomInfo
+from .init_db import DB_ENGINE
 
-from ...web_configs import WEB_CONFIGS
 
+async def get_db_streaming_room_info(user_id: int, room_id: int | None = None) -> List[StreamRoomInfo] | None:
+    """查询数据库中的商品信息
 
-async def get_streaming_room_info(user_id, id=-1) -> List[StreamRoomInfoDatabaseItem] | StreamRoomInfoDatabaseItem:
-    # 加载直播间数据
-    with open(WEB_CONFIGS.STREAMING_ROOM_CONFIG_PATH, "r", encoding="utf-8") as f:
-        streaming_room_info = yaml.safe_load(f)
+    Args:
+        user_id (int): 用户 ID
+        streamer_id (int | None, optional): 主播 ID，用户获取特定主播信息. Defaults to None.
 
-    if streaming_room_info is None:
-        empty_info = dict(StreamRoomInfoDatabaseItem(status=dict(OnAirRoomStatusItem())))
-        if id == 0:
-            return empty_info
-        else:
-            # 想获取所有，需要返回一个 list
-            return [empty_info]
+    Returns:
+        List[StreamRoomInfo] | None: 直播间信息
+    """
 
-    filter_list = []
-    for room in streaming_room_info:
+    # 查询条件
+    query_condiction = and_(StreamRoomInfo.user_id == user_id, StreamRoomInfo.delete == False)
 
-        # 过滤 ID
-        if room["user_id"] != user_id:
-            continue
+    # 获取总数
+    with Session(DB_ENGINE) as session:
+        if room_id is not None:
+            # 查询条件更改为查找特定 ID
+            query_condiction = and_(
+                StreamRoomInfo.user_id == user_id, StreamRoomInfo.delete == False, StreamRoomInfo.room_id == room_id
+            )
 
-        if room["delete"]:
-            continue
+        # 查询获取直播间信息
+        stream_room_list = session.exec(
+            select(StreamRoomInfo).where(query_condiction).order_by(StreamRoomInfo.room_id)
+        ).all()
 
-        if room["room_id"] == id:
-            # 选择特定的直播间
-            return room
+    if stream_room_list is None:
+        logger.warning("nothing to find in db...")
+        stream_room_list = []
 
-        filter_list.append(room)
+    # 将路径换成服务器路径
+    for stream_room in stream_room_list:
+        # 主播信息
+        stream_room.streamer_info.avatar = API_CONFIG.REQUEST_FILES_URL + stream_room.streamer_info.avatar
+        stream_room.streamer_info.tts_reference_audio = (
+            API_CONFIG.REQUEST_FILES_URL + stream_room.streamer_info.tts_reference_audio
+        )
+        stream_room.streamer_info.poster_image = API_CONFIG.REQUEST_FILES_URL + stream_room.streamer_info.poster_image
+        stream_room.streamer_info.base_mp4_path = API_CONFIG.REQUEST_FILES_URL + stream_room.streamer_info.base_mp4_path
 
-    if id <= 0:
-        # 全部返回
-        return filter_list
+        # 商品信息
+        for idx, product in enumerate(stream_room.product_list):
+            stream_room.product_list[idx].product_info.image_path = API_CONFIG.REQUEST_FILES_URL + product.product_info.image_path
+            stream_room.product_list[idx].product_info.instruction = API_CONFIG.REQUEST_FILES_URL + product.product_info.instruction
 
-    return []
+    logger.info(stream_room_list)
+    logger.info(f"len {len(stream_room_list)}")
+
+    return stream_room_list
 
 
 def update_streaming_room_info(new_info):

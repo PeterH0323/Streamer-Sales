@@ -20,14 +20,6 @@ from sqlmodel import Field, Relationship, SQLModel
 # =======================================================
 
 
-class ProductStreamRoomLink(SQLModel, table=True):
-    """商品 & 直播间多对多链接表"""
-    __tablename__ = "product_stream_room_link"
-
-    product_id: int | None = Field(default=None, foreign_key="product_info.product_id", primary_key=True)
-    room_id: int | None = Field(default=None, foreign_key="stream_room_info.room_id", primary_key=True)
-
-
 class ProductInfo(SQLModel, table=True):
     """商品信息"""
 
@@ -47,7 +39,8 @@ class ProductInfo(SQLModel, table=True):
     delete: bool = False
 
     user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
-    stream_room: list["StreamRoomInfo"] = Relationship(back_populates="product_list", link_model=ProductStreamRoomLink)
+
+    sales_info: list["SalesDocAndVideoInfo"] = Relationship(back_populates="product_info")
 
 
 # =======================================================
@@ -63,7 +56,5 @@ class ProductPageItem(PageItem):
     product_list: List[ProductInfo] = []
 
 
-class ProductQueryItem(PageItem):
-    productName: str = ""  # 商品名，用于指定查询
-    productId: str = "-1"  # 商品ID，用于指定查询
+class ProductQueryItem(BaseModel):
     instructionPath: str = ""  # 商品说明书路径，用于获取说明书内容

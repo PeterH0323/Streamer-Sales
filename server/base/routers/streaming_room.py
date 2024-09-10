@@ -18,14 +18,15 @@ from fastapi import APIRouter, Depends
 from loguru import logger
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
+from ..database.product_db import get_db_product_info
 from ..database.streamer_info_db import get_streamers_info
 from ..database.streamer_room_db import (
     get_conversation_list,
-    get_streaming_room_info,
+    get_db_streaming_room_info,
     update_conversation_message_info,
     update_streaming_room_info,
 )
-from ..database.user_db import get_user_info
+from ..database.user_db import get_db_user_info
 from ..models.product_model import ProductPageItem
 from ..models.streamer_room_model import (
     MessageItem,
@@ -33,8 +34,7 @@ from ..models.streamer_room_model import (
     RoomChatItem,
     RoomProductListItem,
     StreamRoomDetailItem,
-    StreamRoomInfoDatabaseItem,
-    StreamRoomInfoReponseItem,
+    StreamRoomInfo,
     StreamRoomProductDatabaseItem,
     StreamRoomProductItem,
 )
@@ -44,7 +44,6 @@ from ..server_info import SERVER_PLUGINS_INFO
 from ..utils import ResultCode, delete_item_by_id, make_return_data
 from .digital_human import gen_tts_and_digital_human_video_app
 from .llm import combine_history, gen_poduct_base_prompt, get_agent_res, get_llm_res
-from .products import get_prduct_by_page, get_product_list
 
 router = APIRouter(
     prefix="/streaming-room",
@@ -53,100 +52,41 @@ router = APIRouter(
 )
 
 
-@router.post("/list", summary="获取所有直播间信息接口")
+@router.get("/list", summary="获取所有直播间信息接口")
 async def get_streaming_room_api(user_id: int = Depends(get_current_user_info)):
     """获取所有直播间信息"""
     # 加载直播间数据
-    streaming_room_list = await get_streaming_room_info(user_id)
+    streaming_room_list = await get_db_streaming_room_info(user_id)
 
-    if len(streaming_room_list) == 1 and streaming_room_list[0]["room_id"] == 0:
-        # 返回的是初始化信息，证明没有直播间
-        streaming_room_list = []
+    for i in range(len(streaming_room_list)):
+        # 直接返回会导致字段丢失，需要转 dict 确保返回值里面有该字段
+        streaming_room_list[i] = dict(streaming_room_list[i])
 
-    logger.info(streaming_room_list)
-
-    # 加载到返回数据格式
-    res_room_list = [StreamRoomInfoReponseItem(**(info)) for info in streaming_room_list]
-
-    for room in res_room_list:
-        # 因为数据库中保存的是 主播 ID ，需要查库拿到 主播信息
-        streamer_info = await get_streamers_info(user_id, room.streamer_id)
-        room.streamer_info = streamer_info[0]
-
-    logger.info(res_room_list)
-    return make_return_data(True, ResultCode.SUCCESS, "成功", res_room_list)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", streaming_room_list)
 
 
-@router.post("/detail", summary="获取特定直播间信息接口")
-async def get_streaming_room_api(room_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
+@router.get("/info/{roomId}", summary="获取特定直播间信息接口")
+async def get_streaming_room_api(
+    roomId: int, currentPage: int = 1, pageSize: int = 5, user_id: int = Depends(get_current_user_info)
+):
     """获取特定直播间信息"""
     # 加载直播间配置文件
-    if room_info.roomId == 0:
-        streaming_room_info = dict(StreamRoomInfoDatabaseItem(status=dict(OnAirRoomStatusItem())))
+    assert roomId != 0
+
+    # 加载直播间数据
+    streaming_room_list = await get_db_streaming_room_info(user_id, room_id=roomId)
+
+    if len(streaming_room_list) == 1:
+        # 直接返回会导致字段丢失，需要转 dict 确保返回值里面有该字段
+        format_product_list = []
+        for db_product in streaming_room_list[0].product_list:
+            format_product_list.append(dict(db_product))
+        streaming_room_list = dict(streaming_room_list[0])
+        streaming_room_list['product_list'] = format_product_list
     else:
-        streaming_room_info = await get_streaming_room_info(user_id, room_info.roomId)
+        streaming_room_list = []
 
-    # 将直播间的商品 ID 进行提取，后续作为 选中 id
-    selected_id = dict()
-    for room_item in streaming_room_info["product_list"]:
-        selected_id.update({room_item["product_id"]: room_item})
-
-    product_list, _ = await get_product_list(user_id)
-
-    filter_list = []
-    for product in product_list:
-        if product["product_id"] not in selected_id.keys():
-            continue
-
-        # 更新信息详情
-        for k, v in selected_id[product["product_id"]].items():
-            if k == "product_id":
-                continue
-            product.update({k: v})
-        product.update({"selected": True})
-        filter_list.append(product)
-
-    total_size = len(filter_list)
-
-    # 分页
-    end_index = room_info.currentPage * room_info.pageSize
-    start_index = (room_info.currentPage - 1) * room_info.pageSize
-    logger.info(f"start_index = {start_index}")
-    logger.info(f"end_index = {end_index}")
-
-    if start_index == 0 and end_index > len(filter_list):
-        # 单页数量超过商品数，直接返回
-        pass
-    elif end_index > total_size:
-        filter_list = filter_list[start_index:]
-    else:
-        filter_list = filter_list[start_index:end_index]
-
-    # 主播信息
-    streamer_list = await get_streamers_info(user_id)
-    streamer_info = dict()
-    for i in streamer_list:
-        if i["id"] == streaming_room_info["streamer_id"]:
-            streamer_info = i
-            break
-
-    res_data = StreamRoomDetailItem(
-        streamer_info=streamer_info,
-        product_list=filter_list,
-        currentPage=room_info.currentPage,
-        pageSize=room_info.pageSize,
-        totalSize=total_size,
-        room_id=room_info.roomId,
-        name=streaming_room_info["name"],
-        room_poster=streaming_room_info["room_poster"],
-        streamer_id=streaming_room_info["streamer_id"],
-        background_image=streaming_room_info["background_image"],
-        prohibited_words_id=streaming_room_info["prohibited_words_id"],
-        status=streaming_room_info["status"],
-    )
-
-    logger.info(res_data)
-    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", streaming_room_list)
 
 
 @router.post("/product-add", summary="直播间编辑or添加商品接口")
@@ -157,17 +97,17 @@ async def get_streaming_room_api(room_info: RoomProductListItem, user_id: int = 
     # 加载对话配置文件
     if room_info.roomId == 0:
         # 新的直播间
-        streaming_room_info = dict(StreamRoomInfoDatabaseItem())
+        streaming_room_info = dict(StreamRoomInfo())
         streaming_room_info["product_list"] = []
     else:
-        streaming_room_info = await get_streaming_room_info(user_id, room_info.roomId)
+        streaming_room_info = await get_db_streaming_room_info(user_id, room_info.roomId)
 
     if room_info.pageSize > 0:
         # 按页返回
-        page_info = await get_prduct_by_page(user_id, room_info.currentPage, room_info.pageSize)
+        page_info = await get_db_product_info(user_id, room_info.currentPage, room_info.pageSize)
     else:
         # 全部返回
-        product_list, db_product_size = await get_product_list(user_id)
+        product_list, db_product_size = await get_db_product_info(user_id)
         page_info = dict(
             ProductPageItem(
                 product_list=product_list,
@@ -216,15 +156,15 @@ async def get_streaming_room_api(room_info: RoomProductListItem, user_id: int = 
 
 
 @router.post("/edit/form", summary="新增 or 编辑直播间接口")
-async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id: int = Depends(get_current_user_info)):
+async def streaming_room_edit_api(edit_item: StreamRoomInfo, user_id: int = Depends(get_current_user_info)):
     """新增 or 编辑直播间接口
 
     Args:
-        edit_item (StreamRoomInfoReponseItem): _description_
+        edit_item (StreamRoomInfo): _description_
     """
     logger.info(f"get room id = {edit_item.room_id}")
 
-    new_info = StreamRoomInfoDatabaseItem(
+    new_info = StreamRoomInfo(
         user_id=user_id,
         streamer_id=edit_item.streamer_id,
         name=edit_item.name,
@@ -254,7 +194,7 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
         new_info.status = edit_item.status  # 直播间状态
 
     # 新建
-    streaming_room_info = await get_streaming_room_info(user_id)
+    streaming_room_info = await get_db_streaming_room_info(user_id)
     max_room_id = 0
     update_index = -1
     for idx, item in enumerate(streaming_room_info):
@@ -290,14 +230,14 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfoReponseItem, user_id:
 
 @router.post("/chat", summary="直播间开播对话接口")
 async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
-    streaming_room_info = await get_streaming_room_info(user_id, room_chat.roomId)
+    streaming_room_info = await get_db_streaming_room_info(user_id, room_chat.roomId)
 
     # 获取直播间对话
     conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
     assert len(conversation_list) > 0
 
     # 获取用户信息
-    user_info = await get_user_info(user_id)
+    user_info = await get_db_user_info(user_id)
 
     user_msg = MessageItem(
         role="user",
@@ -312,7 +252,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     # 获取商品信息
     prodcut_index = streaming_room_info["status"]["current_product_index"]
     product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_product_list(user_id, id=int(product_info["product_id"]))
+    product_list, _ = await get_db_product_info(user_id, id=int(product_info["product_id"]))
     product_detail = product_list[0]
 
     # 根据对话记录生成 prompt
@@ -369,7 +309,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
 
 async def get_or_init_conversation(user_id, room_id: int, next_product=False):
     # 根据直播间 ID 获取信息
-    streaming_room_info = await get_streaming_room_info(user_id, room_id)
+    streaming_room_info = await get_db_streaming_room_info(user_id, room_id)
     logger.info(streaming_room_info)
 
     # 根据 ID 获取主播信息
@@ -385,7 +325,7 @@ async def get_or_init_conversation(user_id, room_id: int, next_product=False):
 
     assert prodcut_index >= 0
     product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_product_list(user_id, id=int(product_info["product_id"]))
+    product_list, _ = await get_db_product_info(user_id, id=int(product_info["product_id"]))
 
     # 是否为最后的商品
     if len(streaming_room_info["product_list"]) - 1 == prodcut_index:
@@ -494,7 +434,7 @@ async def upload_product_api(delete_info: RoomProductListItem, user_id: int = De
 @router.post("/offline", summary="直播间下播接口")
 async def offline_api(delete_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
     # 根据直播间 ID 获取信息
-    streaming_room_info = await get_streaming_room_info(user_id, delete_info.roomId)
+    streaming_room_info = await get_db_streaming_room_info(user_id, delete_info.roomId)
     logger.info(streaming_room_info)
 
     streaming_room_info["status"]["live_status"] = 2  # 标志为下播

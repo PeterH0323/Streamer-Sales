@@ -31,7 +31,7 @@ from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .database.init_db import DB_ENGINE
 from .models.product_model import ProductInfo
 from .models.streamer_info_model import StreamerInfo
-from .models.streamer_room_model import OnAirRoomStatusItem, StreamRoomInfo
+from .models.streamer_room_model import OnAirRoomStatusItem, SalesDocAndVideoInfo, StreamRoomInfo
 from .modules.agent.agent_worker import get_agent_result
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
@@ -426,13 +426,20 @@ def gen_default_data():
 
             stream_item = StreamRoomInfo(
                 name="001",
-                product_list=random.choices(product_list, k=3),
                 user_id=1,
                 status_id=on_air_status.status_id,
                 streamer_id=1,
             )
             session.add(stream_item)
             session.commit()
+            session.refresh(stream_item)
+
+            random_list = random.choices(product_list, k=3)
+            for product_random in random_list:
+                add_sales_info = SalesDocAndVideoInfo(product_id=product_random.product_id, room_id=stream_item.room_id)
+                session.add(add_sales_info)
+                session.commit()
+                session.refresh(add_sales_info)
 
     create_default_product_item()  # 商品信息
     create_default_streamer()  # 主播信息

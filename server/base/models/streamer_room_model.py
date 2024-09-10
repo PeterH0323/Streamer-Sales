@@ -9,18 +9,19 @@
 @Desc    :   直播间信息数据结构定义
 """
 
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
 
 from sqlmodel import Field, Relationship, SQLModel
 
-from ..models.product_model import ProductInfo, ProductPageItem, ProductStreamRoomLink
+from ..models.product_model import ProductInfo
 
 from ..models.streamer_info_model import StreamerInfo
 
 
 class RoomProductListItem(BaseModel):
+    # TODO 删除
     roomId: int
     currentPage: int = 1
     pageSize: int = 10
@@ -47,6 +48,7 @@ class MessageItem(BaseModel):
 class StreamRoomProductDatabaseItem(BaseModel):
     """直播间商品信息，数据库保存时的数据结构"""
 
+    # TODO 删除
     product_id: int = 0
     sales_doc: str = ""
     start_time: str = ""
@@ -57,27 +59,6 @@ class StreamRoomProductDatabaseItem(BaseModel):
 # =======================================================
 #                      数据库模型
 # =======================================================
-
-
-class StreamRoomInfo(SQLModel, table=True):
-    """直播间信息，数据库保存时的数据结构"""
-
-    __tablename__ = "stream_room_info"
-
-    room_id: int | None = Field(default=None, primary_key=True, unique=True)  # 直播间 ID
-
-    name: str = ""  # 直播间名字
-    product_list: list[ProductInfo] = Relationship(back_populates="stream_room", link_model=ProductStreamRoomLink)  # 商品列表
-
-    prohibited_words_id: int = 0  # 违禁词表 ID
-    room_poster: str = ""  # 海报图
-    background_image: str = ""  # 主播背景图
-
-    delete: bool = False  # 是否删除
-
-    status_id: int | None = Field(default=None, foreign_key="on_air_room_status_item.status_id")
-    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
-    streamer_id: int | None = Field(default=None, foreign_key="streamer_info.streamer_id")  # 主播 ID
 
 
 class OnAirRoomStatusItem(SQLModel, table=True):
@@ -96,13 +77,56 @@ class OnAirRoomStatusItem(SQLModel, table=True):
     live_status: int = 0  # 直播间状态 0 未开播，1 正在直播，2 下播了
     start_time: datetime | None = None  # 直播开始时间
 
+    room_info: Optional["StreamRoomInfo"] | None = Relationship(
+        back_populates="status", sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
+
+class SalesDocAndVideoInfo(SQLModel, table=True):
+    """直播间 文案 和 数字人介绍视频数据结构"""
+
+    __tablename__ = "sales_doc_and_video_info"
+
+    sales_info_id: int | None = Field(default=None, primary_key=True, unique=True)
+
+    sales_doc: str = ""
+    start_time: str = ""
+    start_video: str = ""
+    selected: bool = True
+
+    product_id: int | None = Field(default=None, foreign_key="product_info.product_id")
+    product_info: ProductInfo | None = Relationship(back_populates="sales_info", sa_relationship_kwargs={"lazy": "selectin"})
+
+    room_id: int | None = Field(default=None, foreign_key="stream_room_info.room_id")
+    stream_room: Optional["StreamRoomInfo"] | None = Relationship(back_populates="product_list")
+
+
+class StreamRoomInfo(SQLModel, table=True):
+    """直播间信息，数据库保存时的数据结构"""
+
+    __tablename__ = "stream_room_info"
+
+    room_id: int | None = Field(default=None, primary_key=True, unique=True)  # 直播间 ID
+
+    name: str = ""  # 直播间名字
+
+    product_list: list[SalesDocAndVideoInfo] = Relationship(
+        back_populates="stream_room", sa_relationship_kwargs={"lazy": "selectin"}
+    )  # 商品列表
+
+    prohibited_words_id: int = 0  # 违禁词表 ID
+    room_poster: str = ""  # 海报图
+    background_image: str = ""  # 主播背景图
+
+    delete: bool = False  # 是否删除
+
+    status_id: int | None = Field(default=None, foreign_key="on_air_room_status_item.status_id")
+    status: OnAirRoomStatusItem | None = Relationship(back_populates="room_info", sa_relationship_kwargs={"lazy": "selectin"})
+
+    streamer_id: int | None = Field(default=None, foreign_key="streamer_info.streamer_id")  # 主播 ID
+    streamer_info: StreamerInfo | None = Relationship(back_populates="room_info", sa_relationship_kwargs={"lazy": "selectin"})
+
     user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
-
-
-class StreamRoomInfoReponseItem(BaseModel):  # StreamRoomInfo):
-    """直播间接口返回的数据结构，继承自 StreamRoomInfo"""
-
-    streamer_info: StreamerInfo = {}
 
 
 class StreamRoomProductItem(BaseModel):  # StreamRoomInfo, ProductInfo):

@@ -80,7 +80,7 @@ const getProductInfo = async () => {
 // 获取商品表格信息
 const RoomDetailInfo = ref({} as RoomDetailItem)
 RoomDetailInfo.value.streamer_info = {} as StreamerInfo
-RoomDetailInfo.value.streamer_info.id = 0
+RoomDetailInfo.value.streamer_info.streamer_id = 0
 RoomDetailInfo.value.pageSize = 10
 RoomDetailInfo.value.room_id = Number(props.roomId)
 RoomDetailInfo.value.product_list = [] as StreamingRoomProductList[]
@@ -268,15 +268,15 @@ const handelControlClick = (
                     <el-col :span="6">
                       <el-image
                         style="width: 80px; height: 80px"
-                        :src="item.image_path"
+                        :src="item.product_info.image_path"
                         fit="contain"
                       />
                     </el-col>
                     <el-col :span="18">
                       <div class="product-info">
-                        <p class="title">{{ item.product_name }}</p>
-                        <p class="content">{{ item.heighlights }}</p>
-                        <p class="price">￥{{ item.selling_price }}</p>
+                        <p class="title">{{ item.product_info.product_name }}</p>
+                        <p class="content">{{ item.product_info.heighlights }}</p>
+                        <p class="price">￥{{ item.product_info.selling_price }}</p>
                       </div>
                     </el-col>
                   </el-row>
@@ -325,25 +325,25 @@ const handelControlClick = (
 
       <!-- TODO 商品表格可以做成 component 组件 -->
       <el-table :data="RoomDetailInfo.product_list" max-height="1000" border>
-        <el-table-column prop="product_id" label="ID" align="center" width="50px" />
+        <el-table-column prop="product_info.product_id" label="ID" align="center" width="50px" />
 
-        <el-table-column prop="image_path" label="图片" align="center">
+        <el-table-column prop="product_info.image_path" label="图片" align="center">
           <template #default="scope">
             <div style="display: flex; align-items: center">
               <!-- TODO 加上  :preview-src-list="[scope.row.image_path]"  -->
-              <el-image :src="scope.row.image_path" />
+              <el-image :src="scope.row.product_info.image_path" />
             </div>
           </template>
         </el-table-column>
 
-        <el-table-column prop="product_name" label="名称" align="center" />
-        <el-table-column prop="product_class" label="分类" align="center" />
-        <el-table-column prop="heighlights" label="亮点" align="center" />
-        <el-table-column prop="selling_price" label="价格" align="center" />
-        <el-table-column prop="amount" label="库存" align="center" />
-        <el-table-column prop="departure_place" label="发货地" align="center" />
-        <el-table-column prop="delivery_company" label="快递公司" align="center" />
-        <el-table-column prop="upload_date" label="上传时间" align="center" />
+        <el-table-column prop="product_info.product_name" label="名称" align="center" />
+        <el-table-column prop="product_info.product_class" label="分类" align="center" />
+        <el-table-column prop="product_info.heighlights" label="亮点" align="center" />
+        <el-table-column prop="product_info.selling_price" label="价格" align="center" />
+        <el-table-column prop="product_info.amount" label="库存" align="center" />
+        <el-table-column prop="product_info.departure_place" label="发货地" align="center" />
+        <el-table-column prop="product_info.delivery_company" label="快递公司" align="center" />
+        <el-table-column prop="product_info.upload_date" label="上传时间" align="center" />
         <el-table-column label="操作" v-slot="{ row }" align="center" width="400px">
           <div class="control-item">
             <el-button
@@ -352,11 +352,11 @@ const handelControlClick = (
               :icon="row.instruction !== '' ? Check : Warning"
               @click="
                 handelControlClick(
-                  row.product_name,
+                  row.product_info.product_name,
                   'Instruction',
-                  row.instruction,
+                  row.product_info.instruction,
                   row.product_id,
-                  RoomDetailInfo.streamer_info.id,
+                  RoomDetailInfo.streamer_info.streamer_id,
                   row.sales_doc
                 )
               "
@@ -371,11 +371,11 @@ const handelControlClick = (
               :icon="row.sales_doc !== '' ? Check : Warning"
               @click="
                 handelControlClick(
-                  row.product_name,
+                  row.product_info.product_name,
                   'SalesDoc',
                   row.sales_doc,
                   row.product_id,
-                  RoomDetailInfo.streamer_info.id,
+                  RoomDetailInfo.streamer_info.streamer_id,
                   row.sales_doc
                 )
               "
@@ -390,11 +390,11 @@ const handelControlClick = (
               :icon="row.start_video !== '' ? Check : Warning"
               @click="
                 handelControlClick(
-                  row.product_name,
+                  row.product_info.product_name,
                   'DigitalHuman',
                   row.start_video,
                   row.product_id,
-                  RoomDetailInfo.streamer_info.id,
+                  RoomDetailInfo.streamer_info.streamer_id,
                   row.sales_doc
                 )
               "
