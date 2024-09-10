@@ -3,9 +3,7 @@ import logging
 
 import streamlit as st
 import torch
-from lagent.actions import ActionExecutor
-from lagent.agents.internlm2_agent import Internlm2Protocol
-from lagent.schema import ActionReturn, AgentReturn
+
 from lmdeploy import GenerationConfig
 
 from utils.digital_human.digital_human_worker import gen_digital_human_video_in_spinner
@@ -41,8 +39,12 @@ def combine_history(prompt, meta_instruction, history_msg=None, first_input_str=
 
 @st.cache_resource
 def init_handlers(departure_place, delivery_company_name):
-    
-    from utils.agent.delivery_time_query import DeliveryTimeQueryAction  # isort:skip
+    try:
+        from lagent.actions import ActionExecutor
+        from lagent.agents.internlm2_agent import Internlm2Protocol
+        from utils.agent.delivery_time_query import DeliveryTimeQueryAction  # isort:skip
+    except Exception:
+        return None, None
 
     META_CN = "当开启工具以及代码时，根据需求选择合适的工具进行调用"
 
@@ -90,6 +92,7 @@ def init_handlers(departure_place, delivery_company_name):
 
 
 def get_agent_result(model_pipe, prompt_input, departure_place, delivery_company_name):
+    from lagent.schema import ActionReturn, AgentReturn
 
     action_executor, protocol_handler = init_handlers(departure_place, delivery_company_name)
 
