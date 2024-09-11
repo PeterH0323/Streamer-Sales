@@ -114,14 +114,27 @@ const roomPorductAddListRequest = (roomId_: number, currentPage_: number, pageSi
 
 // 添加或者更新直播间接口
 const RoomCreadeOrEditRequest = async (params: RoomDetailItem) => {
-  return request_handler<ResultPackage<number>>({
-    method: 'POST',
-    url: '/streaming-room/edit/form',
-    data: params,
-    headers: {
-      Authorization: header_authorization.value
-    }
-  })
+  if (params.room_id === 0) {
+    // 新建
+    return request_handler<ResultPackage<number>>({
+      method: 'POST',
+      url: '/streaming-room/create',
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  } else {
+    // 编辑
+    return request_handler<ResultPackage<number>>({
+      method: 'PUT',
+      url: `/streaming-room/edit/${params.room_id}`,
+      data: params,
+      headers: {
+        Authorization: header_authorization.value
+      }
+    })
+  }
 }
 
 // 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息

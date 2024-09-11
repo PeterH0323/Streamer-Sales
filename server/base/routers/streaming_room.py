@@ -9,8 +9,8 @@
 @Desc    :   主播间信息交互接口
 """
 
-from copy import deepcopy
 import uuid
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
@@ -22,6 +22,7 @@ from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..database.product_db import get_db_product_info
 from ..database.streamer_info_db import get_streamers_info
 from ..database.streamer_room_db import (
+    create_or_update_db_room_by_id,
     delete_room_id,
     get_conversation_list,
     get_db_streaming_room_info,
@@ -30,13 +31,7 @@ from ..database.streamer_room_db import (
 )
 from ..database.user_db import get_db_user_info
 from ..models.product_model import ProductInfo
-from ..models.streamer_room_model import (
-    MessageItem,
-    OnAirRoomStatusItem,
-    RoomChatItem,
-    SalesDocAndVideoInfo,
-    StreamRoomInfo,
-)
+from ..models.streamer_room_model import MessageItem, OnAirRoomStatusItem, RoomChatItem, SalesDocAndVideoInfo, StreamRoomInfo
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..routers.users import get_current_user_info
 from ..server_info import SERVER_PLUGINS_INFO
@@ -160,72 +155,29 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfo, user_id: int = Depe
     pass
 
 
-@router.put("/edit/{roomId}", summary="编辑直播间接口")
-async def streaming_room_edit_api(roomId: int, edit_item: StreamRoomInfo, user_id: int = Depends(get_current_user_info)):
-    """新增 or 编辑直播间接口
+@router.put("/edit/{room_id}", summary="编辑直播间接口")
+async def streaming_room_edit_api(room_id: int, edit_item: dict, user_id: int = Depends(get_current_user_info)):
+    """编辑直播间接口
 
     Args:
         edit_item (StreamRoomInfo): _description_
     """
-    logger.info(f"get room id = {edit_item.room_id}")
 
-    new_info = StreamRoomInfo(
-        user_id=user_id,
-        streamer_id=edit_item.streamer_id,
-        name=edit_item.name,
-        product_list=[],
-        status=OnAirRoomStatusItem(),
-        room_poster=edit_item.room_poster,
-        background_image=edit_item.background_image,
-        prohibited_words_id=edit_item.prohibited_words_id,
-        delete=False,
-    )
+    product_list = edit_item.pop("product_list")
+    status = edit_item.pop("status")
+    edit_item.pop("streamer_info")
 
-    # 商品 ID
-    logger.info(edit_item.product_list)
-    save_product_list = []
-    for product in edit_item.product_list:
-        product = dict(product)
-        if product.get("selected", False) is False:
+    formate_product_list = []
+    for product in product_list:
+        if not product["selected"]:
             continue
-        save_product_list.append(dict(StreamRoomInfo(**product)))
-    new_info.product_list = save_product_list
+        product.pop("product_info")
+        product_item = SalesDocAndVideoInfo(**product)
+        formate_product_list.append(product_item)
 
-    # 更新 直播间状态
-    if edit_item.status is None:
-        new_status = OnAirRoomStatusItem(current_product_id=save_product_list[0]["product_id"])
-        new_info.status = new_status
-    else:
-        new_info.status = edit_item.status  # 直播间状态
-
-    # 新建
-    streaming_room_info = await get_db_streaming_room_info(user_id)
-    max_room_id = 0
-    update_index = -1
-    for idx, item in enumerate(streaming_room_info):
-
-        if item["room_id"] == edit_item.room_id:
-            update_index = idx
-            break
-
-        max_room_id = max(item["room_id"], max_room_id)
-
-    if update_index > 0:
-        # 修改
-        logger.info("已有 ID，编辑模式，修改对应配置")
-        new_info.room_id = streaming_room_info[update_index]["room_id"]
-        streaming_room_info[update_index] = new_info
-    else:
-        logger.info("新 ID，新增模式，新增对应配置")
-        new_info.room_id = max_room_id + 1  # 直播间 ID
-        new_info.delete = False
-        streaming_room_info.append(new_info)
-
-    logger.info(new_info)
-    new_info.status = dict(new_info.status)
-    update_streaming_room_info(new_info)
-
-    return make_return_data(True, ResultCode.SUCCESS, "成功", new_info.room_id)
+    formate_info = StreamRoomInfo(**edit_item, product_list=formate_product_list, status=OnAirRoomStatusItem(**status))
+    create_or_update_db_room_by_id(room_id, formate_info, user_id)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", room_id)
 
 
 # ============================================================

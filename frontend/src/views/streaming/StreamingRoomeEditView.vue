@@ -142,7 +142,7 @@ onMounted(() => {
 // 新增商品
 const handelAddProductClick = async () => {
   // 先保存商品，防止文案 or 数字人视频丢失
-  onSubmit()
+  // onSubmit()
 
   drawerShow.value = true
   getProductInfo()

@@ -14,10 +14,10 @@ from typing import List
 
 import yaml
 from loguru import logger
-from sqlmodel import Session, and_, select
+from sqlmodel import Session, and_, not_, select
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
-from ..models.streamer_room_model import StreamRoomInfo
+from ..models.streamer_room_model import OnAirRoomStatusItem, SalesDocAndVideoInfo, StreamRoomInfo
 from .init_db import DB_ENGINE
 
 
@@ -105,6 +105,110 @@ async def delete_room_id(room_id: int, user_id: int) -> bool:
         delete_success = False
 
     return delete_success
+
+
+def create_or_update_db_room_by_id(room_id: int, new_info: StreamRoomInfo, user_id: int):
+    """新增 or 编辑直播间信息
+
+    Args:
+        room_id (int): 直播间 ID
+        new_info (StreamRoomInfo): 新的信息
+        user_id (int): 用户 ID，用于防止其他用户恶意修改
+    """
+
+    # 去掉服务器地址
+
+    with Session(DB_ENGINE) as session:
+
+        # 更新商品信息
+        if len(new_info.product_list) > 0:
+            selected_id_list = [product.product_id for product in new_info.product_list]
+            for product in new_info.product_list:
+                if product.sales_info_id is not None:
+                    # 更新
+                    sales_info = session.exec(
+                        select(SalesDocAndVideoInfo).where(
+                            and_(
+                                SalesDocAndVideoInfo.room_id == room_id,
+                                SalesDocAndVideoInfo.product_id == product.product_id,
+                                SalesDocAndVideoInfo.sales_info_id == product.sales_info_id,
+                            )
+                        )
+                    ).one()
+                else:
+                    # 新建
+                    sales_info = SalesDocAndVideoInfo()
+
+                sales_info.product_id = product.product_id
+                sales_info.sales_doc = product.sales_doc
+                sales_info.start_time = product.start_time
+                sales_info.start_video = product.start_video.replace(API_CONFIG.REQUEST_FILES_URL, "")
+                sales_info.selected = True
+                sales_info.room_id = room_id
+                session.add(sales_info)
+                session.commit()
+
+            # 删除没选上的
+            if len(selected_id_list) > 0:
+                cancel_select_sales_info = session.exec(
+                    select(SalesDocAndVideoInfo).where(
+                        and_(
+                            SalesDocAndVideoInfo.room_id == room_id,
+                            not_(SalesDocAndVideoInfo.product_id.in_(selected_id_list)),
+                        )
+                    )
+                ).all()
+
+                if cancel_select_sales_info is not None:
+                    for cancel_select in cancel_select_sales_info:
+                        session.delete(cancel_select)
+                        session.commit()
+
+        # 更新 status 内容
+        if new_info.status_id is not None:
+            status_info = session.exec(
+                select(OnAirRoomStatusItem).where(OnAirRoomStatusItem.status_id == new_info.status_id)
+            ).one()
+        else:
+            status_info = OnAirRoomStatusItem()
+
+        status_info.conversation_id = new_info.status.conversation_id
+        status_info.current_product_id = new_info.status.current_product_id
+        status_info.current_product_index = new_info.status.current_product_index
+        status_info.current_product_start_time = new_info.status.current_product_start_time
+        status_info.streaming_video_path = new_info.status.streaming_video_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
+        status_info.live_status = new_info.status.live_status
+        status_info.start_time = new_info.status.start_time
+        session.add(status_info)
+        session.commit()
+        session.refresh(status_info)
+
+        if room_id > 0:
+
+            # 更新主播间其他信息
+            room_info = session.exec(
+                select(StreamRoomInfo).where(and_(StreamRoomInfo.room_id == room_id, StreamRoomInfo.user_id == user_id))
+            ).one()
+
+            if room_info is None:
+                logger.error("Edit by other ID !!!")
+                return
+
+        else:
+            room_info = StreamRoomInfo(status_id=status_info.status_id)
+
+        # 更新对应的值
+        room_info.name = new_info.name
+        room_info.prohibited_words_id = new_info.prohibited_words_id
+        room_info.room_poster = new_info.room_poster.replace(API_CONFIG.REQUEST_FILES_URL, "")
+        room_info.background_image = new_info.background_image.replace(API_CONFIG.REQUEST_FILES_URL, "")
+        room_info.streamer_id = new_info.streamer_id
+
+        session.add(room_info)
+        session.commit()  # 提交
+        session.refresh(room_info)
+
+        return room_info.room_id
 
 
 def update_streaming_room_info(new_info):
