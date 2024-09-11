@@ -20,13 +20,6 @@ from ..models.product_model import ProductInfo
 from ..models.streamer_info_model import StreamerInfo
 
 
-class RoomProductListItem(BaseModel):
-    # TODO 删除
-    roomId: int
-    currentPage: int = 1
-    pageSize: int = 10
-
-
 class RoomChatItem(BaseModel):
     roomId: int
     message: str = ""
@@ -43,17 +36,6 @@ class MessageItem(BaseModel):
     avatar: str
     messageIndex: int
     datetime: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-class StreamRoomProductDatabaseItem(BaseModel):
-    """直播间商品信息，数据库保存时的数据结构"""
-
-    # TODO 删除
-    product_id: int = 0
-    sales_doc: str = ""
-    start_time: str = ""
-    start_video: str = ""
-    selected: bool = True
 
 
 # =======================================================
@@ -127,13 +109,3 @@ class StreamRoomInfo(SQLModel, table=True):
     streamer_info: StreamerInfo | None = Relationship(back_populates="room_info", sa_relationship_kwargs={"lazy": "selectin"})
 
     user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
-
-
-class StreamRoomProductItem(BaseModel):  # StreamRoomInfo, ProductInfo):
-    """直播间商品信息，内含商品基本信息 ProductPageItem 和 文案数字人信息 StreamRoomInfo"""
-
-    ...
-
-
-class StreamRoomDetailItem(BaseModel):  # ProductPageItem, StreamRoomInfoReponseItem):
-    product_list: List[StreamRoomProductItem] = []

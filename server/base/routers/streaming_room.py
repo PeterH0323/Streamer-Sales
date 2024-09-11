@@ -9,6 +9,7 @@
 @Desc    :   主播间信息交互接口
 """
 
+from copy import deepcopy
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -28,15 +29,13 @@ from ..database.streamer_room_db import (
     update_streaming_room_info,
 )
 from ..database.user_db import get_db_user_info
-from ..models.product_model import ProductPageItem
+from ..models.product_model import ProductInfo
 from ..models.streamer_room_model import (
     MessageItem,
     OnAirRoomStatusItem,
     RoomChatItem,
-    RoomProductListItem,
+    SalesDocAndVideoInfo,
     StreamRoomInfo,
-    StreamRoomProductDatabaseItem,
-    StreamRoomProductItem,
 )
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..routers.users import get_current_user_info
@@ -66,12 +65,14 @@ async def get_streaming_room_api(user_id: int = Depends(get_current_user_info)):
 
 
 @router.get("/info/{roomId}", summary="获取特定直播间信息接口")
-async def get_streaming_room_api(
+async def get_streaming_room_id_api(
     roomId: int, currentPage: int = 1, pageSize: int = 5, user_id: int = Depends(get_current_user_info)
 ):
     """获取特定直播间信息"""
     # 加载直播间配置文件
     assert roomId != 0
+
+    # TODO 加入分页
 
     # 加载直播间数据
     streaming_room_list = await get_db_streaming_room_info(user_id, room_id=roomId)
@@ -90,7 +91,7 @@ async def get_streaming_room_api(
 
 
 @router.delete("/delete/{roomId}", summary="删除直播间接口")
-async def upload_product_api(roomId: int, user_id: int = Depends(get_current_user_info)):
+async def delete_room_api(roomId: int, user_id: int = Depends(get_current_user_info)):
 
     process_success_flag = await delete_room_id(roomId, user_id)
 
@@ -100,74 +101,67 @@ async def upload_product_api(roomId: int, user_id: int = Depends(get_current_use
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.post("/product-add", summary="直播间编辑or添加商品接口")
-async def get_streaming_room_api(room_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
-    """直播间编辑or添加商品"""
+@router.get("/product-edit-list/{roomId}", summary="获取直播间商品编辑列表，含有已选中的标识")
+async def get_streaming_room_product_list_api(
+    roomId: int, currentPage: int = 1, pageSize: int = 0, user_id: int = Depends(get_current_user_info)
+):
+    """获取直播间商品编辑列表，含有已选中的标识"""
 
-    logger.info(room_info)
-    # 加载对话配置文件
-    if room_info.roomId == 0:
+    # 获取目前直播间商品列表
+    if roomId == 0:
         # 新的直播间
         streaming_room_info = dict(StreamRoomInfo())
         streaming_room_info["product_list"] = []
     else:
-        streaming_room_info = await get_db_streaming_room_info(user_id, room_info.roomId)
+        streaming_room_info = await get_db_streaming_room_info(user_id, roomId)
 
-    if room_info.pageSize > 0:
-        # 按页返回
-        page_info = await get_db_product_info(user_id, room_info.currentPage, room_info.pageSize)
-    else:
-        # 全部返回
-        product_list, db_product_size = await get_db_product_info(user_id)
-        page_info = dict(
-            ProductPageItem(
-                product_list=product_list,
-                current=room_info.currentPage,
-                pageSize=db_product_size,
-                totalSize=db_product_size,
+    if len(streaming_room_info) == 0:
+        raise "401"
+
+    # TODO 完成分页
+
+    streaming_room_info = streaming_room_info[0]
+
+    # 获取未被选中的商品
+    exclude_list = [product.product_id for product in streaming_room_info.product_list]
+    not_select_product_list, db_product_size = await get_db_product_info(user_id=user_id, exclude_list=exclude_list)
+
+    # 合并商品信息
+    merge_list = deepcopy(streaming_room_info.product_list)
+    for not_select_product in not_select_product_list:
+        merge_list.append(
+            SalesDocAndVideoInfo(
+                product_id=not_select_product.product_id,
+                product_info=ProductInfo(**dict(not_select_product)),
+                selected=False,
             )
         )
 
-    logger.info(streaming_room_info)
+    # 格式化
+    format_merge_list = []
+    for product in merge_list:
+        # 直接返回会导致字段丢失，需要转 dict 确保返回值里面有该字段
+        dict_info = dict(product)
+        dict_info.pop("stream_room")
+        format_merge_list.append(dict_info)
 
-    # 将直播间的商品 ID 进行提取，后续作为 选中 id
-    selected_id = dict()
-    for room_item in streaming_room_info["product_list"]:
-        selected_id.update({room_item["product_id"]: room_item})
-
-    logger.info(selected_id)
-
-    # 根据选中情况更新 selected 的值，格式化返回的包
-    product_all_list = []
-    for product in page_info["product_list"]:
-
-        product = dict(product)
-        if product["product_id"] in selected_id:
-            sales_doc = selected_id[product["product_id"]]["sales_doc"]
-            start_video = selected_id[product["product_id"]]["start_video"]
-            start_time = selected_id[product["product_id"]]["start_time"]
-        else:
-            sales_doc = ""
-            start_video = ""
-            start_time = ""
-
-        product_item_info = StreamRoomProductItem(
-            **product,
-            sales_doc=sales_doc,
-            start_video=start_video,
-            start_time=start_time,
-            selected=True if product["product_id"] in selected_id.keys() else False,
-        )
-        product_all_list.append(product_item_info)
-
-    page_info["product_list"] = product_all_list
-
+    page_info = dict(
+        product_list=format_merge_list,
+        current=currentPage,
+        pageSize=db_product_size,
+        totalSize=db_product_size,
+    )
     logger.info(page_info)
     return make_return_data(True, ResultCode.SUCCESS, "成功", page_info)
 
 
-@router.post("/edit/form", summary="新增 or 编辑直播间接口")
+@router.post("/create", summary="新增直播间接口")
 async def streaming_room_edit_api(edit_item: StreamRoomInfo, user_id: int = Depends(get_current_user_info)):
+    pass
+
+
+@router.put("/edit/{roomId}", summary="编辑直播间接口")
+async def streaming_room_edit_api(roomId: int, edit_item: StreamRoomInfo, user_id: int = Depends(get_current_user_info)):
     """新增 or 编辑直播间接口
 
     Args:
@@ -194,7 +188,7 @@ async def streaming_room_edit_api(edit_item: StreamRoomInfo, user_id: int = Depe
         product = dict(product)
         if product.get("selected", False) is False:
             continue
-        save_product_list.append(dict(StreamRoomProductDatabaseItem(**product)))
+        save_product_list.append(dict(StreamRoomInfo(**product)))
     new_info.product_list = save_product_list
 
     # 更新 直播间状态
@@ -401,8 +395,8 @@ async def get_or_init_conversation(user_id, room_id: int, next_product=False):
     return res_data
 
 
-@router.post("/live-info", summary="获取正在直播的直播间信息接口")
-async def get_on_air_live_room_api(room_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
+@router.get("/live-info/{roomId}", summary="获取正在直播的直播间信息接口")
+async def get_on_air_live_room_api(roomId: int, user_id: int = Depends(get_current_user_info)):
     """获取正在直播的直播间信息
 
     1. 主播视频地址
@@ -410,31 +404,31 @@ async def get_on_air_live_room_api(room_info: RoomProductListItem, user_id: int 
     3. 对话记录 conversation_list
 
     Args:
-        room_info (RoomProductListItem): 直播间 ID
+        roomId (int): 直播间 ID
     """
 
-    res_data = await get_or_init_conversation(user_id, room_info.roomId, next_product=False)
+    res_data = await get_or_init_conversation(user_id, roomId, next_product=False)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/next-product", summary="直播间进行下一个商品讲解接口")
-async def on_air_live_room_next_product_api(room_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
+@router.post("/next-product/{roomId}", summary="直播间进行下一个商品讲解接口")
+async def on_air_live_room_next_product_api(roomId: int, user_id: int = Depends(get_current_user_info)):
     """直播间进行下一个商品讲解
 
     Args:
-        room_info (RoomProductListItem): 直播间 ID
+        roomId (int): 直播间 ID
     """
 
-    res_data = await get_or_init_conversation(user_id, room_info.roomId, next_product=True)
+    res_data = await get_or_init_conversation(user_id, roomId, next_product=True)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/offline", summary="直播间下播接口")
-async def offline_api(delete_info: RoomProductListItem, user_id: int = Depends(get_current_user_info)):
+@router.post("/offline/{roomId}", summary="直播间下播接口")
+async def offline_api(roomId: int, user_id: int = Depends(get_current_user_info)):
     # 根据直播间 ID 获取信息
-    streaming_room_info = await get_db_streaming_room_info(user_id, delete_info.roomId)
+    streaming_room_info = await get_db_streaming_room_info(user_id, roomId)
     logger.info(streaming_room_info)
 
     streaming_room_info["status"]["live_status"] = 2  # 标志为下播

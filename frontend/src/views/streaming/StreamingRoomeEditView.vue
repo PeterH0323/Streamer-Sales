@@ -156,7 +156,7 @@ function cancelClick() {
 async function confirmClick() {
   EditProductList.value = RoomDetailInfo.value
   EditProductList.value.product_list = DrawerProductList.value.product_list
-  EditProductList.value.streamer_id = RoomDetailInfo.value.streamer_info.id
+  EditProductList.value.streamer_id = RoomDetailInfo.value.streamer_info.streamer_id
 
   console.log(EditProductList.value)
   try {

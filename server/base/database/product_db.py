@@ -13,7 +13,7 @@ from typing import List, Tuple
 
 from loguru import logger
 from sqlalchemy import func
-from sqlmodel import Session, and_, select
+from sqlmodel import Session, and_, not_, select
 
 from ...web_configs import API_CONFIG
 from ..models.product_model import ProductInfo
@@ -26,6 +26,7 @@ async def get_db_product_info(
     page_size: int = 10,
     product_name: str | None = None,
     product_id: int | None = None,
+    exclude_list: List[int] | None = None
 ) -> Tuple[List[ProductInfo], int]:
     """查询数据库中的商品信息
 
@@ -62,6 +63,12 @@ async def get_db_product_info(
             # 查询条件更改为查找特定 ID
             query_condiction = and_(
                 ProductInfo.user_id == user_id, ProductInfo.delete == False, ProductInfo.product_id == product_id
+            )
+            
+        elif exclude_list is not None:
+            # 排除查询
+            query_condiction = and_(
+                ProductInfo.user_id == user_id, ProductInfo.delete == False, not_(ProductInfo.product_id.in_(exclude_list))
             )
 
         # 查询获取商品
