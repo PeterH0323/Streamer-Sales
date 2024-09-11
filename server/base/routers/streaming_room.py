@@ -85,17 +85,6 @@ async def get_streaming_room_id_api(
     return make_return_data(True, ResultCode.SUCCESS, "成功", streaming_room_list)
 
 
-@router.delete("/delete/{roomId}", summary="删除直播间接口")
-async def delete_room_api(roomId: int, user_id: int = Depends(get_current_user_info)):
-
-    process_success_flag = await delete_room_id(roomId, user_id)
-
-    if not process_success_flag:
-        return make_return_data(False, ResultCode.FAIL, "失败", "")
-
-    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
-
-
 @router.get("/product-edit-list/{roomId}", summary="获取直播间商品编辑列表，含有已选中的标识")
 async def get_streaming_room_product_list_api(
     roomId: int, currentPage: int = 1, pageSize: int = 0, user_id: int = Depends(get_current_user_info)
@@ -199,6 +188,17 @@ async def streaming_room_edit_api(room_id: int, edit_item: dict, user_id: int = 
     formate_info = StreamRoomInfo(**edit_item, product_list=formate_product_list, status=OnAirRoomStatusItem(**status))
     create_or_update_db_room_by_id(room_id, formate_info, user_id)
     return make_return_data(True, ResultCode.SUCCESS, "成功", room_id)
+
+
+@router.delete("/delete/{roomId}", summary="删除直播间接口")
+async def delete_room_api(roomId: int, user_id: int = Depends(get_current_user_info)):
+
+    process_success_flag = await delete_room_id(roomId, user_id)
+
+    if not process_success_flag:
+        return make_return_data(False, ResultCode.FAIL, "失败", "")
+
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
 # ============================================================

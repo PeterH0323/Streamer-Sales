@@ -352,8 +352,8 @@ const handelControlClick = (
           <div class="control-item">
             <el-button
               size="small"
-              :type="row.instruction !== '' ? 'success' : 'warning'"
-              :icon="row.instruction !== '' ? Check : Warning"
+              :type="row.product_info.instruction !== '' ? 'success' : 'warning'"
+              :icon="row.product_info.instruction !== '' ? Check : Warning"
               @click="
                 handelControlClick(
                   row.product_info.product_name,

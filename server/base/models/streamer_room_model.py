@@ -9,7 +9,7 @@
 @Desc    :   直播间信息数据结构定义
 """
 
-from typing import List, Optional
+from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
