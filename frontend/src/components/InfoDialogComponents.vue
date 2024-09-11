@@ -66,6 +66,12 @@ const showItemInfoDialog = async (
   }
 }
 
+const handleSaveClick = () => {
+  // 更新双向绑定的值
+  dialogFormVisible.value = false
+  updateGenValue(infoValue.value)
+}
+
 // 是否正在生成文案标识
 const isGenerating = ref(false)
 
@@ -262,7 +268,7 @@ defineExpose({ showItemInfoDialog })
 
           <el-button
             v-show="itemType !== 'Instruction'"
-            @click="dialogFormVisible = false"
+            @click="handleSaveClick"
             type="success"
             :disabled="isGenerating"
           >
