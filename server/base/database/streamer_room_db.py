@@ -116,53 +116,7 @@ def create_or_update_db_room_by_id(room_id: int, new_info: StreamRoomInfo, user_
         user_id (int): 用户 ID，用于防止其他用户恶意修改
     """
 
-    # 去掉服务器地址
-
     with Session(DB_ENGINE) as session:
-
-        # 更新商品信息
-        if len(new_info.product_list) > 0:
-            selected_id_list = [product.product_id for product in new_info.product_list]
-            for product in new_info.product_list:
-                if product.sales_info_id is not None:
-                    # 更新
-                    sales_info = session.exec(
-                        select(SalesDocAndVideoInfo).where(
-                            and_(
-                                SalesDocAndVideoInfo.room_id == room_id,
-                                SalesDocAndVideoInfo.product_id == product.product_id,
-                                SalesDocAndVideoInfo.sales_info_id == product.sales_info_id,
-                            )
-                        )
-                    ).one()
-                else:
-                    # 新建
-                    sales_info = SalesDocAndVideoInfo()
-
-                sales_info.product_id = product.product_id
-                sales_info.sales_doc = product.sales_doc
-                sales_info.start_time = product.start_time
-                sales_info.start_video = product.start_video.replace(API_CONFIG.REQUEST_FILES_URL, "")
-                sales_info.selected = True
-                sales_info.room_id = room_id
-                session.add(sales_info)
-                session.commit()
-
-            # 删除没选上的
-            if len(selected_id_list) > 0:
-                cancel_select_sales_info = session.exec(
-                    select(SalesDocAndVideoInfo).where(
-                        and_(
-                            SalesDocAndVideoInfo.room_id == room_id,
-                            not_(SalesDocAndVideoInfo.product_id.in_(selected_id_list)),
-                        )
-                    )
-                ).all()
-
-                if cancel_select_sales_info is not None:
-                    for cancel_select in cancel_select_sales_info:
-                        session.delete(cancel_select)
-                        session.commit()
 
         # 更新 status 内容
         if new_info.status_id is not None:
@@ -195,7 +149,7 @@ def create_or_update_db_room_by_id(room_id: int, new_info: StreamRoomInfo, user_
                 return
 
         else:
-            room_info = StreamRoomInfo(status_id=status_info.status_id)
+            room_info = StreamRoomInfo(status_id=status_info.status_id, user_id=user_id)
 
         # 更新对应的值
         room_info.name = new_info.name
@@ -207,6 +161,50 @@ def create_or_update_db_room_by_id(room_id: int, new_info: StreamRoomInfo, user_
         session.add(room_info)
         session.commit()  # 提交
         session.refresh(room_info)
+
+        # 更新商品信息
+        if len(new_info.product_list) > 0:
+            selected_id_list = [product.product_id for product in new_info.product_list]
+            for product in new_info.product_list:
+                if product.sales_info_id is not None:
+                    # 更新
+                    sales_info = session.exec(
+                        select(SalesDocAndVideoInfo).where(
+                            and_(
+                                SalesDocAndVideoInfo.room_id == room_info.room_id,
+                                SalesDocAndVideoInfo.product_id == product.product_id,
+                                SalesDocAndVideoInfo.sales_info_id == product.sales_info_id,
+                            )
+                        )
+                    ).one()
+                else:
+                    # 新建
+                    sales_info = SalesDocAndVideoInfo()
+
+                sales_info.product_id = product.product_id
+                sales_info.sales_doc = product.sales_doc
+                sales_info.start_time = product.start_time
+                sales_info.start_video = product.start_video.replace(API_CONFIG.REQUEST_FILES_URL, "")
+                sales_info.selected = True
+                sales_info.room_id = room_info.room_id
+                session.add(sales_info)
+                session.commit()
+
+            # 删除没选上的
+            if len(selected_id_list) > 0:
+                cancel_select_sales_info = session.exec(
+                    select(SalesDocAndVideoInfo).where(
+                        and_(
+                            SalesDocAndVideoInfo.room_id == room_info.room_id,
+                            not_(SalesDocAndVideoInfo.product_id.in_(selected_id_list)),
+                        )
+                    )
+                ).all()
+
+                if cancel_select_sales_info is not None:
+                    for cancel_select in cancel_select_sales_info:
+                        session.delete(cancel_select)
+                        session.commit()
 
         return room_info.room_id
 

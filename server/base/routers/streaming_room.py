@@ -105,24 +105,23 @@ async def get_streaming_room_product_list_api(
     # 获取目前直播间商品列表
     if roomId == 0:
         # 新的直播间
-        streaming_room_info = dict(StreamRoomInfo())
-        streaming_room_info["product_list"] = []
+        merge_list = []
+        exclude_list = []
     else:
         streaming_room_info = await get_db_streaming_room_info(user_id, roomId)
 
-    if len(streaming_room_info) == 0:
-        raise "401"
+        if len(streaming_room_info) == 0:
+            raise "401"
 
-    # TODO 完成分页
+        streaming_room_info = streaming_room_info[0]
+        # 获取未被选中的商品
+        exclude_list = [product.product_id for product in streaming_room_info.product_list]
+        merge_list = deepcopy(streaming_room_info.product_list)
 
-    streaming_room_info = streaming_room_info[0]
-
-    # 获取未被选中的商品
-    exclude_list = [product.product_id for product in streaming_room_info.product_list]
+    # 获取未选中的商品信息
     not_select_product_list, db_product_size = await get_db_product_info(user_id=user_id, exclude_list=exclude_list)
 
     # 合并商品信息
-    merge_list = deepcopy(streaming_room_info.product_list)
     for not_select_product in not_select_product_list:
         merge_list.append(
             SalesDocAndVideoInfo(
@@ -132,12 +131,15 @@ async def get_streaming_room_product_list_api(
             )
         )
 
+    # TODO 完成分页
+
     # 格式化
     format_merge_list = []
     for product in merge_list:
         # 直接返回会导致字段丢失，需要转 dict 确保返回值里面有该字段
         dict_info = dict(product)
-        dict_info.pop("stream_room")
+        if "stream_room" in dict_info:
+            dict_info.pop("stream_room")
         format_merge_list.append(dict_info)
 
     page_info = dict(
@@ -151,8 +153,27 @@ async def get_streaming_room_product_list_api(
 
 
 @router.post("/create", summary="新增直播间接口")
-async def streaming_room_edit_api(edit_item: StreamRoomInfo, user_id: int = Depends(get_current_user_info)):
-    pass
+async def streaming_room_edit_api(edit_item: dict, user_id: int = Depends(get_current_user_info)):
+    product_list = edit_item.pop("product_list")
+    status = edit_item.pop("status")
+    edit_item.pop("streamer_info")
+    edit_item.pop("room_id")
+
+    if "status_id" in edit_item:
+        edit_item.pop("status_id")
+
+    formate_product_list = []
+    for product in product_list:
+        if not product["selected"]:
+            continue
+        product.pop("product_info")
+        product_item = SalesDocAndVideoInfo(**product)
+        formate_product_list.append(product_item)
+
+    edit_item["user_id"] = user_id
+    formate_info = StreamRoomInfo(**edit_item, product_list=formate_product_list, status=OnAirRoomStatusItem(**status))
+    room_id = create_or_update_db_room_by_id(0, formate_info, user_id)
+    return make_return_data(True, ResultCode.SUCCESS, "成功", room_id)
 
 
 @router.put("/edit/{room_id}", summary="编辑直播间接口")

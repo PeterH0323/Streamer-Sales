@@ -88,6 +88,10 @@ RoomDetailInfo.value.status = {} as StreamingRoomStatusItem
 const EditProductList = ref({} as RoomDetailItem)
 
 const getProductListInfo = async (currentPage: number, pageSize: number) => {
+  if (RoomDetailInfo.value.room_id === 0) {
+    return
+  }
+
   try {
     const { data } = await roomDetailRequest(
       String(RoomDetailInfo.value.room_id),
