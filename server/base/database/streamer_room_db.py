@@ -126,9 +126,6 @@ def create_or_update_db_room_by_id(room_id: int, new_info: StreamRoomInfo, user_
         else:
             status_info = OnAirRoomStatusItem()
 
-        status_info.conversation_id = new_info.status.conversation_id
-        status_info.current_product_id = new_info.status.current_product_id
-        status_info.current_product_index = new_info.status.current_product_index
         status_info.current_product_start_time = new_info.status.current_product_start_time
         status_info.streaming_video_path = new_info.status.streaming_video_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
         status_info.live_status = new_info.status.live_status

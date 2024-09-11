@@ -120,7 +120,7 @@ async def get_streaming_room_product_list_api(
             )
         )
 
-    # TODO 完成分页
+    # TODO 懒加载分页
 
     # 格式化
     format_merge_list = []

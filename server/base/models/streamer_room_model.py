@@ -9,14 +9,14 @@
 @Desc    :   直播间信息数据结构定义
 """
 
-from typing import Optional
-from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
+from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
 
+from ..models.user_model import UserInfo
 from ..models.product_model import ProductInfo
-
 from ..models.streamer_info_model import StreamerInfo
 
 
@@ -29,6 +29,7 @@ class RoomChatItem(BaseModel):
 class MessageItem(BaseModel):
     """直播页面对话数据结构"""
 
+    # TODO 删除
     role: str
     userId: int
     userName: str
@@ -39,29 +40,8 @@ class MessageItem(BaseModel):
 
 
 # =======================================================
-#                      数据库模型
+#                      直播间数据库模型
 # =======================================================
-
-
-class OnAirRoomStatusItem(SQLModel, table=True):
-    """直播间状态信息"""
-
-    __tablename__ = "on_air_room_status_item"
-
-    status_id: int | None = Field(default=None, primary_key=True, unique=True)  # 直播间 ID
-
-    conversation_id: str = ""  # 现阶段的对话 ID
-    current_product_id: int = 0  # 目前介绍的商品 ID
-    current_product_index: int = 0  # 商品列表索引
-    current_product_start_time: datetime | None = None  # 该商品开始时间
-    streaming_video_path: str = ""  # 目前介绍使用的视频
-
-    live_status: int = 0  # 直播间状态 0 未开播，1 正在直播，2 下播了
-    start_time: datetime | None = None  # 直播开始时间
-
-    room_info: Optional["StreamRoomInfo"] | None = Relationship(
-        back_populates="status", sa_relationship_kwargs={"lazy": "selectin"}
-    )
 
 
 class SalesDocAndVideoInfo(SQLModel, table=True):
@@ -71,9 +51,9 @@ class SalesDocAndVideoInfo(SQLModel, table=True):
 
     sales_info_id: int | None = Field(default=None, primary_key=True, unique=True)
 
-    sales_doc: str = ""
-    start_time: str = ""
-    start_video: str = ""
+    sales_doc: str = ""  # 讲解文案
+    start_video: str = ""  # 开播时候第一个讲解视频
+    start_time: datetime | None = None  # 当前商品开始时间
     selected: bool = True
 
     product_id: int | None = Field(default=None, foreign_key="product_info.product_id")
@@ -81,6 +61,25 @@ class SalesDocAndVideoInfo(SQLModel, table=True):
 
     room_id: int | None = Field(default=None, foreign_key="stream_room_info.room_id")
     stream_room: Optional["StreamRoomInfo"] | None = Relationship(back_populates="product_list")
+
+
+class OnAirRoomStatusItem(SQLModel, table=True):
+    """直播间状态信息"""
+
+    __tablename__ = "on_air_room_status_item"
+
+    status_id: int | None = Field(default=None, primary_key=True, unique=True)  # 直播间 ID
+
+    sales_info_id: int | None = Field(default=None, foreign_key="sales_doc_and_video_info.sales_info_id")
+
+    streaming_video_path: str = ""  # 目前介绍使用的视频
+
+    live_status: int = 0  # 直播间状态 0 未开播，1 正在直播，2 下播了
+    start_time: datetime | None = None  # 直播开始时间
+
+    room_info: Optional["StreamRoomInfo"] | None = Relationship(
+        back_populates="status", sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class StreamRoomInfo(SQLModel, table=True):
@@ -109,3 +108,26 @@ class StreamRoomInfo(SQLModel, table=True):
     streamer_info: StreamerInfo | None = Relationship(back_populates="room_info", sa_relationship_kwargs={"lazy": "selectin"})
 
     user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
+
+
+# =======================================================
+#                    直播对话数据库模型
+# =======================================================
+
+
+class ChatMessageInfo(SQLModel, table=True):
+    """直播页面对话数据结构"""
+
+    __tablename__ = "chat_message_info"
+
+    message_id: int | None = Field(default=None, primary_key=True, unique=True)  # 消息 ID
+
+    sales_info_id: int | None = Field(default=None, foreign_key="sales_doc_and_video_info.sales_info_id")
+    sales_info: SalesDocAndVideoInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
+    user_info: UserInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    role: str
+    message: str
+    send_time: datetime | None = None

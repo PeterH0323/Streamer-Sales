@@ -46,14 +46,13 @@ class ProductInfo(SQLModel, table=True):
 # =======================================================
 #                      基本模型
 # =======================================================
-class PageItem(BaseModel):
+
+
+class ProductPageItem(BaseModel):
+    product_list: List[ProductInfo] = []
     currentPage: int = 0  # 当前页数
     pageSize: int = 0  # 页面的组件数量
     totalSize: int = 0  # 总大小
-
-
-class ProductPageItem(PageItem):
-    product_list: List[ProductInfo] = []
 
 
 class ProductQueryItem(BaseModel):

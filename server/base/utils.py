@@ -309,6 +309,7 @@ def gen_default_data():
     """生成默认数据，包括：
     - 商品数据
     - 主播数据
+    - 直播间信息以及关联表
     """
 
     def create_default_product_item():
