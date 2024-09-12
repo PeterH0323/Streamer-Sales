@@ -44,7 +44,7 @@ case $1 in
         ;;
 
     llm-4bit)
-        echo "正在启动 LLM 服务..."
+        echo "正在启动 LLM-4bit 服务..."
         export LMDEPLOY_USE_MODELSCOPE=True
         export MODELSCOPE_CACHE="./weights/llm_weights"
         lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b-4bit \
