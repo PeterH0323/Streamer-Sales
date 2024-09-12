@@ -21,3 +21,4 @@ fastapi[all]==0.111.0
 PyJWT==2.9.0
 passlib==1.7.4
 sqlmodel==0.0.22
+psycopg==3.2.1
