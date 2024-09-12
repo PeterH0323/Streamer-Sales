@@ -35,7 +35,7 @@ psql --version
 2. 输入命令：`sudo passwd postgres`
 3. 系统将提示你输入新密码。
 4. 关闭并重新打开终端。
-5. 连接到 postgres 服务，并打开 psql shell：`sudo -u postgres psql`
+5. 连接到 postgres 服务，并打开 psql shell：`sudo -u postgres psql`，或者临时切换用户的方法进入： `su - postgres && psql`
 6. 成功输入 psql shell 后，将显示更改为如下所示的命令行：`postgres=#`
 
 ## 设置数据库用户名密码
@@ -65,10 +65,10 @@ host    all             all             0.0.0.0/0               scram-sha-256
 
 - 修改 数据库服务器参数配置 `sudo vim /etc/postgresql/16/main/postgresql.conf`
 
-在 listen_addresses 前加入：
+在 `# - Connection Settings -` 的 `#listen_addresses = 'localhost'` 前加入：
 
 ```bash
-listen_addresses='*'
+listen_addresses = '*'
 ```
 
 重启服务
@@ -90,7 +90,17 @@ sudo -u postgres psql
 2. 创建数据库
 
 ```bash
-CREATE DATABASE my_database;
+CREATE DATABASE streamer_sales_db;
+```
+
+3. 查看目前所有的数据库
+
+```bash
+\l
 ```
 
 后续数据表会在代码里面自行创建
+
+## 数据库可视化
+
+[pgadmin](https://www.pgadmin.org/)
