@@ -12,13 +12,17 @@ import { AxiosError } from 'axios'
 
 const dialogInfoVisible = ref(false)
 const saveLoading = ref(false)
-// 定义标题
 const steamerInfo = ref({} as StreamerInfo)
 steamerInfo.value.streamer_id = 0
 
 const showItemInfoDialog = async (streamerId: number) => {
   console.log('streamerId = ', streamerId)
   dialogInfoVisible.value = true
+
+  if (streamerId === 0) {
+    steamerInfo.value = {} as StreamerInfo
+    return
+  }
 
   try {
     // 请求接口获取主播数据
@@ -66,7 +70,7 @@ defineExpose({ showItemInfoDialog })
 <template>
   <div class="dialog-container">
     <el-dialog v-model="dialogInfoVisible" title="主播详情" width="80%" destroy-on-close>
-      <StreamerInfoComponent v-model="steamerInfo" />
+      <StreamerInfoComponent v-model="steamerInfo" :disable-change="false" />
 
       <template #footer>
         <div class="dialog-footer">
