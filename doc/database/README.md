@@ -44,7 +44,7 @@ psql --version
 
 ```bash
 sudo -u postgres psql
-# 会出现 postgres=# 然后输入，xxx 就是密码，后续连接用这个密码
+# 会出现 postgres=# 然后输入，xxx 就是密码，后续连接用这个密码，最后的 ; 不要漏了！
 alter role postgres with password 'xxx';
 ```
 
