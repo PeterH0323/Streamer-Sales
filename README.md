@@ -33,7 +33,7 @@
 6. 🌐 **Agent 网络查询**
 7. 🎙️ **ASR 语音转文字**
 8. 🍍 **Vue + pinia + element-plus** 搭建的前端，可自由扩展快速开发
-9. 🗝️ 后端采用 **FastAPI + Uvicorn，高性能，高效编码，生产可用，同时具有 JWT 身份验证**
+9. 🗝️ 后端采用 **FastAPI + Uvicorn + PostgreSQL，高性能，高效编码，生产可用，具有 JWT 身份验证**，接口均采用 RESTful API 规范编写，更规范
 10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
 
 无论是线上直播销售，还是线下门店推广，这款卖货主播大模型都能成为您不可或缺的得力助手。它不仅能够提升销售效率，还能增强用户体验，为您的品牌形象加分。
@@ -48,6 +48,7 @@
 
 ## 🎉 NEWS
 
+- [2024.09.13] 使用 **RESTful API** 规范重构所有接口，后端**全面接入 [PostgreSQL](https://www.postgresql.org/) 数据库**
 - [2024.09.02] 💥💥💥**重磅发布：【 AI 卖货主播后台系统 】** ❗❗❗： **前端使用 Vue 重写，后端使用 FastAPI 进一步扩充接口**，更加贴近生产，功能添加更为自由灵活，详见[架构图](#-架构图)
 - [2024.07.23] **支持 Docker-Compose 一键部署**，再也不用担心环境问题，服务可以自由编排，一键部署更加丝滑！
 - [2024.07.10] **前后端分离**，可以定义服务数量做到负载均衡啦！
@@ -234,6 +235,10 @@ bash deploy.sh llm-4bit
 
 5. 中台服务
 
+启用中台服务需要先配置数据库环境，详见 [数据库环境搭建](./doc/database/README.md)
+
+同时在 `server/web_config.py` 配置数据库的用户名(`POSTGRES_USER`)和密码(`POSTGRES_PASSWORD`)
+
 ```bash
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
@@ -269,10 +274,13 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 #### Docker-Compose
 
+目前只支持 v0.8.0 ，后续会升级
+
 ```bash
 git clone https://github.com/PeterH0323/Streamer-Sales.git
 
 cd Streamer-Sales
+git checkout v0.8.0
 docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
 
 docker-compose up
@@ -384,7 +392,7 @@ export WEATHER_API_KEY="${和风天气 API key}"
 - [x] 接入 Agent，支持订单情况、收货时间等实时信息
 - [x] ASR
 - [x] 前后端分离解耦
-- [ ] 多模态
+- [x] 后端接入数据库
 
 ## 🧭 详细指南
 
