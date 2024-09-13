@@ -11,6 +11,7 @@
 
 
 import asyncio
+from ipaddress import IPv4Address
 import json
 import random
 import wave
@@ -25,6 +26,8 @@ from loguru import logger
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from tqdm import tqdm
+
+from server.base.models.user_model import UserInfo
 
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
@@ -312,6 +315,39 @@ def gen_default_data():
     - 直播间信息以及关联表
     """
 
+    def create_default_user():
+        """创建默认用户"""
+        admin_user = UserInfo(
+            username="hingwen.wong",
+            ip_address=IPv4Address("127.0.0.1"),
+            email="peterhuang0323@qq.com",
+            hashed_password="$2b$12$zXXveodjipHZMoSxJz5ODul7Z9YeRJd0GeSBjpwHdqEtBbAFvEdre",  # 123456 -> 用 get_password_hash 加密后的字符串
+            avatar="/user/user-avatar.png",
+        )
+
+        with Session(DB_ENGINE) as session:
+            session.add(admin_user)
+            session.commit()
+
+
+    def init_user() -> bool:
+        """判断是否需要创建默认用户
+
+        Returns:
+            bool: 是否执行创建默认用户
+        """
+        with Session(DB_ENGINE) as session:
+            results = session.exec(select(UserInfo).where(UserInfo.user_id == 1)).first()
+
+        if results is None:
+            # 如果数据库为空，创建初始用户
+            create_default_user()
+            logger.info("created default user info")
+            return True
+
+        return False
+
+
     def create_default_product_item():
         """生成商品默认数据库"""
         delivery_company_list = ["京东", "顺丰", "韵达", "圆通", "中通"]
@@ -443,6 +479,9 @@ def gen_default_data():
                 session.commit()
                 session.refresh(add_sales_info)
 
-    create_default_product_item()  # 商品信息
-    create_default_streamer()  # 主播信息
-    create_default_room()  # 直播间信息
+    # 主要逻辑
+    created = init_user()
+    if created:
+        create_default_product_item()  # 商品信息
+        create_default_streamer()  # 主播信息
+        create_default_room()  # 直播间信息

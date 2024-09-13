@@ -9,46 +9,11 @@
 @Desc    :   用户信息数据库操作
 """
 
-from ipaddress import IPv4Address
-
-from loguru import logger
 from sqlmodel import Session, select
 
+from ...web_configs import API_CONFIG
 from ..models.user_model import UserBaseInfo, UserInfo
 from .init_db import DB_ENGINE
-
-
-def create_default_user():
-    """创建默认用户"""
-    admin_user = UserInfo(
-        username="hingwen.wong",
-        ip_address=IPv4Address("127.0.0.1"),
-        email="peterhuang0323@qq.com",
-        hashed_password="$2b$12$zXXveodjipHZMoSxJz5ODul7Z9YeRJd0GeSBjpwHdqEtBbAFvEdre",  # 123456 -> 用 get_password_hash 加密后的字符串
-        avatar="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png",
-    )
-
-    with Session(DB_ENGINE) as session:
-        session.add(admin_user)
-        session.commit()
-
-
-def init_user() -> bool:
-    """判断是否需要创建默认用户
-
-    Returns:
-        bool: 是否执行创建默认用户
-    """
-    with Session(DB_ENGINE) as session:
-        results = session.exec(select(UserInfo).where(UserInfo.user_id == 1)).first()
-
-    if results is None:
-        # 如果数据库为空，创建初始用户
-        create_default_user()
-        logger.info("created default user info")
-        return True
-
-    return False
 
 
 def get_db_user_info(id: int = -1, username: str = "", all_info: bool = False) -> UserBaseInfo | UserInfo | None:
@@ -72,6 +37,9 @@ def get_db_user_info(id: int = -1, username: str = "", all_info: bool = False) -
     # 查询数据库
     with Session(DB_ENGINE) as session:
         results = session.exec(query).first()
+
+    # 返回服务器地址
+    results.avatar = API_CONFIG.REQUEST_FILES_URL + results.avatar
 
     if results is not None and all_info is False:
         # 返回不含用户敏感信息的基本信息

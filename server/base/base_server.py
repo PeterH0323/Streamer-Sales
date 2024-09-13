@@ -22,7 +22,6 @@ from loguru import logger
 
 from ..web_configs import API_CONFIG, WEB_CONFIGS
 from .database.init_db import create_db_and_tables
-from .database.user_db import init_user
 from .routers import digital_human, llm, products, streamer_info, streaming_room, users
 from .server_info import SERVER_PLUGINS_INFO
 from .utils import ChatItem, ResultCode, gen_default_data, make_return_data, streamer_sales_process
@@ -54,10 +53,9 @@ async def lifespan(app: FastAPI):
     """服务生命周期函数"""
     # 启动
     create_db_and_tables()  # 创建数据库和数据表
-    created = init_user()
-    if created:
-        # 新服务，生成默认数据，可以自行注释 or 修改
-        gen_default_data()
+
+    # 新服务，生成默认数据，可以自行注释 or 修改
+    gen_default_data()
 
     yield
 
