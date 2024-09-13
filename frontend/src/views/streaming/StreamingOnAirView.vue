@@ -15,7 +15,7 @@ import {
   type StreamingRoomStatusItem
 } from '@/api/streamingRoom'
 import type { ProductItem, StreamerInfo } from '@/api/product'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { AxiosError } from 'axios'
 import { getUserInfoRequest, type UserInfo } from '@/api/user'
 
@@ -146,8 +146,7 @@ const handleNextProductClick = async () => {
     const { data } = await onAirRoomNextProductRequest(Number(props.roomId))
     if (data.code === 0) {
       console.info('Next Product')
-      currentStatus.value = data.data
-      console.info(currentStatus.value)
+      await getRoomInfo()
     } else {
       ElMessage.error('失败' + data.message)
     }
@@ -162,22 +161,31 @@ const handleNextProductClick = async () => {
 
 // 结束直播按钮
 const handleOffLineClick = async () => {
-  try {
-    const { data } = await streamRoomOffline(Number(props.roomId))
-    console.log(data)
-
-    if (data.code === 0) {
-      router.push({ name: 'StreamingOverview' })
-    } else {
-      ElMessage.error('失败' + data.message)
-    }
-  } catch (error: unknown) {
-    if (error instanceof AxiosError) {
-      ElMessage.error('失败' + error.message)
-    } else {
-      ElMessage.error('未知错误：' + error)
-    }
-  }
+  ElMessageBox.confirm(`确定要下播吗？`, '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
+    .then(async () => {
+      try {
+        const { data } = await streamRoomOffline(Number(props.roomId))
+        if (data.code === 0) {
+          ElMessage.success('下播成功')
+          router.push({ name: 'StreamingOverview' })
+        } else {
+          ElMessage.error('下播失败' + data.message)
+        }
+      } catch (error: unknown) {
+        if (error instanceof AxiosError) {
+          ElMessage.error('失败' + error.message)
+        } else {
+          ElMessage.error('未知错误：' + error)
+        }
+      }
+    })
+    .catch((error) => {
+      ElMessage.error('下播失败: ' + error.message)
+    })
 }
 
 onMounted(() => {

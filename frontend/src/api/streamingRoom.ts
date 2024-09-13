@@ -17,7 +17,7 @@ interface messageItem {
   userName: string
   avatar: string
   message: string
-  datetime: string
+  send_time: string
 }
 
 interface StreamingRoomStatusItem {
@@ -138,10 +138,21 @@ const RoomCreadeOrEditRequest = async (params: RoomDetailItem) => {
 }
 
 // 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
-const onAirRoomInfoRequest = (roomId_: number) => {
+const onAirRoomStartRequest = (roomId_: number) => {
+  return request_handler<ResultPackage<StreamingRoomStatusItem>>({
+    method: 'POST',
+    url: `/streaming-room/online/${roomId_}`,
+    headers: {
+      Authorization: header_authorization.value
+    }
+  })
+}
+
+// 获取直播间实时信息：主播目前的视频地址，目前讲述的商品信息，聊天信息
+const onAirRoomInfoRequest = (roomId: number) => {
   return request_handler<ResultPackage<StreamingRoomStatusItem>>({
     method: 'GET',
-    url: `/streaming-room/live-info/${roomId_}`,
+    url: `/streaming-room/live-info/${roomId}`,
     headers: {
       Authorization: header_authorization.value
     }
@@ -151,7 +162,7 @@ const onAirRoomInfoRequest = (roomId_: number) => {
 // 用户发起对话
 const onAirRoomChatRequest = async (roomId_: number, message_: string) => {
   return request_handler<ResultPackage<messageItem>>({
-    method: 'POST',
+    method: 'PUT',
     url: '/streaming-room/chat',
     data: { roomId: roomId_, message: message_ },
     headers: {
@@ -182,7 +193,7 @@ const deleteStreamingRoomByIdRequest = (roomId: number) => {
   })
 }
 
-// 发送音频文件到服务器
+// 发送浏览器录音音频文件到服务器，用于 ASR
 const sendAudioToServer = async (blob: Blob) => {
   const formData = new FormData()
   formData.append('file', blob, 'recording.webm')
@@ -212,7 +223,7 @@ const genAsrResult = async (roomId_: number, asrFileUrl_: string) => {
 // 下播
 const streamRoomOffline = (roomId_: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
+    method: 'PUT',
     url: `/streaming-room/offline/${roomId_}`,
     headers: {
       Authorization: header_authorization.value
@@ -237,5 +248,6 @@ export {
   deleteStreamingRoomByIdRequest,
   sendAudioToServer,
   streamRoomOffline,
-  genAsrResult
+  genAsrResult,
+  onAirRoomStartRequest
 }

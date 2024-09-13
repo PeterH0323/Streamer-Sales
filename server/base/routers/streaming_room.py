@@ -212,7 +212,7 @@ async def offline_api(roomId: int, user_id: int = Depends(get_current_user_info)
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-@router.post("/offline/{roomId}", summary="直播间下播接口")
+@router.put("/offline/{roomId}", summary="直播间下播接口")
 async def offline_api(roomId: int, user_id: int = Depends(get_current_user_info)):
 
     update_db_room_status(roomId, user_id, "offline")
@@ -248,7 +248,7 @@ async def get_on_air_live_room_api(roomId: int, user_id: int = Depends(get_curre
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/chat", summary="直播间对话接口")
+@router.put("/chat", summary="直播间对话接口")
 async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
     # 根据直播间 ID 获取信息
     streaming_room_info = await get_db_streaming_room_info(user_id, room_chat.roomId)
@@ -285,7 +285,7 @@ async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depen
     # ====================== RAG ======================
     # 调取 rag
     elif SERVER_PLUGINS_INFO.rag_enabled:
-        logger.info("Agent 未执行 or 未开启")
+        logger.info("Agent 未执行 or 未开启，调用 RAG")
         # agent 失败，调取 rag, chat_item.plugins.rag 为 True，则使用 RAG 查询数据库
         rag_res = build_rag_prompt(RAG_RETRIEVER, product_detail.product_name, prompt[-1]["content"])
         if rag_res != "":

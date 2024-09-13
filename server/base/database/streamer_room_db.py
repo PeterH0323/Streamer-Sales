@@ -274,7 +274,7 @@ def update_db_room_status(room_id: int, user_id: int, process_type: str):
             logger.error("status_info is None !!!")
             return
 
-        if process_type in ["online", "next_product"]:
+        if process_type in ["online", "next-product"]:
 
             if process_type == "online":
                 status_info.live_status = 1
@@ -282,7 +282,7 @@ def update_db_room_status(room_id: int, user_id: int, process_type: str):
                 status_info.end_time = None
                 status_info.current_product_index = 0
 
-            elif process_type == "next_product":
+            elif process_type == "next-product":
                 status_info.current_product_index += 1
 
             current_idx = status_info.current_product_index
@@ -310,7 +310,7 @@ def update_db_room_status(room_id: int, user_id: int, process_type: str):
             status_info.end_time = datetime.now()
 
         else:
-            NotImplemented("process type error !!")
+            raise NotImplemented("process type error !!")
 
         session.add(status_info)
         session.commit()
