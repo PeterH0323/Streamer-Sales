@@ -26,19 +26,6 @@ class RoomChatItem(BaseModel):
     asrFileUrl: str = ""
 
 
-class MessageItem(BaseModel):
-    """直播页面对话数据结构"""
-
-    # TODO 删除
-    role: str
-    userId: int
-    userName: str
-    message: str
-    avatar: str
-    messageIndex: int
-    datetime: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
 # =======================================================
 #                      直播间数据库模型
 # =======================================================
@@ -72,18 +59,21 @@ class OnAirRoomStatusItem(SQLModel, table=True):
 
     sales_info_id: int | None = Field(default=None, foreign_key="sales_doc_and_video_info.sales_info_id")
 
+    current_product_index: int = 0  # 目前讲解的商品列表索引
     streaming_video_path: str = ""  # 目前介绍使用的视频
 
     live_status: int = 0  # 直播间状态 0 未开播，1 正在直播，2 下播了
     start_time: datetime | None = None  # 直播开始时间
+    end_time: datetime | None = None  # 直播下播时间
 
     room_info: Optional["StreamRoomInfo"] | None = Relationship(
         back_populates="status", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
+    """直播间信息，数据库保存时的数据结构"""
+
 
 class StreamRoomInfo(SQLModel, table=True):
-    """直播间信息，数据库保存时的数据结构"""
 
     __tablename__ = "stream_room_info"
 
@@ -92,8 +82,9 @@ class StreamRoomInfo(SQLModel, table=True):
     name: str = ""  # 直播间名字
 
     product_list: list[SalesDocAndVideoInfo] = Relationship(
-        back_populates="stream_room", sa_relationship_kwargs={"lazy": "selectin"}
-    )  # 商品列表
+        back_populates="stream_room",
+        sa_relationship_kwargs={"lazy": "selectin", "order_by": "asc(SalesDocAndVideoInfo.product_id)"},
+    )  # 商品列表，查找的时候加上 order_by 自动排序，desc -> 降序; asc -> 升序
 
     prohibited_words_id: int = 0  # 违禁词表 ID
     room_poster: str = ""  # 海报图
@@ -127,6 +118,9 @@ class ChatMessageInfo(SQLModel, table=True):
 
     user_id: int | None = Field(default=None, foreign_key="user_info.user_id")
     user_info: UserInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
+
+    streamer_id: int | None = Field(default=None, foreign_key="streamer_info.streamer_id")
+    streamer_info: StreamerInfo | None = Relationship(sa_relationship_kwargs={"lazy": "selectin"})
 
     role: str
     message: str

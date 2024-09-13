@@ -94,7 +94,7 @@ const handelSendClick = async () => {
     userName: userInfoItem.value.username,
     avatar: userInfoItem.value.avatar,
     message: inputValue.value,
-    datetime: ''
+    send_time: ''
   })
   // disable 输入框
   disableInput.value = true
@@ -293,7 +293,7 @@ const handleStop = async () => {
               :avatar="item.avatar"
               :userName="item.userName"
               :message="item.message"
-              :datetime="item.datetime"
+              :datetime="item.send_time"
             />
 
             <!-- 加载标识 -->

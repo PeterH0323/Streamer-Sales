@@ -11,7 +11,6 @@
 
 import uuid
 from copy import deepcopy
-from datetime import datetime
 from pathlib import Path
 
 import requests
@@ -20,18 +19,18 @@ from loguru import logger
 
 from ...web_configs import API_CONFIG, WEB_CONFIGS
 from ..database.product_db import get_db_product_info
-from ..database.streamer_info_db import get_streamers_info
 from ..database.streamer_room_db import (
     create_or_update_db_room_by_id,
+    get_live_room_info,
+    get_message_list,
+    update_db_room_status,
     delete_room_id,
-    get_conversation_list,
     get_db_streaming_room_info,
-    update_conversation_message_info,
-    update_streaming_room_info,
+    update_message_info,
+    update_room_video_path,
 )
-from ..database.user_db import get_db_user_info
 from ..models.product_model import ProductInfo
-from ..models.streamer_room_model import MessageItem, OnAirRoomStatusItem, RoomChatItem, SalesDocAndVideoInfo, StreamRoomInfo
+from ..models.streamer_room_model import OnAirRoomStatusItem, RoomChatItem, SalesDocAndVideoInfo, StreamRoomInfo
 from ..modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from ..routers.users import get_current_user_info
 from ..server_info import SERVER_PLUGINS_INFO
@@ -206,166 +205,30 @@ async def delete_room_api(roomId: int, user_id: int = Depends(get_current_user_i
 # ============================================================
 
 
-@router.post("/chat", summary="直播间开播对话接口")
-async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
-    streaming_room_info = await get_db_streaming_room_info(user_id, room_chat.roomId)
+@router.post("/online/{roomId}", summary="直播间开播接口")
+async def offline_api(roomId: int, user_id: int = Depends(get_current_user_info)):
 
-    # 获取直播间对话
-    conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
-    assert len(conversation_list) > 0
-
-    # 获取用户信息
-    user_info = await get_db_user_info(user_id)
-
-    user_msg = MessageItem(
-        role="user",
-        userId=user_id,
-        userName=user_info["username"],
-        message=room_chat.message,
-        avatar=user_info["avatar"],
-        messageIndex=conversation_list[-1]["messageIndex"] + 1,
-    )
-    conversation_list.append(dict(user_msg))
-
-    # 获取商品信息
-    prodcut_index = streaming_room_info["status"]["current_product_index"]
-    product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_db_product_info(user_id, id=int(product_info["product_id"]))
-    product_detail = product_list[0]
-
-    # 根据对话记录生成 prompt
-    prompt = await gen_poduct_base_prompt(
-        user_id, streaming_room_info["streamer_id"], streaming_room_info["status"]["current_product_id"]
-    )  # system + 获取商品文案prompt
-    prompt = combine_history(prompt, conversation_list)
-
-    # ====================== Agent ======================
-    # 调取 Agent
-    agent_response = await get_agent_res(prompt, product_detail["departure_place"], product_detail["delivery_company"])
-    if agent_response != "":
-        logger.info("Agent 执行成功，不执行 RAG")
-        prompt[-1]["content"] = agent_response
-
-    # ====================== RAG ======================
-    # 调取 rag
-    elif SERVER_PLUGINS_INFO.rag_enabled:
-        logger.info("Agent 未执行 or 未开启")
-        # agent 失败，调取 rag, chat_item.plugins.rag 为 True，则使用 RAG 查询数据库
-        rag_res = build_rag_prompt(RAG_RETRIEVER, product_detail["product_name"], prompt[-1]["content"])
-        if rag_res != "":
-            prompt[-1]["content"] = rag_res
-
-    # 调取 LLM
-    streamer_res = await get_llm_res(prompt)
-
-    # 生成数字人视频，并更新直播间数字人视频信息
-    server_video_path = await gen_tts_and_digital_human_video_app(streaming_room_info["streamer_id"], streamer_res)
-    streaming_room_info["status"]["streaming_video_path"] = server_video_path
-
-    stream_info = conversation_list[0]
-    streamer_msg = MessageItem(
-        role="streamer",
-        userId=stream_info["userId"],
-        userName=stream_info["userName"],
-        message=streamer_res,
-        avatar=stream_info["avatar"],
-        messageIndex=conversation_list[-1]["messageIndex"] + 1,
-    )
-    conversation_list.append(dict(streamer_msg))
-
-    # 保存对话
-    _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
-
-    # 保存直播间信息
-    update_streaming_room_info(streaming_room_info)
-
-    logger.info(streaming_room_info["status"]["conversation_id"])
-    logger.info(conversation_list)
-
+    update_db_room_status(roomId, user_id, "online")
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
-async def get_or_init_conversation(user_id, room_id: int, next_product=False):
-    # 根据直播间 ID 获取信息
-    streaming_room_info = await get_db_streaming_room_info(user_id, room_id)
-    logger.info(streaming_room_info)
+@router.post("/offline/{roomId}", summary="直播间下播接口")
+async def offline_api(roomId: int, user_id: int = Depends(get_current_user_info)):
 
-    # 根据 ID 获取主播信息
-    streamer_info = await get_streamers_info(streaming_room_info["streamer_id"])
-    streamer_info = streamer_info[0]
+    update_db_room_status(roomId, user_id, "offline")
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
-    # 商品信息
-    prodcut_index = streaming_room_info["status"]["current_product_index"]
 
-    if next_product:
-        # 如果是介绍下一个商品，则进行递增
-        prodcut_index += 1
+@router.post("/next-product/{roomId}", summary="直播间进行下一个商品讲解接口")
+async def on_air_live_room_next_product_api(roomId: int, user_id: int = Depends(get_current_user_info)):
+    """直播间进行下一个商品讲解
 
-    assert prodcut_index >= 0
-    product_info = streaming_room_info["product_list"][prodcut_index]
-    product_list, _ = await get_db_product_info(user_id, id=int(product_info["product_id"]))
+    Args:
+        roomId (int): 直播间 ID
+    """
 
-    # 是否为最后的商品
-    if len(streaming_room_info["product_list"]) - 1 == prodcut_index:
-        final_procut = True
-    else:
-        final_procut = False
-
-    # 获取直播间对话
-    if next_product:
-        conversation_list = []
-    else:
-        conversation_list = await get_conversation_list(streaming_room_info["status"]["conversation_id"])
-
-    if len(conversation_list) == 0:
-        # 新直播间 or 新产品，需要新建对话
-        streamer_msg = MessageItem(
-            role="streamer",
-            userId=str(streaming_room_info["streamer_id"]),
-            userName=streamer_info["name"],
-            message=product_info["sales_doc"],
-            avatar=streamer_info["avatar"],
-            messageIndex=0,
-        )
-        conversation_list.append(dict(streamer_msg))
-
-        #  基本信息完善
-        streaming_room_info["status"]["conversation_id"] = str(uuid.uuid4().hex)
-        streaming_room_info["status"]["current_product_id"] = product_info["product_id"]
-        streaming_room_info["status"]["streaming_video_path"] = product_info["start_video"]
-        streaming_room_info["status"]["current_product_index"] = prodcut_index
-        streaming_room_info["status"]["start_time"] = (
-            streaming_room_info["status"]["start_time"]
-            if streaming_room_info["status"]["start_time"] != ""
-            else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
-        streaming_room_info["status"]["current_product_start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        streaming_room_info["status"]["live_status"] = 1  # 0 未开播，1 正在直播，2 下播了
-
-        # 更新商品开始信息
-        if streaming_room_info["product_list"][prodcut_index]["start_time"] == "":
-            streaming_room_info["product_list"][prodcut_index]["start_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    logger.info(streaming_room_info["status"])
-    logger.info(conversation_list)
-    # 保存对话
-    _ = await update_conversation_message_info(streaming_room_info["status"]["conversation_id"], conversation_list)
-
-    # 保存直播间信息
-    update_streaming_room_info(streaming_room_info)
-
-    res_data = {
-        "streamerInfo": streamer_info,
-        "conversation": conversation_list,
-        "currentProductInfo": product_list[0],
-        "currentStreamerVideo": streaming_room_info["status"]["streaming_video_path"],
-        "currentProductIndex": streaming_room_info["status"]["current_product_index"],
-        "startTime": streaming_room_info["status"]["start_time"],
-        "currentPoductStartTime": streaming_room_info["status"]["current_product_start_time"],
-        "finalProduct": final_procut,
-    }
-
-    return res_data
+    update_db_room_status(roomId, user_id, "next-product")
+    return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
 
 @router.get("/live-info/{roomId}", summary="获取正在直播的直播间信息接口")
@@ -380,34 +243,65 @@ async def get_on_air_live_room_api(roomId: int, user_id: int = Depends(get_curre
         roomId (int): 直播间 ID
     """
 
-    res_data = await get_or_init_conversation(user_id, roomId, next_product=False)
+    res_data = await get_live_room_info(user_id, roomId)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/next-product/{roomId}", summary="直播间进行下一个商品讲解接口")
-async def on_air_live_room_next_product_api(roomId: int, user_id: int = Depends(get_current_user_info)):
-    """直播间进行下一个商品讲解
-
-    Args:
-        roomId (int): 直播间 ID
-    """
-
-    res_data = await get_or_init_conversation(user_id, roomId, next_product=True)
-
-    return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
-
-
-@router.post("/offline/{roomId}", summary="直播间下播接口")
-async def offline_api(roomId: int, user_id: int = Depends(get_current_user_info)):
+@router.post("/chat", summary="直播间对话接口")
+async def get_on_air_live_room_api(room_chat: RoomChatItem, user_id: int = Depends(get_current_user_info)):
     # 根据直播间 ID 获取信息
-    streaming_room_info = await get_db_streaming_room_info(user_id, roomId)
-    logger.info(streaming_room_info)
+    streaming_room_info = await get_db_streaming_room_info(user_id, room_chat.roomId)
+    streaming_room_info = streaming_room_info[0]
 
-    streaming_room_info["status"]["live_status"] = 2  # 标志为下播
+    # 商品索引
+    product_detail = streaming_room_info.product_list[streaming_room_info.status.current_product_index].product_info
 
-    # 保存直播间信息
-    update_streaming_room_info(streaming_room_info)
+    # 销售 ID
+    sales_info_id = streaming_room_info.product_list[streaming_room_info.status.current_product_index].sales_info_id
+
+    # 更新对话记录
+    update_message_info(sales_info_id, user_id, role="user", message=room_chat.message)
+
+    # 获取最新的对话记录
+    conversation_list = get_message_list(sales_info_id)
+
+    # 根据对话记录生成 prompt
+    prompt = await gen_poduct_base_prompt(
+        user_id,
+        streamer_info=streaming_room_info.streamer_info,
+        product_info=product_detail,
+    )  # system + 获取商品文案prompt
+
+    prompt = combine_history(prompt, conversation_list)
+
+    # ====================== Agent ======================
+    # 调取 Agent
+    agent_response = await get_agent_res(prompt, product_detail.departure_place, product_detail.delivery_company)
+    if agent_response != "":
+        logger.info("Agent 执行成功，不执行 RAG")
+        prompt[-1]["content"] = agent_response
+
+    # ====================== RAG ======================
+    # 调取 rag
+    elif SERVER_PLUGINS_INFO.rag_enabled:
+        logger.info("Agent 未执行 or 未开启")
+        # agent 失败，调取 rag, chat_item.plugins.rag 为 True，则使用 RAG 查询数据库
+        rag_res = build_rag_prompt(RAG_RETRIEVER, product_detail.product_name, prompt[-1]["content"])
+        if rag_res != "":
+            prompt[-1]["content"] = rag_res
+
+    # 调取 LLM
+    streamer_res = await get_llm_res(prompt)
+
+    # 生成数字人视频
+    server_video_path = await gen_tts_and_digital_human_video_app(streaming_room_info.streamer_info.streamer_id, streamer_res)
+
+    # 更新直播间数字人视频信息
+    update_room_video_path(streaming_room_info.status_id, server_video_path)
+
+    # 更新对话记录
+    update_message_info(sales_info_id, streaming_room_info.streamer_info.streamer_id, role="streamer", message=streamer_res)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 

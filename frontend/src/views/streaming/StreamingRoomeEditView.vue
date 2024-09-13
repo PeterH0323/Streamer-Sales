@@ -11,7 +11,8 @@ import {
   type RoomProductData,
   type RoomDetailItem,
   type StreamingRoomStatusItem,
-  type StreamingRoomProductList
+  type StreamingRoomProductList,
+  onAirRoomStartRequest
 } from '@/api/streamingRoom'
 import type { StreamerInfo } from '@/api/streamerInfo'
 import InfoDialogComponents from '@/components/InfoDialogComponents.vue'
@@ -188,10 +189,10 @@ async function confirmClick() {
 }
 
 // 保存
-const onSubmit = () => {
+const onSubmit = async () => {
   try {
     // 调用接口保存商品
-    RoomCreadeOrEditRequest(RoomDetailInfo.value)
+    await RoomCreadeOrEditRequest(RoomDetailInfo.value)
     ElMessage.success('保存成功')
   } catch (error: unknown) {
     if (error instanceof AxiosError) {
@@ -202,14 +203,31 @@ const onSubmit = () => {
   }
 }
 
-const handelOnAirClick = () => {
+const handelOnAirClick = async () => {
   for (const entry of RoomDetailInfo.value.product_list) {
     if (entry.start_video === '') {
       ElMessage.error('必须将所有的商品都生成数字人视频才可以进行开播')
       return false
     }
   }
-  onSubmit()
+
+  // 保存商品信息
+  await onSubmit()
+
+  if (RoomDetailInfo.value.status.live_status !== 1) {
+    try {
+      // 调用接口执行开播
+      await onAirRoomStartRequest(RoomDetailInfo.value.room_id)
+      ElMessage.success('开播成功')
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        ElMessage.error('开播成功' + error.message)
+      } else {
+        ElMessage.error('未知错误：' + error)
+      }
+    }
+  }
+
   router.push({ name: 'StreamingOnAir', params: { roomId: String(RoomDetailInfo.value.room_id) } })
 }
 
@@ -307,7 +325,7 @@ const handelControlClick = (
 
     <el-card shadow="never">
       <StreamerInfoComponent
-        disableChange
+        :disable-change="true"
         v-model="RoomDetailInfo.streamer_info"
         :optionList="streamerNameOptions"
       />
