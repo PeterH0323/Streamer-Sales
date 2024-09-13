@@ -9,15 +9,9 @@
 @Desc    :   大模型对话数据结构
 """
 
-
 from pydantic import BaseModel
 
 
 class GenProductItem(BaseModel):
     gen_type: str
     instruction: str
-
-
-class GenSalesDocItem(BaseModel):
-    streamerId: int
-    productId: int

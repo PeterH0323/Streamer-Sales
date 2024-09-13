@@ -11,13 +11,15 @@
 
 
 from typing import Dict, List
+
 from fastapi import APIRouter, Depends
 from loguru import logger
 
 from ..database.llm_db import get_llm_product_prompt_base_info
 from ..database.product_db import get_db_product_info
 from ..database.streamer_info_db import get_db_streamer_info
-from ..models.llm_model import GenProductItem, GenSalesDocItem
+from ..models.product_model import ProductInfo
+from ..models.streamer_info_model import StreamerInfo
 from ..modules.agent.agent_worker import get_agent_result
 from ..server_info import SERVER_PLUGINS_INFO
 from ..utils import LLM_MODEL_HANDLER, ResultCode, make_return_data
@@ -35,7 +37,7 @@ def combine_history(prompt: list, history_msg: list):
 
     Args:
         prompt (_type_): _description_
-        history_msg (_type_, optional): _description_. Defaults to None.
+        history_msg (_type_): _description_. Defaults to None.
 
     Returns:
         _type_: _description_
@@ -50,17 +52,28 @@ def combine_history(prompt: list, history_msg: list):
     return prompt
 
 
-async def gen_poduct_base_prompt(user_id, streamer_id, product_id) -> List[Dict[str, str]]:
+async def gen_poduct_base_prompt(
+    user_id: int,
+    streamer_id: int = -1,
+    product_id: int = -1,
+    streamer_info: StreamerInfo | None = None,
+    product_info: ProductInfo | None = None,
+) -> List[Dict[str, str]]:
     """生成商品介绍的 prompt
 
     Args:
         user_id (int): 用户 ID
         streamer_id (int): 主播 ID
         product_id (int): 商品 ID
+        streamer_info (StreamerInfo, optional): 主播信息，如果为空则根据 streamer_id 查表
+        product_info (ProductInfo, optional): 商品信息，如果为空则根据 product_id 查表
 
     Returns:
         List[Dict[str,str]]: 生成的 promot
     """
+
+    assert streamer_id == -1 and streamer_info is not None
+    assert product_id == -1 and product_info is not None
 
     # 加载对话配置文件
     dataset_yaml = await get_llm_product_prompt_base_info()
@@ -74,19 +87,21 @@ async def gen_poduct_base_prompt(user_id, streamer_id, product_id) -> List[Dict[
     product_info_struct_template = dataset_yaml["product_info_struct"]
 
     # 根据 ID 获取主播信息
-    streamer_info = await get_db_streamer_info(streamer_id)
-    streamer_info = streamer_info[0]
+    if streamer_info is None:
+        streamer_info = await get_db_streamer_info(streamer_id)
+        streamer_info = streamer_info[0]
 
     # 将销售角色名和角色信息插入到 system prompt
-    character_str = streamer_info["character"].replace(";", "、")
-    system_str = system.replace("{role_type}", streamer_info["name"]).replace("{character}", character_str)
+    character_str = streamer_info.character.replace(";", "、")
+    system_str = system.replace("{role_type}", streamer_info.name).replace("{character}", character_str)
 
     # 根据 ID 获取商品信息
-    product_list, _ = await get_db_product_info(user_id, id=product_id)
-    product_info = product_list[0]
+    if product_info is None:
+        product_list, _ = await get_db_product_info(user_id, product_id=product_id)
+        product_info = product_list[0]
 
-    heighlights_str = product_info["heighlights"].replace(";", "、")
-    product_info_str = product_info_struct_template[0].replace("{name}", product_info["product_name"])
+    heighlights_str = product_info.heighlights.replace(";", "、")
+    product_info_str = product_info_struct_template[0].replace("{name}", product_info.product_name)
     product_info_str += product_info_struct_template[1].replace("{highlights}", heighlights_str)
 
     # 生成商品文案 prompt
@@ -138,26 +153,24 @@ async def get_llm_res(prompt):
     return res_data
 
 
-@router.post("/gen_sales_doc", summary="生成主播文案接口")
-async def get_product_info_api(gen_sales_doc_item: GenSalesDocItem, user_id: int = Depends(get_current_user_info)):
+@router.get("/gen_sales_doc", summary="生成主播文案接口")
+async def get_product_info_api(streamer_id: int, product_id: int, user_id: int = Depends(get_current_user_info)):
     """生成口播文案
 
     Args:
-        gen_sales_doc_item (GenSalesDocItem): _description_
-
-    Returns:
-        _type_: _description_
+        streamer_id (int): 主播 ID，用于获取性格等信息
+        product_id (int): 商品 ID
     """
 
-    prompt = await gen_poduct_base_prompt(user_id, gen_sales_doc_item.streamerId, gen_sales_doc_item.productId)
+    prompt = await gen_poduct_base_prompt(user_id, streamer_id, product_id)
 
     res_data = await get_llm_res(prompt)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", res_data)
 
 
-@router.post("/gen_product_info")
-async def get_product_info_api(gen_product_item: GenProductItem, user_id: int = Depends(get_current_user_info)):
+@router.get("/gen_product_info")
+async def get_product_info_api(product_id: int, user_id: int = Depends(get_current_user_info)):
     """TODO 根据说明书内容生成商品信息
 
     Args:

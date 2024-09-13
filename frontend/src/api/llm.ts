@@ -2,11 +2,11 @@ import { request_handler, type ResultPackage } from '@/api/base'
 import { header_authorization } from '@/api/user'
 
 // 获取后端主播信息
-const genSalesDocRequest = (productId_: number, streamerId_: number) => {
+const genSalesDocRequest = (productId: number, streamerId: number) => {
   return request_handler<ResultPackage<string>>({
-    method: 'POST',
+    method: 'GET',
     url: '/llm/gen_sales_doc',
-    data: { productId: productId_, streamerId: streamerId_ },
+    params: { streamer_id: streamerId, product_id: productId },
     headers: {
       Authorization: header_authorization.value
     }
@@ -14,11 +14,11 @@ const genSalesDocRequest = (productId_: number, streamerId_: number) => {
 }
 
 // 使用说明书总结生成商品信息接口
-const genProductInfoByLlmRequest = (salesDoc: string) => {
+const genProductInfoByLlmRequest = (productId: number) => {
   return request_handler({
-    method: 'POST',
+    method: 'GET',
     url: '/llm/gen_product_info',
-    data: salesDoc,
+    params: { product_id: productId },
     headers: {
       Authorization: header_authorization.value
     }
