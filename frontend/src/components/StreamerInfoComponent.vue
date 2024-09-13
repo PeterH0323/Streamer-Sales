@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, nextTick, ref } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { ElInput } from 'element-plus'
 import type { InputInstance } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
@@ -23,11 +23,26 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 // 性格操作
-modelSteamerInfo.value.character = ''
-const characterList = computed(() => modelSteamerInfo.value.character.split(';'))
 const inputCharacterValue = ref('')
 const inputCharacterVisible = ref(false)
 const InputCharacterRef = ref<InputInstance>()
+
+modelSteamerInfo.value.character = ''
+let characterList = ref([] as string[])
+watch(
+  modelSteamerInfo,
+  (newValue) => {
+    console.log(`性格：更新为: ${newValue}`)
+
+    if (
+      typeof modelSteamerInfo.value.character === 'string' &&
+      modelSteamerInfo.value.character !== ''
+    ) {
+      characterList.value = modelSteamerInfo.value.character.split(';')
+    }
+  },
+  { immediate: true }
+)
 
 const handleCharacterClose = (tag: string) => {
   // 删除性格操作
