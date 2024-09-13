@@ -83,9 +83,7 @@ async def delete_streamer_id(streamer_id: int, user_id: int) -> bool:
         with Session(DB_ENGINE) as session:
             # 查找特定 ID
             streamer_info = session.exec(
-                select(StreamerInfo).where(
-                    and_(StreamerInfo.streamer_id == streamer_id, StreamerInfo.user_id == user_id)
-                )
+                select(StreamerInfo).where(and_(StreamerInfo.streamer_id == streamer_id, StreamerInfo.user_id == user_id))
             ).one()
 
             if streamer_info is None:
@@ -124,36 +122,28 @@ def create_or_update_db_streamer_by_id(streamer_id: int, new_info: StreamerInfo,
         if streamer_id > 0:
             # 更新特定 ID
             streamer_info = session.exec(
-                select(StreamerInfo).where(
-                    and_(StreamerInfo.streamer_id == streamer_id, StreamerInfo.user_id == user_id)
-                )
+                select(StreamerInfo).where(and_(StreamerInfo.streamer_id == streamer_id, StreamerInfo.user_id == user_id))
             ).one()
 
             if streamer_info is None:
                 logger.error("Edit by other ID !!!")
                 return -1
-
-            # 更新对应的值
-            streamer_info.name = new_info.name
-            streamer_info.character = new_info.character
-            streamer_info.avatar = new_info.avatar
-            streamer_info.tts_weight_tag = new_info.tts_weight_tag
-            streamer_info.tts_reference_sentence = new_info.tts_reference_sentence
-            streamer_info.tts_reference_audio = new_info.tts_reference_audio
-            streamer_info.poster_image = new_info.poster_image
-            streamer_info.base_mp4_path = new_info.base_mp4_path
-
-            session.add(streamer_info)
         else:
             # 新增，直接添加即可
-            session.add(new_info)
+            streamer_info = StreamerInfo(user_id=user_id)
 
+        # 更新对应的值
+        streamer_info.name = new_info.name
+        streamer_info.character = new_info.character
+        streamer_info.avatar = new_info.avatar
+        streamer_info.tts_weight_tag = new_info.tts_weight_tag
+        streamer_info.tts_reference_sentence = new_info.tts_reference_sentence
+        streamer_info.tts_reference_audio = new_info.tts_reference_audio
+        streamer_info.poster_image = new_info.poster_image
+        streamer_info.base_mp4_path = new_info.base_mp4_path
+
+        session.add(streamer_info)
         session.commit()  # 提交
-        session.refresh(new_info)
+        session.refresh(streamer_info)
 
-        return new_info.streamer_id
-
-
-async def get_streamers_info(user_id: int, stream_id: int = -1) -> List[StreamerInfo]:
-    # TODO 删除
-    raise NotImplemented("Delete")
+        return int(streamer_info.streamer_id)

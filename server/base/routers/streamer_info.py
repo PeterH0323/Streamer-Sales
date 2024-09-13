@@ -9,6 +9,7 @@
 @Desc    :   主播管理信息页面接口
 """
 
+from typing import Tuple
 import uuid
 from pathlib import Path
 
@@ -29,7 +30,7 @@ router = APIRouter(
 )
 
 
-async def gen_digital_human(user_id, streamer_id: int, new_streamer_info: StreamerInfo) -> StreamerInfo:
+async def gen_digital_human(user_id, streamer_id: int, new_streamer_info: StreamerInfo) -> Tuple[str, str]:
     """生成数字人视频
 
     Args:
@@ -38,16 +39,17 @@ async def gen_digital_human(user_id, streamer_id: int, new_streamer_info: Stream
         new_streamer_info (StreamerInfo): 新的主播信息
 
     Returns:
-        str: 新的数字人信息
+        str: 数字人视频地址
+        str: 数字人头像/海报地址
     """
 
     streamer_info_db = await get_db_streamer_info(user_id, streamer_id)
     streamer_info_db = streamer_info_db[0]
 
     new_base_mp4_path = new_streamer_info.base_mp4_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
-    if streamer_info_db.base_mp4_path == new_base_mp4_path:
+    if streamer_info_db.base_mp4_path.replace(API_CONFIG.REQUEST_FILES_URL, "") == new_base_mp4_path:
         # 数字人视频没更新，跳过
-        return new_streamer_info
+        return streamer_info_db.base_mp4_path, streamer_info_db.poster_image
 
     # 调取接口生成进行数字人预处理
 
@@ -74,9 +76,7 @@ async def gen_digital_human(user_id, streamer_id: int, new_streamer_info: Stream
     if "http://" not in poster_server_url and "http:/" in poster_server_url:
         poster_server_url = poster_server_url.replace("http:/", "http://")
 
-    new_streamer_info.poster_image = poster_server_url
-
-    return new_streamer_info
+    return new_streamer_info.base_mp4_path, poster_server_url
 
 
 @router.get("/list", summary="获取所有主播信息接口，用于用户进行主播的选择")
@@ -98,9 +98,9 @@ async def get_streamer_info_api(streamerId: int, user_id: int = Depends(get_curr
 
 
 @router.post("/create", summary="新增主播信息接口")
-async def create_streamer_info_api(streamer_info: StreamerInfo, user_id: int = Depends(get_current_user_info)):
+async def create_streamer_info_api(streamerItem: StreamerInfo, user_id: int = Depends(get_current_user_info)):
     """新增主播信息"""
-
+    streamer_info = streamerItem
     streamer_info.user_id = user_id
     streamer_info.streamer_id = None
 
@@ -115,12 +115,16 @@ async def create_streamer_info_api(streamer_info: StreamerInfo, user_id: int = D
 
     streamer_info.poster_image = poster_image
     streamer_info.base_mp4_path = base_mp4_path
+    streamer_info.streamer_id = streamer_id
 
     # 数字人视频对其进行初始化，同时生成头图
-    streamer_info = await gen_digital_human(user_id, streamer_id, streamer_info)
+    video_info = await gen_digital_human(user_id, streamer_id, streamer_info)
+
+    streamer_info.base_mp4_path = video_info[0]
+    streamer_info.poster_image = video_info[1]
+    streamer_info.avatar = video_info[1]
 
     create_or_update_db_streamer_by_id(streamer_id, streamer_info, user_id)
-
     return make_return_data(True, ResultCode.SUCCESS, "成功", streamer_id)
 
 
@@ -129,7 +133,11 @@ async def edit_streamer_info_api(streamer_id: int, streamer_info: StreamerInfo, 
     """修改主播信息"""
 
     # 如果更新了数字人视频对其进行初始化，同时生成头图
-    streamer_info = await gen_digital_human(user_id, streamer_id, streamer_info)
+    video_info = await gen_digital_human(user_id, streamer_id, streamer_info)
+
+    streamer_info.base_mp4_path = video_info[0]
+    streamer_info.poster_image = video_info[1]
+    streamer_info.avatar = video_info[1]
 
     # 更新数据库
     create_or_update_db_streamer_by_id(streamer_id, streamer_info, user_id)

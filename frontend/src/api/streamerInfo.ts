@@ -44,8 +44,9 @@ const streamerDetailInfoRequest = (streamerId: number) => {
 
 // 更新特定主播信息
 const streamerEditDetailRequest = async (streamerItem: StreamerInfo) => {
-  if (streamerItem.streamer_id == 0) {
+  if (typeof streamerItem.streamer_id != 'number' || streamerItem.streamer_id === 0) {
     // 新建
+    console.info(streamerItem)
     return request_handler<ResultPackage<number>>({
       method: 'POST',
       url: '/streamer/create',
