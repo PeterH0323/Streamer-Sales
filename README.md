@@ -81,8 +81,8 @@
   - [🎨 快速体验](#-快速体验)
     - [在线体验](#在线体验)
     - [本地部署](#本地部署)
-      - [宿主机直接部署](#宿主机直接部署)
-      - [Docker-Compose](#docker-compose)
+      - [方式一：Docker-Compose（推荐）](#方式一docker-compose推荐)
+      - [方式二：宿主机直接部署](#方式二宿主机直接部署)
   - [🖥️ 配置需求](#️-配置需求)
   - [🦸 数字人生成 Workflow](#-数字人生成-workflow)
   - [🌐 Agent](#-agent)
@@ -95,8 +95,8 @@
     - [五、RAG 向量数据库](#五rag-向量数据库)
     - [六、模型合并 + 量化](#六模型合并--量化)
     - [七、启动 Web APP](#七启动-web-app)
-      - [Docker-Compose（推荐）](#docker-compose推荐)
-      - [宿主机直接部署](#宿主机直接部署-1)
+      - [方式一：Docker-Compose（推荐）](#方式一docker-compose推荐-1)
+      - [方式二：宿主机直接部署](#方式二宿主机直接部署-1)
   - [🔧 自定义](#-自定义)
     - [如何自定义数字人](#如何自定义数字人)
     - [如何替换自己的 TTS](#如何替换自己的-tts)
@@ -179,7 +179,27 @@
 
 ### 本地部署
 
-#### 宿主机直接部署
+#### 方式一：Docker-Compose（推荐）
+
+目前只支持后端，后续会加入前端
+
+```bash
+git clone https://github.com/PeterH0323/Streamer-Sales.git
+
+cd Streamer-Sales
+docker build -t streamer-sales:v0.9.0 -f docker/Dockerfile .
+
+docker-compose up
+```
+
+> [!NOTE]
+> 如果出现错误：
+>
+> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
+>
+> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
+
+#### 方式二：宿主机直接部署
 
 - 环境搭建：
 
@@ -243,10 +263,9 @@ export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
 export WEATHER_API_KEY="${天气 API key}"
 
 # 数据库配置
-export POSTGRES_SERVER="127.0.0.1"  # 数据库 IP
-export POSTGRES_USER="postgres"  # 数据库用户名
+# export POSTGRES_SERVER="127.0.0.1"  # 数据库 IP，按需配置
 export POSTGRES_PASSWORD=""  # 数据库密码，自行填写
-export POSTGRES_DB="streamer_sales_db"  # 数据库名字
+# export POSTGRES_DB="streamer_sales_db"  # 数据库名字，按需配置
 
 bash deploy.sh base
 ```
@@ -275,27 +294,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 </details>
-
-#### Docker-Compose
-
-目前只支持 v0.8.0 ，后续会升级
-
-```bash
-git clone https://github.com/PeterH0323/Streamer-Sales.git
-
-cd Streamer-Sales
-git checkout v0.8.0
-docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
-
-docker-compose up
-```
-
-> [!NOTE]
-> 如果出现错误：
->
-> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
->
-> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
 
 
 ## 🖥️ 配置需求
@@ -789,17 +787,27 @@ python ./benchmark/get_benchmark_report.py
 
 ### 七、启动 Web APP
 
-#### Docker-Compose（推荐）
+#### 方式一：Docker-Compose（推荐）
+
+目前只支持后端，后续会加入前端
 
 ```bash
 git clone https://github.com/PeterH0323/Streamer-Sales.git
 
-docker build -t streamer-sales:v0.8.0 -f docker/Dockerfile .
+cd Streamer-Sales
+docker build -t streamer-sales:v0.9.0 -f docker/Dockerfile .
 
 docker-compose up
 ```
 
-#### 宿主机直接部署
+> [!NOTE]
+> 如果出现错误：
+>
+> 1、第一次启动需要下载模型，有可能会出现服务之间 connect fail，耐心等待下载好模型重启即可
+>
+> 2、如果您有多卡，可以修改 compose.yaml 中的 `device_ids` 来配置每个服务部署的显卡 ID
+
+#### 方式二：宿主机直接部署
 
 - 环境搭建：
 
@@ -824,62 +832,58 @@ pip install -r requirements.txt
 1. TTS 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.tts.tts_server:app --host 0.0.0.0 --port 8001 # tts
+bash deploy.sh tts
 ```
 
 2. 数字人 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.digital_human.digital_human_server:app --host 0.0.0.0 --port 8002 # digital human
+bash deploy.sh dg
 ```
 
 3. ASR 服务
 
 ```bash
-conda activate streamer-sales
-uvicorn server.asr.asr_server:app --host 0.0.0.0 --port 8003 # asr
+bash deploy.sh asr
 ```
 
 4. LLM 服务
 
 ```bash
-conda activate streamer-sales
-export MODELSCOPE_CACHE="./weights/llm_weights"
-export LMDEPLOY_USE_MODELSCOPE=True
-lmdeploy serve api_server HinGwenWoong/streamer-sales-lelemiao-7b \
-                          --server-port 23333 \
-                          --model-name internlm2 \
-                          --session-len 32768 \
-                          --cache-max-entry-count 0.1 \
-                          --model-format hf
+bash deploy.sh llm
 ```
 
-使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署建议使用 40G 显存机器。
+默认使用 [lelemiao-7b](https://modelscope.cn/models/HinGwenWoong/streamer-sales-lelemiao-7b) 进行部署，建议使用 40G 显存机器。
 
-如果您的机器是 24G 的显卡，需要换成 4bit 模型，修改命令中的两处地方就行：
+如果您的机器是 24G 的显卡，需要换成 4bit 模型，命令如下：
 
-- `HinGwenWoong/streamer-sales-lelemiao-7b` -> `HinGwenWoong/streamer-sales-lelemiao-7b-4bit`
-- `--model-format hf` -> `--model-format awq`
+```bash
+bash deploy.sh llm-4bit
+```
 
 5. 中台服务
 
-```bash
-conda activate streamer-sales
+启用中台服务需要先配置数据库环境，详见 [数据库环境搭建](./doc/database/README.md)
 
+```bash
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
 export WEATHER_API_KEY="${天气 API key}"
 
-uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000 # base: llm + rag + agent
+# 数据库配置
+# export POSTGRES_SERVER="127.0.0.1"  # 数据库 IP，按需配置
+export POSTGRES_PASSWORD=""  # 数据库密码，自行填写
+# export POSTGRES_DB="streamer_sales_db"  # 数据库名字，按需配置
+
+bash deploy.sh base
 ```
 
 6. 前端
 
+需要先搭建前端的环境，详见 [搭建前端环境文档](./doc/frontend/README.md)
+
 ```bash
-conda activate streamer-sales
-streamlit run app.py --server.address=0.0.0.0 --server.port 7860
+bash deploy.sh frontend
 ```
 
 </details>
@@ -888,7 +892,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 <summary><b>前后端融合版本 ( <= v0.7.1 )</b>：适合初学者或者只是想部署玩玩的用户</summary>
 
 ```bash
-
 git checkout v0.7.1
 
 # Agent Key (如果没有请忽略)
@@ -899,7 +902,6 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```
 
 </details>
-
 ## 🔧 自定义
 
 ### 如何自定义数字人

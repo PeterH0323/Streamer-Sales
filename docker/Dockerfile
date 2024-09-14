@@ -10,7 +10,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
 RUN sed -i s/archive.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list \
     && sed -i s/security.ubuntu.com/mirrors.aliyun.com/g /etc/apt/sources.list \
     && apt-get update -y \ 
-    && apt-get install -y --no-install-recommends wget git libgl1 libglib2.0-0 unzip \
+    && apt-get install -y --no-install-recommends wget git libgl1 libglib2.0-0 unzip libpq-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

@@ -9,6 +9,7 @@ services:
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
+      - ./static:/workspace/Streamer-Sales/static
     ports:
       - "8001:8001"
     networks:
@@ -41,6 +42,7 @@ services:
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
+      - ./static:/workspace/Streamer-Sales/static
     ports:
       - "8002:8002"
     networks:
@@ -72,6 +74,7 @@ services:
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
+      - ./static:/workspace/Streamer-Sales/static
     ports:
       - "8003:8003"
     networks:
@@ -103,6 +106,7 @@ services:
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
+      - ./static:/workspace/Streamer-Sales/static
     ports:
       - "23333:23333"
     networks:
@@ -132,6 +136,20 @@ services:
                       --model-format hf
     restart: always
 
+  database:
+    container_name: streamer-sales-database
+    image: postgres:16.4
+    ports:
+      - "5432:5432"
+    networks:
+      - streamer-sales-network
+    environment:
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: "streamer_sales_db"
+    volumes:
+      - ./work_dirs/database:/var/lib/postgresql/data # 数据持久化
+    restart: always
+
   base:
     container_name: streamer-sales-base-server
     build:
@@ -141,11 +159,13 @@ services:
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
+      - ./static:/workspace/Streamer-Sales/static
     ports:
       - "8000:8000"
     networks:
       - streamer-sales-network
     depends_on:
+      - database
       - llm
       - tts
       - digital_human
@@ -153,6 +173,11 @@ services:
     environment:
       USING_DOCKER_COMPOSE: "true"
       HF_ENDPOINT: "https://hf-mirror.com"
+
+      # 数据库配置
+      POSTGRES_SERVER: "database" # 不可修改，docker-compsoe 路由自动配置的 host
+      POSTGRES_PASSWORD: "123456" # 和 database.environment.POSTGRES_PASSWORD 一致
+      POSTGRES_DATABASE: "streamer_sales_db" # 和 database.environment.POSTGRES_DB 一致
 
       # Agent Key (如果没有请忽略)
       # DELIVERY_TIME_API_KEY: "${快递 EBusinessID},${快递 api_key}"
@@ -172,31 +197,6 @@ services:
         nvidia-smi
         sleep 60
         uvicorn server.base.base_server:app --host 0.0.0.0 --port 8000
-    restart: always
-
-  frontend:
-    container_name: streamer-sales-frontend
-    build:
-      context: ./
-      dockerfile: ./docker/Dockerfile
-    image: streamer-sales:v0.8.0
-    volumes:
-      - ./weights:/workspace/Streamer-Sales/weights
-      - ./work_dirs:/workspace/Streamer-Sales/work_dirs
-    ports:
-      - "7860:7860"
-    networks:
-      - streamer-sales-network
-    environment:
-      USING_DOCKER_COMPOSE: "true"
-    depends_on:
-      - base
-    command:
-      - /bin/bash
-      - -c
-      - |
-        sleep 90
-        streamlit run app.py --server.address=0.0.0.0 --server.port 7860
     restart: always
 
 networks:
