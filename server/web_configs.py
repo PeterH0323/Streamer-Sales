@@ -36,7 +36,7 @@ class WebConfigs:
     # ==================================================================
     #                             数据库配置
     # ==================================================================
-    POSTGRES_SERVER = os.environ.get("POSTGRES_USER", "127.0.0.1")  # 数据库 IP
+    POSTGRES_SERVER = os.environ.get("POSTGRES_SERVER", "127.0.0.1")  # 数据库 IP
     POSTGRES_PORT = 5432  # 数据库端口号
     POSTGRES_USER = os.environ.get("POSTGRES_USER", "postgres")  # 数据库用户名
     POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "")  # 数据库密码，自行填写
