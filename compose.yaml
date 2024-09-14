@@ -5,7 +5,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile
-    image: streamer-sales:v0.8.0
+    image: streamer-sales:v0.9.0
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
@@ -38,7 +38,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile
-    image: streamer-sales:v0.8.0
+    image: streamer-sales:v0.9.0
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
@@ -70,7 +70,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile
-    image: streamer-sales:v0.8.0
+    image: streamer-sales:v0.9.0
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
@@ -102,7 +102,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile
-    image: streamer-sales:v0.8.0
+    image: streamer-sales:v0.9.0
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
@@ -155,7 +155,7 @@ services:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile
-    image: streamer-sales:v0.8.0
+    image: streamer-sales:v0.9.0
     volumes:
       - ./weights:/workspace/Streamer-Sales/weights
       - ./work_dirs:/workspace/Streamer-Sales/work_dirs
