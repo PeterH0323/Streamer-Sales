@@ -237,12 +237,16 @@ bash deploy.sh llm-4bit
 
 启用中台服务需要先配置数据库环境，详见 [数据库环境搭建](./doc/database/README.md)
 
-同时在 `server/web_config.py` 配置数据库的用户名(`POSTGRES_USER`)和密码(`POSTGRES_PASSWORD`)
-
 ```bash
 # Agent Key (如果没有请忽略)
 export DELIVERY_TIME_API_KEY="${快递 EBusinessID},${快递 api_key}"
 export WEATHER_API_KEY="${天气 API key}"
+
+# 数据库配置
+export POSTGRES_SERVER="127.0.0.1"  # 数据库 IP
+export POSTGRES_USER="postgres"  # 数据库用户名
+export POSTGRES_PASSWORD=""  # 数据库密码，自行填写
+export POSTGRES_DB="streamer_sales_db"  # 数据库名字
 
 bash deploy.sh base
 ```
