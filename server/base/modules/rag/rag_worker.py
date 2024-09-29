@@ -1,17 +1,20 @@
 import shutil
 from pathlib import Path
 
-from loguru import logger
 import torch
-import yaml
+from loguru import logger
 
 from ....web_configs import WEB_CONFIGS
+from ...database.product_db import get_db_product_info
 from .feature_store import gen_vector_db
 from .retriever import CacheRetriever
 
 # 基础配置
 CONTEXT_MAX_LENGTH = 3000  # 上下文最大长度
 GENERATE_TEMPLATE = "这是说明书：“{}”\n 客户的问题：“{}” \n 请阅读说明并运用你的性格进行解答。"  # RAG prompt 模板
+
+# RAG 实例句柄
+RAG_RETRIEVER = None
 
 
 def build_rag_prompt(rag_retriever: CacheRetriever, product_name, prompt):
@@ -50,7 +53,7 @@ def init_rag_retriever(rag_config: str, db_path: str):
     return retriever
 
 
-def gen_rag_db(force_gen=False):
+async def gen_rag_db(user_id, force_gen=False):
     """
     生成向量数据库。
 
@@ -71,25 +74,21 @@ def gen_rag_db(force_gen=False):
     Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).mkdir(exist_ok=True, parents=True)
 
     # 读取 yaml 文件，获取所有说明书路径，并移动到 tmp 目录
-    with open(WEB_CONFIGS.PRODUCT_INFO_YAML_PATH, "r", encoding="utf-8") as f:
-        product_info_dict = yaml.safe_load(f)
-    for _, info in product_info_dict.items():
+    product_list, _ = await get_db_product_info(user_id)
 
-        if info["delete"]:
-            # 去掉删除的商品
-            continue
+    for info in product_list:
 
         shutil.copyfile(
             Path(
                 WEB_CONFIGS.SERVER_FILE_ROOT,
                 WEB_CONFIGS.PRODUCT_FILE_DIR,
                 WEB_CONFIGS.INSTRUCTIONS_DIR,
-                Path(info["instruction"]).name,
+                Path(info.instruction).name,
             ),
-            Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info["instruction"]).name),
+            Path(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP).joinpath(Path(info.instruction).name),
         )
 
-    print("Generating rag database, pls wait ...")
+    logger.info("Generating rag database, pls wait ...")
     # 调用函数生成向量数据库
     gen_vector_db(
         WEB_CONFIGS.RAG_CONFIG_PATH,
@@ -101,27 +100,23 @@ def gen_rag_db(force_gen=False):
     shutil.rmtree(WEB_CONFIGS.PRODUCT_INSTRUCTION_DIR_GEN_DB_TMP)
 
 
-def load_rag_model():
-    # 生成 rag 数据库
-    gen_rag_db()
+async def load_rag_model(user_id):
 
-    # 加载 rag 模型
-    retriever = init_rag_retriever(rag_config=WEB_CONFIGS.RAG_CONFIG_PATH, db_path=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
-
-    return retriever
-
-
-def rebuild_rag_db(db_name="default"):
+    global RAG_RETRIEVER
 
     # 重新生成 RAG 向量数据库
-    gen_rag_db(force_gen=True)
+    await gen_rag_db(user_id)
+
+    # 加载 rag 模型
+    RAG_RETRIEVER = init_rag_retriever(rag_config=WEB_CONFIGS.RAG_CONFIG_PATH, db_path=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
+    logger.info("load rag model done !...")
+
+
+async def rebuild_rag_db(user_id, db_name="default"):
+
+    # 重新生成 RAG 向量数据库
+    await gen_rag_db(user_id, force_gen=True)
 
     # 重新加载 retriever
     RAG_RETRIEVER.pop(db_name)
     RAG_RETRIEVER.get(fs_id=db_name, config_path=WEB_CONFIGS.RAG_CONFIG_PATH, work_dir=WEB_CONFIGS.RAG_VECTOR_DB_DIR)
-
-
-if WEB_CONFIGS.ENABLE_RAG:
-    RAG_RETRIEVER = load_rag_model()
-else:
-    RAG_RETRIEVER = None

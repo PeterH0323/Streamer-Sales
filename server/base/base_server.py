@@ -57,6 +57,11 @@ async def lifespan(app: FastAPI):
     # 新服务，生成默认数据，可以自行注释 or 修改
     gen_default_data()
 
+    if WEB_CONFIGS.ENABLE_RAG:
+        from .modules.rag.rag_worker import load_rag_model
+        # 生成 rag 数据库
+        await load_rag_model(user_id=1)
+
     yield
 
     # 结束

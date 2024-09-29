@@ -66,7 +66,7 @@ async def upload_product_api(upload_product_item: ProductInfo, user_id: int = De
 
     if WEB_CONFIGS.ENABLE_RAG and rebuild_rag_db_flag:
         # 重新生成 RAG 向量数据库
-        rebuild_rag_db()
+        await rebuild_rag_db(user_id)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
@@ -78,7 +78,7 @@ async def upload_product_api(product_id: int, upload_product_item: ProductInfo, 
 
     if WEB_CONFIGS.ENABLE_RAG and rebuild_rag_db_flag:
         # 重新生成 RAG 向量数据库
-        rebuild_rag_db()
+        await rebuild_rag_db(user_id)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
@@ -93,7 +93,7 @@ async def upload_product_api(productId: int, user_id: int = Depends(get_current_
 
     if WEB_CONFIGS.ENABLE_RAG:
         # 重新生成 RAG 向量数据库
-        rebuild_rag_db()
+        await rebuild_rag_db(user_id)
 
     return make_return_data(True, ResultCode.SUCCESS, "成功", "")
 
