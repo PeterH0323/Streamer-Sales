@@ -11,6 +11,14 @@ import requests
 import yaml
 from tqdm import tqdm
 
+def get_access_token(api_key,secret_key):
+    """
+    使用 AK，SK 生成鉴权签名（Access Token）
+    :return: access_token，或是None(如果错误)
+    """
+    url = "https://aip.baidubce.com/oauth/2.0/token"
+    params = {"grant_type": "client_credentials", "client_id": api_key, "client_secret": secret_key}
+    return str(requests.post(url, params=params).json().get("access_token"))
 
 def set_api_key(api_type, api_yaml_path):
     """设置 api key
@@ -22,17 +30,21 @@ def set_api_key(api_type, api_yaml_path):
     # 读取 yaml 文件
     with open(api_yaml_path, "r", encoding="utf-8") as f:
         api_yaml = yaml.safe_load(f)
-
+    secret_key =  None
+    
     # 设置 api key
     if api_type == "qwen":
         api_key = api_yaml["ali_qwen_api_key"]
         dashscope.api_key = api_key
     elif api_type == "ernie":
         api_key = api_yaml["baidu_ernie_api_key"]
+    elif api_type == "qianfan":
+        api_key = api_yaml["baidu_qianfan_api_key"]
+        secret_key = api_yaml["baidu_qianfan_secret_key"]
     else:
         raise ValueError("api_type must be qwen or ernie")
 
-    return api_key
+    return api_key,secret_key
 
 
 def call_qwen_message(content_str, model_type=dashscope.Generation.Models.qwen_turbo):
@@ -212,7 +224,7 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
         ), f"{specific_name} not in dataset_yaml['role_type'] ({dataset_yaml['role_type']}), pls check dataset yaml!"
 
     # 设置 api key
-    api_key = set_api_key(model_name, api_yaml_path)
+    api_key,secret_key = set_api_key(model_name, api_yaml_path)
 
     data_gen_setting = dataset_yaml["data_generation_setting"]
     gen_num = data_gen_setting["each_product_gen"]
@@ -312,6 +324,10 @@ def gen_dataset(dastset_yaml_path: str, api_yaml_path: str, save_json_root: Path
                             format_json = process_request(call_qwen_message, content_str, qwen_model_type[idx], model_name)
                         elif model_name == "ernie":
                             format_json = process_request(call_ernie_message, content_str, api_key, model_name)
+                        elif model_name == "qianfan":
+                            api_key = get_access_token(api_key,secret_key)
+                            model_name = "ernie"
+                            format_json = process_request(call_ernie_message, content_str, api_key, model_name)
                         else:
                             raise ValueError(f"model_name {model_name} not support")
 
@@ -359,7 +375,7 @@ if __name__ == "__main__":
 
     # 命令行输入参数
     parser = argparse.ArgumentParser(description="Gen Dataset")
-    parser.add_argument("model_name", type=str, choices=["qwen", "ernie"], help="Model name for data generation")
+    parser.add_argument("model_name", type=str, choices=["qwen", "ernie", "qianfan"], help="Model name for data generation")
     parser.add_argument("--data_yaml", type=str, default="../../configs/conversation_cfg.yaml", help="data setting file path")
     parser.add_argument("--api_yaml", type=str, default="../../configs/api_cfg.yaml", help="api setting file path")
     parser.add_argument("--output_dir", type=str, default="./train_dataset/response", help="generation json output dir")
