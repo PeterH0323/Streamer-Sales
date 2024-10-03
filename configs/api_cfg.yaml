@@ -1,3 +1,6 @@
 ali_qwen_api_key: {your_ali_qwen_api_key}
 baidu_ernie_api_key: {your_baidu_ernie_api_key}
 kimi_api_key: {kimi_api_key}
+#千帆api填下面两项
+baidu_qianfan_api_key: {your_baidu_qianfan_api_key}
+baidu_qianfan_secret_key: {your_baidu_qianfan_secret_key}
