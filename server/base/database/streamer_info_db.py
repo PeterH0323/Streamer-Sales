@@ -21,7 +21,7 @@ from .init_db import DB_ENGINE
 
 
 async def get_db_streamer_info(user_id: int, streamer_id: int | None = None) -> List[StreamerInfo] | None:
-    """查询数据库中的商品信息
+    """查询数据库中的主播信息
 
     Args:
         user_id (int): 用户 ID
@@ -45,8 +45,11 @@ async def get_db_streamer_info(user_id: int, streamer_id: int | None = None) -> 
                 StreamerInfo.user_id == user_id, StreamerInfo.delete == False, StreamerInfo.streamer_id == streamer_id
             )
 
-        # 查询获取商品
-        streamer_list = session.exec(select(StreamerInfo).where(query_condiction).order_by(StreamerInfo.streamer_id)).all()
+        # 查询主播商品，并根据 ID 进行排序
+        try:
+            streamer_list = session.exec(select(StreamerInfo).where(query_condiction).order_by(StreamerInfo.streamer_id)).all()
+        except Exception as e:
+            streamer_list = None
 
     if streamer_list is None:
         logger.warning("nothing to find in db...")

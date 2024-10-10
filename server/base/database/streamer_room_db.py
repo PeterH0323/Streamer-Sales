@@ -13,11 +13,10 @@
 from datetime import datetime
 from typing import List
 
-import yaml
 from loguru import logger
 from sqlmodel import Session, and_, not_, select
 
-from ...web_configs import API_CONFIG, WEB_CONFIGS
+from ...web_configs import API_CONFIG
 from ..models.streamer_room_model import ChatMessageInfo, OnAirRoomStatusItem, SalesDocAndVideoInfo, StreamRoomInfo
 from .init_db import DB_ENGINE
 
@@ -351,7 +350,8 @@ def get_message_list(sales_info_id: int) -> List[ChatMessageInfo]:
 
     return formate_message_list
 
-def update_room_video_path(status_id: int, news_video_server_path:str):
+
+def update_room_video_path(status_id: int, news_video_server_path: str):
     """数据库更新 status 主播视频
 
     Args:
@@ -361,9 +361,7 @@ def update_room_video_path(status_id: int, news_video_server_path:str):
     """
     with Session(DB_ENGINE) as session:
         # 更新 status 内容
-        status_info = session.exec(
-            select(OnAirRoomStatusItem).where(OnAirRoomStatusItem.status_id == status_id)
-        ).one()
+        status_info = session.exec(select(OnAirRoomStatusItem).where(OnAirRoomStatusItem.status_id == status_id)).one()
 
         status_info.streaming_video_path = news_video_server_path.replace(API_CONFIG.REQUEST_FILES_URL, "")
         session.add(status_info)
