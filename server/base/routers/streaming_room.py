@@ -75,7 +75,13 @@ async def get_streaming_room_id_api(
         # 直接返回会导致字段丢失，需要转 dict 确保返回值里面有该字段
         format_product_list = []
         for db_product in streaming_room_list[0].product_list:
-            format_product_list.append(dict(db_product))
+            
+            product_dict = dict(db_product)
+            # 将 start_video 改为服务器地址
+            if product_dict["start_video"] != "":
+                product_dict["start_video"] = API_CONFIG.REQUEST_FILES_URL + product_dict["start_video"]
+
+            format_product_list.append(product_dict)
         streaming_room_list = dict(streaming_room_list[0])
         streaming_room_list["product_list"] = format_product_list
     else:
