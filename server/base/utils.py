@@ -329,7 +329,6 @@ def gen_default_data():
             session.add(admin_user)
             session.commit()
 
-
     def init_user() -> bool:
         """判断是否需要创建默认用户
 
@@ -346,7 +345,6 @@ def gen_default_data():
             return True
 
         return False
-
 
     def create_default_product_item():
         """生成商品默认数据库"""

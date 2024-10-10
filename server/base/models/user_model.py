@@ -28,16 +28,16 @@ class UserBaseInfo(BaseModel):
     username: str = Field(index=True, unique=True)
     email: str | None = None
     avatar: str | None = None
-    create_time: datetime =datetime.now()
+    create_time: datetime = datetime.now()
 
 
 # =======================================================
 #                      数据库模型
 # =======================================================
 class UserInfo(UserBaseInfo, SQLModel, table=True):
-    
+
     __tablename__ = "user_info"
-    
+
     hashed_password: str
     ip_address: IPv4Address | None = None
     delete: bool = False

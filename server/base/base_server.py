@@ -59,6 +59,7 @@ async def lifespan(app: FastAPI):
 
     if WEB_CONFIGS.ENABLE_RAG:
         from .modules.rag.rag_worker import load_rag_model
+
         # 生成 rag 数据库
         await load_rag_model(user_id=1)
 

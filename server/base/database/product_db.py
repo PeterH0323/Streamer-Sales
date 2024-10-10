@@ -26,7 +26,7 @@ async def get_db_product_info(
     page_size: int = 10,
     product_name: str | None = None,
     product_id: int | None = None,
-    exclude_list: List[int] | None = None
+    exclude_list: List[int] | None = None,
 ) -> Tuple[List[ProductInfo], int]:
     """查询数据库中的商品信息
 
@@ -64,7 +64,7 @@ async def get_db_product_info(
             query_condiction = and_(
                 ProductInfo.user_id == user_id, ProductInfo.delete == False, ProductInfo.product_id == product_id
             )
-            
+
         elif exclude_list is not None:
             # 排除查询
             query_condiction = and_(

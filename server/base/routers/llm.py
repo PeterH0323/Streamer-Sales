@@ -73,7 +73,7 @@ async def gen_poduct_base_prompt(
     """
 
     assert (streamer_id == -1 and streamer_info is not None) or (streamer_id != -1 and streamer_info is None)
-    assert (product_id == -1 and product_info is not None) or  (product_id != -1 and product_info is None)
+    assert (product_id == -1 and product_info is not None) or (product_id != -1 and product_info is None)
 
     # 加载对话配置文件
     dataset_yaml = await get_llm_product_prompt_base_info()
