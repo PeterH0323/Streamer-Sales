@@ -11,7 +11,10 @@ fi
 # conda deactivate
 conda activate streamer-sales
 
-# 可选配置显卡 export CUDA_VISIBLE_DEVICES=1
+# 可选配置显卡 
+# export CUDA_VISIBLE_DEVICES=1
+
+# 配置 huggingface 国内镜像地址
 export HF_ENDPOINT="https://hf-mirror.com"
 
 case $1 in
