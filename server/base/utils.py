@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import Dict, List
 
 import cv2
-from lmdeploy.serve.openai.api_client import APIClient
 from loguru import logger
 from pydantic import BaseModel
 from sqlmodel import Session, select
@@ -31,6 +30,7 @@ from server.base.models.user_model import UserInfo
 
 from ..tts.tools import SYMBOL_SPLITS, make_text_chunk
 from ..web_configs import API_CONFIG, WEB_CONFIGS
+from .llm_provider import create_llm_provider
 from .database.init_db import DB_ENGINE
 from .models.product_model import ProductInfo
 from .models.streamer_info_model import StreamerInfo
@@ -76,7 +76,17 @@ class ChatItem(BaseModel):
 
 
 # 加载 LLM 模型
-LLM_MODEL_HANDLER = APIClient(API_CONFIG.LLM_URL)
+if WEB_CONFIGS.LLM_PROVIDER == "minimax":
+    LLM_MODEL_HANDLER = create_llm_provider(
+        "minimax",
+        api_key=WEB_CONFIGS.MINIMAX_API_KEY,
+        model=WEB_CONFIGS.MINIMAX_MODEL,
+        base_url=WEB_CONFIGS.MINIMAX_BASE_URL,
+    )
+    logger.info(f"Using MiniMax Cloud API (model={WEB_CONFIGS.MINIMAX_MODEL})")
+else:
+    LLM_MODEL_HANDLER = create_llm_provider("lmdeploy", api_url=API_CONFIG.LLM_URL)
+    logger.info(f"Using LMDeploy ({API_CONFIG.LLM_URL})")
 
 
 async def streamer_sales_process(chat_item: ChatItem):
