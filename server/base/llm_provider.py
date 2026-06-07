@@ -84,7 +84,7 @@ class MiniMaxProvider(LLMProvider):
                 "MiniMax API key is required. Set MINIMAX_API_KEY env var "
                 "or pass api_key to MiniMaxProvider."
             )
-        self._model = model or os.environ.get("MINIMAX_MODEL", "MiniMax-M2.7")
+        self._model = model or os.environ.get("MINIMAX_MODEL", "MiniMax-M3")
         self._base_url = (
             base_url
             or os.environ.get("MINIMAX_BASE_URL", self.DEFAULT_BASE_URL)
@@ -202,7 +202,7 @@ class MiniMaxProvider(LLMProvider):
 
     @staticmethod
     def _strip_think_tags(text: str) -> str:
-        """Remove <think>...</think> blocks from MiniMax M2.5+ responses."""
+        """Remove <think>...</think> blocks from MiniMax M2.7+ responses."""
         import re
 
         return re.sub(r"<think>[\s\S]*?</think>\s*", "", text)

@@ -32,7 +32,7 @@
 5. 🦸 **数字人生成**
 6. 🌐 **Agent 网络查询**
 7. 🎙️ **ASR 语音转文字**
-8. ☁️ **支持 [MiniMax](https://www.minimaxi.com) 云端大模型**（MiniMax-M2.7 / M2.5 等，无需本地 GPU）
+8. ☁️ **支持 [MiniMax](https://www.minimaxi.com) 云端大模型**（MiniMax-M3 / M2.7 等，无需本地 GPU）
 9. 🍍 **Vue + pinia + element-plus** 搭建前端，可自由扩展快速开发
 10. 🗝️ 后端采用 **FastAPI + Uvicorn + PostgreSQL，高性能，高效编码，生产可用，具有 JWT 身份验证**，接口均采用 RESTful API 规范编写，更规范
 11. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
@@ -376,7 +376,7 @@ export WEATHER_API_KEY="${和风天气 API key}"
 
 ## ☁️ MiniMax 云端大模型
 
-除了使用 LMDeploy 部署本地模型外，还支持使用 [MiniMax](https://www.minimaxi.com) 云端大模型作为 LLM 推理后端，**无需本地 GPU**。MiniMax-M2.7 拥有 **1M tokens 超长上下文窗口**，非常适合处理大量商品信息。
+除了使用 LMDeploy 部署本地模型外，还支持使用 [MiniMax](https://www.minimaxi.com) 云端大模型作为 LLM 推理后端，**无需本地 GPU**。MiniMax-M3 提供 **512K 上下文窗口**、最大输出 128K，并支持图片输入，非常适合处理大量商品信息。
 
 ### 使用方式
 
@@ -387,7 +387,7 @@ export WEATHER_API_KEY="${和风天气 API key}"
 ```bash
 export LLM_PROVIDER=minimax
 export MINIMAX_API_KEY="your-minimax-api-key"
-export MINIMAX_MODEL="MiniMax-M2.7"  # 可选：MiniMax-M2.7（默认） / MiniMax-M2.5 等
+export MINIMAX_MODEL="MiniMax-M3"  # 可选：MiniMax-M3（默认） / MiniMax-M2.7 / MiniMax-M2.7-highspeed
 ```
 
 3. 启动中台服务（不需要单独启动 LLM 服务）：
@@ -400,9 +400,9 @@ bash deploy.sh base
 
 | 模型 | 上下文长度 | 说明 |
 | --- | --- | --- |
-| MiniMax-M2.7 | 1M tokens | 最新旗舰模型，推荐使用 |
-| MiniMax-M2.5 | 204K tokens | 均衡模型 |
-| MiniMax-M2.5-highspeed | 204K tokens | 高速推理模型，适合实时场景 |
+| MiniMax-M3 | 512K tokens | 最新旗舰模型，最大输出 128K，支持图片输入（默认） |
+| MiniMax-M2.7 | 192K tokens | 上一代旗舰模型 |
+| MiniMax-M2.7-highspeed | 192K tokens | 上一代低延迟版本，适合实时场景 |
 
 > [!NOTE]
 > 使用 MiniMax 云端大模型时，Agent 功能（依赖 InternLM2 特殊 token）暂不支持，建议设置 `ENABLE_AGENT=false`。

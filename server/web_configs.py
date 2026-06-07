@@ -94,7 +94,7 @@ class WebConfigs:
 
     # MiniMax Cloud API 配置（仅当 LLM_PROVIDER=minimax 时使用）
     MINIMAX_API_KEY: str | None = os.environ.get("MINIMAX_API_KEY", None)
-    MINIMAX_MODEL: str = os.environ.get("MINIMAX_MODEL", "MiniMax-M2.7")  # MiniMax-M2.7 / MiniMax-M2.5 等
+    MINIMAX_MODEL: str = os.environ.get("MINIMAX_MODEL", "MiniMax-M3")  # MiniMax-M3（默认） / MiniMax-M2.7 / MiniMax-M2.7-highspeed
     MINIMAX_BASE_URL: str = os.environ.get("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
 
     # ==================================================================

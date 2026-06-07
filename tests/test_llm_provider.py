@@ -49,15 +49,21 @@ class TestMiniMaxProviderInit:
     """Test MiniMaxProvider initialization."""
 
     def test_init_with_explicit_key(self):
-        p = MiniMaxProvider(api_key="test-key", model="MiniMax-M2.7")
-        assert p.available_models == ["MiniMax-M2.7"]
+        p = MiniMaxProvider(api_key="test-key", model="MiniMax-M3")
+        assert p.available_models == ["MiniMax-M3"]
 
     def test_init_from_env(self, monkeypatch):
         monkeypatch.setenv("MINIMAX_API_KEY", "env-key")
-        monkeypatch.setenv("MINIMAX_MODEL", "MiniMax-M2.5")
+        monkeypatch.setenv("MINIMAX_MODEL", "MiniMax-M2.7")
         p = MiniMaxProvider()
-        assert p.available_models == ["MiniMax-M2.5"]
+        assert p.available_models == ["MiniMax-M2.7"]
         assert p._api_key == "env-key"
+
+    def test_default_model_is_m3(self, monkeypatch):
+        """Default model should be MiniMax-M3."""
+        monkeypatch.delenv("MINIMAX_MODEL", raising=False)
+        p = MiniMaxProvider(api_key="k")
+        assert p.available_models == ["MiniMax-M3"]
 
     def test_init_missing_key_raises(self, monkeypatch):
         monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
@@ -141,7 +147,7 @@ class TestMiniMaxStreamingMocked:
         p = MiniMaxProvider(api_key="test-key")
         results = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.7",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Hi"}],
                 stream=True,
             )
@@ -171,7 +177,7 @@ class TestMiniMaxStreamingMocked:
         p = MiniMaxProvider(api_key="test-key")
         results = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.7",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Hi"}],
                 stream=True,
             )
@@ -200,7 +206,7 @@ class TestMiniMaxSyncMocked:
         p = MiniMaxProvider(api_key="test-key")
         results = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.7",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Hi"}],
                 stream=False,
             )
@@ -226,7 +232,7 @@ class TestMiniMaxSyncMocked:
         p = MiniMaxProvider(api_key="test-key")
         results = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.7",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Hi"}],
                 stream=False,
             )
@@ -250,7 +256,7 @@ class TestMiniMaxSyncMocked:
         with pytest.raises(RuntimeError, match="MiniMax API error 401"):
             list(
                 p.chat_completions_v1(
-                    model="MiniMax-M2.7",
+                    model="MiniMax-M3",
                     messages=[{"role": "user", "content": "Hi"}],
                 )
             )
@@ -376,10 +382,10 @@ class TestMiniMaxIntegrationSync:
     """Integration: non-streaming call to MiniMax API."""
 
     def test_sync_chat(self):
-        p = MiniMaxProvider(api_key=MINIMAX_API_KEY, model="MiniMax-M2.5-highspeed")
+        p = MiniMaxProvider(api_key=MINIMAX_API_KEY, model="MiniMax-M3")
         results = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.5-highspeed",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Say hello in one word."}],
                 stream=False,
                 temperature=0.1,
@@ -396,10 +402,10 @@ class TestMiniMaxIntegrationStream:
     """Integration: streaming call to MiniMax API."""
 
     def test_stream_chat(self):
-        p = MiniMaxProvider(api_key=MINIMAX_API_KEY, model="MiniMax-M2.5-highspeed")
+        p = MiniMaxProvider(api_key=MINIMAX_API_KEY, model="MiniMax-M3")
         chunks = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.5-highspeed",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Say hello in one word."}],
                 stream=True,
                 temperature=0.1,
@@ -417,12 +423,12 @@ class TestMiniMaxIntegrationFactory:
     """Integration: factory creates working MiniMax provider."""
 
     def test_factory_minimax(self):
-        p = create_llm_provider("minimax", api_key=MINIMAX_API_KEY, model="MiniMax-M2.5-highspeed")
+        p = create_llm_provider("minimax", api_key=MINIMAX_API_KEY, model="MiniMax-M3")
         assert isinstance(p, MiniMaxProvider)
-        assert p.available_models == ["MiniMax-M2.5-highspeed"]
+        assert p.available_models == ["MiniMax-M3"]
         results = list(
             p.chat_completions_v1(
-                model="MiniMax-M2.5-highspeed",
+                model="MiniMax-M3",
                 messages=[{"role": "user", "content": "Respond with OK"}],
                 stream=False,
             )
