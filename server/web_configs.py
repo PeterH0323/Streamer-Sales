@@ -87,6 +87,17 @@ class WebConfigs:
     DIGITAL_HUMAN_FPS: str = 25
 
     # ==================================================================
+    #                             LLM Provider 配置
+    # ==================================================================
+    # 支持 "lmdeploy"（默认）和 "minimax"
+    LLM_PROVIDER: str = os.environ.get("LLM_PROVIDER", "lmdeploy")
+
+    # MiniMax Cloud API 配置（仅当 LLM_PROVIDER=minimax 时使用）
+    MINIMAX_API_KEY: str | None = os.environ.get("MINIMAX_API_KEY", None)
+    MINIMAX_MODEL: str = os.environ.get("MINIMAX_MODEL", "MiniMax-M3")  # MiniMax-M3（默认） / MiniMax-M2.7 / MiniMax-M2.7-highspeed
+    MINIMAX_BASE_URL: str = os.environ.get("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
+
+    # ==================================================================
     #                             Agent 配置
     # ==================================================================
     AGENT_WEATHER_API_KEY: str | None = os.environ.get("WEATHER_API_KEY", None)  # 天气 API Key

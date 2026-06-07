@@ -32,9 +32,10 @@
 5. 🦸 **数字人生成**
 6. 🌐 **Agent 网络查询**
 7. 🎙️ **ASR 语音转文字**
-8. 🍍 **Vue + pinia + element-plus** 搭建前端，可自由扩展快速开发
-9. 🗝️ 后端采用 **FastAPI + Uvicorn + PostgreSQL，高性能，高效编码，生产可用，具有 JWT 身份验证**，接口均采用 RESTful API 规范编写，更规范
-10. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
+8. ☁️ **支持 [MiniMax](https://www.minimaxi.com) 云端大模型**（MiniMax-M3 / M2.7 等，无需本地 GPU）
+9. 🍍 **Vue + pinia + element-plus** 搭建前端，可自由扩展快速开发
+10. 🗝️ 后端采用 **FastAPI + Uvicorn + PostgreSQL，高性能，高效编码，生产可用，具有 JWT 身份验证**，接口均采用 RESTful API 规范编写，更规范
+11. 🐋 采用 Docker-compose 部署，**一键实现分布式部署**
 
 无论是线上直播销售，还是线下门店推广，这款卖货主播大模型都能成为您不可或缺的得力助手。它不仅能够提升销售效率，还能增强用户体验，为您的品牌形象加分。
 
@@ -372,6 +373,39 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 export DELIVERY_TIME_API_KEY="${快递鸟 EBusinessID},${快递鸟 api_key}"
 export WEATHER_API_KEY="${和风天气 API key}"
 ```
+
+## ☁️ MiniMax 云端大模型
+
+除了使用 LMDeploy 部署本地模型外，还支持使用 [MiniMax](https://www.minimaxi.com) 云端大模型作为 LLM 推理后端，**无需本地 GPU**。MiniMax-M3 提供 **512K 上下文窗口**、最大输出 128K，并支持图片输入，非常适合处理大量商品信息。
+
+### 使用方式
+
+1. 前往 [MiniMax 开放平台](https://www.minimaxi.com) 注册并获取 API Key
+
+2. 设置环境变量：
+
+```bash
+export LLM_PROVIDER=minimax
+export MINIMAX_API_KEY="your-minimax-api-key"
+export MINIMAX_MODEL="MiniMax-M3"  # 可选：MiniMax-M3（默认） / MiniMax-M2.7 / MiniMax-M2.7-highspeed
+```
+
+3. 启动中台服务（不需要单独启动 LLM 服务）：
+
+```bash
+bash deploy.sh base
+```
+
+### 可选模型
+
+| 模型 | 上下文长度 | 说明 |
+| --- | --- | --- |
+| MiniMax-M3 | 512K tokens | 最新旗舰模型，最大输出 128K，支持图片输入（默认） |
+| MiniMax-M2.7 | 192K tokens | 上一代旗舰模型 |
+| MiniMax-M2.7-highspeed | 192K tokens | 上一代低延迟版本，适合实时场景 |
+
+> [!NOTE]
+> 使用 MiniMax 云端大模型时，Agent 功能（依赖 InternLM2 特殊 token）暂不支持，建议设置 `ENABLE_AGENT=false`。
 
 ## 🧱 开发计划
 
@@ -989,6 +1023,7 @@ prompt_text = 列车巡游银河，我不一定都能帮上忙，但只要是花
 - [MuseTalk](https://github.com/TMElyralab/MuseTalk)
 - [lagent](https://github.com/InternLM/lagent)
 - [FunASR](https://github.com/modelscope/FunASR)
+- [MiniMax](https://www.minimaxi.com)
 
 感谢上海人工智能实验室推出的书生·浦语大模型实战营，为我们的项目提供宝贵的技术指导和强大的算力支持。
 
