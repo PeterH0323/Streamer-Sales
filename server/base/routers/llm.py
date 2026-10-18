@@ -20,7 +20,7 @@ from ..database.product_db import get_db_product_info
 from ..database.streamer_info_db import get_db_streamer_info
 from ..models.product_model import ProductInfo
 from ..models.streamer_info_model import StreamerInfo
-from ..modules.agent.agent_worker import get_agent_result
+from ..modules.agent.agent_worker import get_agent_prompt
 from ..server_info import SERVER_PLUGINS_INFO
 from ..utils import LLM_MODEL_HANDLER, ResultCode, make_return_data
 from .users import get_current_user_info
@@ -115,22 +115,11 @@ async def gen_poduct_base_prompt(
 
 async def get_agent_res(prompt, departure_place, delivery_company):
     """调用 Agent 能力"""
-    agent_response = ""
-
     if not SERVER_PLUGINS_INFO.agent_enabled:
-        # 如果不开启则直接返回空
         return ""
-
-    GENERATE_AGENT_TEMPLATE = (
-        "这是网上获取到的信息：“{}”\n 客户的问题：“{}” \n 请认真阅读信息并运用你的性格进行解答。"  # Agent prompt 模板
+    return get_agent_prompt(
+        LLM_MODEL_HANDLER, prompt[-1]["content"], departure_place, delivery_company,
     )
-    input_prompt = prompt[-1]["content"]
-    agent_response = get_agent_result(LLM_MODEL_HANDLER, input_prompt, departure_place, delivery_company)
-    if agent_response != "":
-        agent_response = GENERATE_AGENT_TEMPLATE.format(agent_response, input_prompt)
-        logger.info(f"Agent response: {agent_response}")
-
-    return agent_response
 
 
 async def get_llm_res(prompt):

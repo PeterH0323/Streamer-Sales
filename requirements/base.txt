@@ -11,6 +11,7 @@ loguru==0.7.2
 faiss-gpu==1.7.2
 
 # Agent
+requests==2.31.0
 lagent==0.2.2
 jionlp==1.5.14
 griffe==0.48.0
