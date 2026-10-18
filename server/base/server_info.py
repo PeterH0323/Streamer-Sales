@@ -15,6 +15,7 @@ import requests
 from loguru import logger
 
 from ..web_configs import API_CONFIG, WEB_CONFIGS
+from .modules.agent.search_provider import get_search_provider
 
 
 class ServerPluginsInfo:
@@ -29,10 +30,7 @@ class ServerPluginsInfo:
         self.asr_server_enabled = self._check_server(API_CONFIG.ASR_URL + "/check")
         self.llm_enabled = self._check_server(API_CONFIG.LLM_URL)
 
-        if WEB_CONFIGS.AGENT_DELIVERY_TIME_API_KEY is None or WEB_CONFIGS.AGENT_WEATHER_API_KEY is None:
-            self.agent_enabled = False
-        else:
-            self.agent_enabled = True
+        self.agent_enabled = get_search_provider() is not None
 
         self.rag_enabled = WEB_CONFIGS.ENABLE_RAG
 

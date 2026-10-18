@@ -359,7 +359,9 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 
 ## 🌐 Agent
 
-目前已支持可以询问主播关于快递单号的信息，可以试试问主播【到杭州需要多久】来触发网络查询，会根据实时网络的信息来反馈给用户。
+没有配置快递/天气 Key 时，Agent 默认使用 [Parallel Search MCP](https://docs.parallel.ai/integrations/mcp/search-mcp) 搜索公开网页。搜索由 Fast 模式提供，无需注册账号或 API Key。可以询问商品公开资料或快递公司的配送政策，返回的资料包含来源链接。查询关键词会发送到 `https://search.parallel.ai/mcp`；请勿提交手机号、详细地址或订单号等私人信息。免费服务有使用限额，搜索失败时不会自动切换服务。
+
+网页搜索不能查询私人订单、提供实时天气观测或保证送达日期。需要预计到达时间及天气信息时，仍可配置原有服务，可以试试问主播【到杭州需要多久】：
 
 目前调用的 API 主要有两个：
 
@@ -371,6 +373,26 @@ streamlit run app.py --server.address=0.0.0.0 --server.port 7860
 ```bash
 export DELIVERY_TIME_API_KEY="${快递鸟 EBusinessID},${快递鸟 api_key}"
 export WEATHER_API_KEY="${和风天气 API key}"
+```
+
+默认的 `AGENT_SEARCH_PROVIDER=auto` 会保留已有快递/天气 Key 对应的服务。即使只配置了其中一个 Key，也不会自动改用网页搜索；请补齐两个 Key 或明确选择服务。可以在启动中台服务前设置：
+
+```bash
+export AGENT_SEARCH_PROVIDER=parallel  # 明确使用 Parallel 网页搜索
+# export AGENT_SEARCH_PROVIDER=delivery  # 使用原有快递和天气 API，需两个 Key
+# export AGENT_SEARCH_PROVIDER=none      # 关闭网络工具
+# export ENABLE_AGENT=false             # 关闭 Agent
+```
+
+聊天请求原有的 Agent 开关仍然有效。模型推理服务仍需按上文部署。
+
+Agent 搜索部分可在无 GPU 的 Python 3.10 环境单独检查：
+
+```bash
+python -m venv .venv-agent
+. .venv-agent/bin/activate
+pip install setuptools==68.2.2 lagent==0.2.2 griffe==0.48.0 class-registry==2.1.2 loguru==0.7.2 requests==2.31.0
+python -m unittest discover -s tests -v
 ```
 
 ## 🧱 开发计划

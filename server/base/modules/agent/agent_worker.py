@@ -6,7 +6,7 @@ from lagent.agents.internlm2_agent import Internlm2Protocol
 from lagent.schema import ActionReturn, AgentReturn
 from loguru import logger
 
-from .delivery_time_query import DeliveryTimeQueryAction
+from .search_provider import get_search_provider
 
 
 def init_handlers(departure_place, delivery_company_name):
@@ -41,12 +41,21 @@ def init_handlers(departure_place, delivery_company_name):
             end="<|action_end|>\n",
         ),
     )
-    action_list = [
-        DeliveryTimeQueryAction(
-            departure_place=departure_place,
-            delivery_company_name=delivery_company_name,
-        ),
-    ]
+    provider = get_search_provider()
+    action_list = []
+    if provider == "parallel":
+        from .parallel_search import ParallelSearchAction
+
+        action_list.append(ParallelSearchAction())
+    elif provider == "delivery":
+        from .delivery_time_query import DeliveryTimeQueryAction
+
+        action_list.append(
+            DeliveryTimeQueryAction(
+                departure_place=departure_place,
+                delivery_company_name=delivery_company_name,
+            )
+        )
     plugin_map = {action.name: action for action in action_list}
     plugin_name = [action.name for action in action_list]
     plugin_action = [plugin_map[name] for name in plugin_name]
@@ -55,8 +64,20 @@ def init_handlers(departure_place, delivery_company_name):
     return action_executor, protocol_handler
 
 
+def get_agent_prompt(llm_model_handler, prompt_input, departure_place, delivery_company_name, enabled=True):
+    """Build the answer context only when this chat permits network tools."""
+    if not enabled:
+        return ""
+    response = get_agent_result(llm_model_handler, prompt_input, departure_place, delivery_company_name)
+    if not response:
+        return ""
+    return f"这是网上获取到的信息：“{response}”\n 客户的问题：“{prompt_input}” \n 请认真阅读信息并运用你的性格进行解答。"
+
+
 def get_agent_result(llm_model_handler, prompt_input, departure_place, delivery_company_name):
 
+    if get_search_provider() is None:
+        return ""
     action_executor, protocol_handler = init_handlers(departure_place, delivery_company_name)
 
     # 第一次将 prompt 生成 agent 形式的 prompt

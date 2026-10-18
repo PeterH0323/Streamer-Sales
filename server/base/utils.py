@@ -36,7 +36,7 @@ from .models.product_model import ProductInfo
 from .models.streamer_info_model import StreamerInfo
 from .models.streamer_room_model import OnAirRoomStatusItem, SalesDocAndVideoInfo, StreamRoomInfo
 
-from .modules.agent.agent_worker import get_agent_result
+from .modules.agent.agent_worker import get_agent_prompt
 from .modules.rag.rag_worker import RAG_RETRIEVER, build_rag_prompt
 from .queue_thread import DIGITAL_HUMAN_QUENE, TTS_TEXT_QUENE
 from .server_info import SERVER_PLUGINS_INFO
@@ -85,17 +85,13 @@ async def streamer_sales_process(chat_item: ChatItem):
     # 调取 Agent
     agent_response = ""
     if chat_item.plugins.agent and SERVER_PLUGINS_INFO.agent_enabled:
-        GENERATE_AGENT_TEMPLATE = (
-            "这是网上获取到的信息：“{}”\n 客户的问题：“{}” \n 请认真阅读信息并运用你的性格进行解答。"  # Agent prompt 模板
+        agent_response = get_agent_prompt(
+            LLM_MODEL_HANDLER, chat_item.prompt[-1]["content"],
+            chat_item.product_info.departure_place, chat_item.product_info.delivery_company_name,
         )
-        input_prompt = chat_item.prompt[-1]["content"]
-        agent_response = get_agent_result(
-            LLM_MODEL_HANDLER, input_prompt, chat_item.product_info.departure_place, chat_item.product_info.delivery_company_name
-        )
-        if agent_response != "":
-            agent_response = GENERATE_AGENT_TEMPLATE.format(agent_response, input_prompt)
-            print(f"Agent response: {agent_response}")
-            chat_item.prompt[-1]["content"] = agent_response
+    if agent_response:
+        print(f"Agent response: {agent_response}")
+        chat_item.prompt[-1]["content"] = agent_response
 
     # ====================== RAG ======================
     # 调取 rag
